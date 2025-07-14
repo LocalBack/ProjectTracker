@@ -1,0 +1,146 @@
+﻿@using ProjectTracker.Service.DTOs
+@model IEnumerable<ProjectDto>
+@{
+    ViewData["Title"] = "Projeler";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-project-diagram"></i> Proje Listesi
+                    </h3>
+                    <div class="card-tools">
+                        <a asp-action="Create" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Yeni Proje
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Success"]
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    }
+
+                    <table class="table table-bordered table-striped" id="projectsTable">
+                        <thead>
+                            <tr>
+                                <th>Proje Adı</th>
+                                <th>Başlangıç Tarihi</th>
+                                <th>Bitiş Tarihi</th>
+                                <th>Bütçe</th>
+                                <th>Maliyet</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var project in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@project.Id">
+                                            @project.Name
+                                        </a>
+                                    </td>
+                                    <td>@project.StartDate.ToString("dd.MM.yyyy")</td>
+                                    <td>
+                                        @if (project.EndDate.HasValue)
+                                        {
+                                            @project.EndDate.Value.ToString("dd.MM.yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-info">Devam Ediyor</span>
+                                        }
+                                    </td>
+                                    <td>@project.Budget.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</td>
+                                    <td>
+                                        @if (project.ActualCost.HasValue)
+                                        {
+                                            @project.ActualCost.Value.ToString("C", new System.Globalization.CultureInfo("tr-TR"))
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!project.EndDate.HasValue)
+                                        {
+                                            <span class="badge badge-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Tamamlandı</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@project.Id"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                onclick="confirmDelete(@project.Id, '@project.Name')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Proje Sil</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bu projeyi silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger font-weight-bold" id="projectName"></p>
+            </div>
+            <div class="modal-footer">
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" id="deleteProjectId" name="id" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#projectsTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Turkish.json"
+                }
+            });
+        });
+
+        function confirmDelete(id, name) {
+            $('#deleteProjectId').val(id);
+            $('#projectName').text(name);
+            $('#deleteModal').modal('show');
+        }
+    </script>
+}
