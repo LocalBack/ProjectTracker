@@ -1,22 +1,45 @@
-html {
-  font-size: 14px;
+/* Mevcut stillere ek olarak */
+
+/* Dashboard Card Styles */
+.border-left-primary {
+    border-left: 4px solid #4e73df !important;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.border-left-success {
+    border-left: 4px solid #1cc88a !important;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.border-left-info {
+    border-left: 4px solid #36b9cc !important;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
 }
 
-body {
-  margin-bottom: 60px;
+.text-xs {
+    font-size: .7rem;
 }
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+/* Card hover effect */
+.card {
+    transition: all 0.3s;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
+    }
+
+    /* Login Card */
+    .card.shadow {
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    }

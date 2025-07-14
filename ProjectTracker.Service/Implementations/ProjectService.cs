@@ -65,5 +65,11 @@ namespace ProjectTracker.Service.Services.Implementations
             var projects = await _projectRepository.FindAsync(p => p.IsActive);
             return _mapper.Map<IEnumerable<ProjectDto>>(projects);
         }
+
+        public async Task<int> GetProjectCountAsync()
+        {
+            var projects = await _projectRepository.GetAllAsync();
+            return projects.Count();
+        }
     }
 }

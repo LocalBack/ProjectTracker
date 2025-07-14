@@ -1,8 +1,106 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid">
+    <!-- Hoşgeldin Mesajı -->
+    <div class="row mb-4">
+        <div class="col-12">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <h2>Hoş Geldiniz, @User.Identity.Name!</h2>
+                <p class="text-muted">Son giriş: @DateTime.Now.ToString("dd MMMM yyyy HH:mm")</p>
+            }
+            else
+            {
+                <div class="jumbotron">
+                    <h1 class="display-4">ProjectTracker'a Hoş Geldiniz</h1>
+                    <p class="lead">Proje yönetim sisteminize giriş yaparak başlayın.</p>
+                    <hr class="my-4">
+                    <p>Projelerinizi takip edin, çalışma kayıtlarını yönetin ve bakım zamanlamalarını kontrol edin.</p>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (User.Identity?.IsAuthenticated ?? false && Model != null)
+    {
+        <!-- Dashboard İstatistikleri -->
+        <div class="row">
+            <!-- Projeler -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Toplam Proje
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProjects</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-project-diagram fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diğer kartlar... -->
+        </div>
+
+        <!-- Son İş Kayıtları -->
+        @if (Model.RecentWorkLogs.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock"></i> Son İş Kayıtları
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Proje</th>
+                                            <th>Çalışan</th>
+                                            <th>Başlık</th>
+                                            <th>Tarih</th>
+                                            <th>Süre</th>
+                                            <th>İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var log in Model.RecentWorkLogs)
+                                        {
+                                            <tr>
+                                                <td>@log.ProjectName</td>
+                                                <td>@log.EmployeeName</td>
+                                                <td>@log.Title</td>
+                                                <td>@log.WorkDate.ToString("dd.MM.yyyy")</td>
+                                                <td>@log.HoursSpent saat</td>
+                                                <td>
+                                                    <a asp-controller="WorkLog" asp-action="Details" asp-route-id="@log.Id"
+                                                       class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
 </div>

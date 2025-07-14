@@ -10,5 +10,6 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task UpdateProjectAsync(int id, ProjectDto projectDto);
         Task DeleteProjectAsync(int id);
         Task<IEnumerable<ProjectDto>> GetActiveProjectsAsync();
+        Task<int> GetProjectCountAsync();
     }
 }

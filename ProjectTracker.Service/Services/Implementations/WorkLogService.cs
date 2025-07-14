@@ -139,5 +139,18 @@ namespace ProjectTracker.Service.Services.Implementations
             _workLogRepository.Update(workLog);
             await _workLogRepository.SaveAsync();
         }
+
+        public async Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count)
+        {
+            var workLogs = await _context.WorkLogs
+                .Include(w => w.Project)
+                .Include(w => w.Employee)
+                .Where(w => w.IsActive)
+                .OrderByDescending(w => w.WorkDate)
+                .Take(count)
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
+        }
     }
 }
