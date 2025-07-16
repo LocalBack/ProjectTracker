@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ProjectTracker.Service.DTOs
+namespace ProjectTracker.Web.ViewModels
 {
-    public class WorkLogDto
+    public class CreateWorkLogViewModel
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Başlık zorunludur")]
         [Display(Name = "Başlık")]
         public string Title { get; set; } = string.Empty;
@@ -15,7 +14,8 @@ namespace ProjectTracker.Service.DTOs
 
         [Required(ErrorMessage = "Çalışma tarihi zorunludur")]
         [Display(Name = "Çalışma Tarihi")]
-        public DateTime WorkDate { get; set; } = DateTime.Now;
+        [DataType(DataType.Date)]
+        public DateTime WorkDate { get; set; } = DateTime.Today;
 
         [Required(ErrorMessage = "Harcanan süre zorunludur")]
         [Display(Name = "Harcanan Süre (Saat)")]
@@ -26,20 +26,12 @@ namespace ProjectTracker.Service.DTOs
         [Display(Name = "Proje")]
         public int ProjectId { get; set; }
 
-        [Display(Name = "Proje Adı")]
-        public string ProjectName { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Çalışan seçimi zorunludur")]
         [Display(Name = "Çalışan")]
         public int EmployeeId { get; set; }
 
-        [Display(Name = "Çalışan Adı")]
-        public string EmployeeName { get; set; } = string.Empty;
-
-        // İlişkili veriler
-        public ICollection<WorkLogDetailDto> Details { get; set; } = new List<WorkLogDetailDto>();
-        public ICollection<WorkLogAttachmentDto> Attachments { get; set; } = new List<WorkLogAttachmentDto>();
-        public int DetailCount { get; set; }
-        public int AttachmentCount { get; set; }
+        // Dropdown listeler için
+        public SelectList? Projects { get; set; }
+        public SelectList? Employees { get; set; }
     }
 }

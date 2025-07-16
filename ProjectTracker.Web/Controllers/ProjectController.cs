@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Service.Services.Interfaces;
+using ProjectTracker.Web.ViewModels;
 using ProjectTracker.Service.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProjectTracker.Web.Controllers
 {
+    [Authorize]
     public class ProjectController : Controller
     {
         private readonly IProjectService _projectService;
@@ -16,19 +20,76 @@ namespace ProjectTracker.Web.Controllers
         }
 
         // GET: Project
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string sortOrder,
+            string currentFilter,
+            string searchString,
+            int? pageNumber,
+            int? pageSize)
         {
-            try
+            // ViewData ayarları
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["BudgetSortParm"] = sortOrder == "Budget" ? "budget_desc" : "Budget";
+
+            // Arama
+            if (searchString != null)
             {
-                var projects = await _projectService.GetActiveProjectsAsync();
-                return View(projects);
+                pageNumber = 1;
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error getting projects");
-                TempData["Error"] = "Projeler yüklenirken hata oluştu.";
-                return View(new List<ProjectDto>());
+                searchString = currentFilter;
             }
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentPageSize"] = pageSize ?? 10;
+
+            // Query oluştur
+            var projects = await _projectService.GetAllProjectsQueryableAsync();
+
+            // Filtreleme
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                projects = projects.Where(s => s.Name.Contains(searchString)
+                                       || s.Description.Contains(searchString));
+            }
+
+            // Sıralama
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    projects = projects.OrderByDescending(s => s.Name);
+                    break;
+                case "Date":
+                    projects = projects.OrderBy(s => s.StartDate);
+                    break;
+                case "date_desc":
+                    projects = projects.OrderByDescending(s => s.StartDate);
+                    break;
+                case "Budget":
+                    projects = projects.OrderBy(s => s.Budget);
+                    break;
+                case "budget_desc":
+                    projects = projects.OrderByDescending(s => s.Budget);
+                    break;
+                default:
+                    projects = projects.OrderBy(s => s.Name);
+                    break;
+            }
+
+            int selectedPageSize = pageSize ?? 10;
+
+            // PaginatedList oluştur
+            var paginatedList = await PaginatedList<ProjectDto>.CreateAsync(
+                projects,
+                pageNumber ?? 1,
+                selectedPageSize,
+                searchString,
+                sortOrder);
+
+            return View(paginatedList);
         }
 
         // GET: Project/Details/5
@@ -39,6 +100,7 @@ namespace ProjectTracker.Web.Controllers
             {
                 return NotFound();
             }
+
             return View(project);
         }
 
@@ -51,21 +113,12 @@ namespace ProjectTracker.Web.Controllers
         // POST: Project/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateProjectDto projectDto)
+        public async Task<IActionResult> Create(ProjectDto projectDto)
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    await _projectService.CreateProjectAsync(projectDto);
-                    TempData["Success"] = "Proje başarıyla oluşturuldu!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error creating project");
-                    ModelState.AddModelError("", "Proje oluşturulurken hata oluştu.");
-                }
+                await _projectService.CreateProjectAsync(projectDto);
+                return RedirectToAction(nameof(Index));
             }
             return View(projectDto);
         }
@@ -93,36 +146,30 @@ namespace ProjectTracker.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    await _projectService.UpdateProjectAsync(id, projectDto);
-                    TempData["Success"] = "Proje başarıyla güncellendi!";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating project");
-                    ModelState.AddModelError("", "Proje güncellenirken hata oluştu.");
-                }
+                await _projectService.UpdateProjectAsync(id, projectDto);
+                return RedirectToAction(nameof(Index));
             }
             return View(projectDto);
         }
 
-        // POST: Project/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // GET: Project/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            try
+            var project = await _projectService.GetProjectByIdAsync(id);
+            if (project == null)
             {
-                await _projectService.DeleteProjectAsync(id);
-                TempData["Success"] = "Proje başarıyla silindi!";
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting project");
-                TempData["Error"] = "Proje silinirken hata oluştu.";
-            }
+
+            return View(project);
+        }
+
+        // POST: Project/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _projectService.DeleteProjectAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

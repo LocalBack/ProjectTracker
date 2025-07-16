@@ -1,27 +1,32 @@
-﻿namespace ProjectTracker.Service.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ProjectTracker.Service.DTOs
 {
     public class ProjectDto
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Proje adı zorunludur")]
+        [Display(Name = "Proje Adı")]
+        [StringLength(200, ErrorMessage = "Proje adı en fazla 200 karakter olabilir")]
         public string Name { get; set; } = string.Empty;
+
+        [Display(Name = "Açıklama")]
         public string Description { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
+
+        [Required(ErrorMessage = "Başlangıç tarihi zorunludur")]
+        [Display(Name = "Başlangıç Tarihi")]
+        public DateTime StartDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Bitiş Tarihi")]
         public DateTime? EndDate { get; set; }
+
+        [Required(ErrorMessage = "Bütçe zorunludur")]
+        [Display(Name = "Bütçe")]
+        [Range(0, double.MaxValue, ErrorMessage = "Bütçe 0'dan büyük olmalıdır")]
         public decimal Budget { get; set; }
+
+        [Display(Name = "Gerçekleşen Maliyet")]
         public decimal? ActualCost { get; set; }
-        public bool IsActive { get; set; }
-
-        // İlişkili veriler için
-        public int EmployeeCount { get; set; }
-        public int WorkLogCount { get; set; }
-    }
-
-    public class CreateProjectDto
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public decimal Budget { get; set; }
     }
 }

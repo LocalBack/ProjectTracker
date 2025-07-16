@@ -1,0 +1,54 @@
+﻿@model ProjectTracker.Service.DTOs.WorkLogDto
+@{
+    ViewData["Title"] = "İş Kaydı Sil";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3><i class="fas fa-trash"></i> İş Kaydı Sil</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Bu işlem geri alınamaz! Emin misiniz?
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Başlık</dt>
+                        <dd class="col-sm-9">@Model.Title</dd>
+
+                        <dt class="col-sm-3">Açıklama</dt>
+                        <dd class="col-sm-9">@Model.Description</dd>
+
+                        <dt class="col-sm-3">Çalışma Tarihi</dt>
+                        <dd class="col-sm-9">@Model.WorkDate.ToString("dd.MM.yyyy")</dd>
+
+                        <dt class="col-sm-3">Proje</dt>
+                        <dd class="col-sm-9">@Model.ProjectName</dd>
+
+                        <dt class="col-sm-3">Çalışan</dt>
+                        <dd class="col-sm-9">@Model.EmployeeName</dd>
+
+                        <dt class="col-sm-3">Harcanan Süre</dt>
+                        <dd class="col-sm-9">@Model.HoursSpent saat</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Vazgeç
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

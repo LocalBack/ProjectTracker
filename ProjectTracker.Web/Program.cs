@@ -18,6 +18,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<AppDbContext>();
+
 // Identity Configuration
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -58,6 +60,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // Services
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 builder.Services.AddAuthorization(options =>
 {

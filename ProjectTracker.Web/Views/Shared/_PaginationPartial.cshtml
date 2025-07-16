@@ -1,0 +1,77 @@
+﻿@model dynamic
+
+@{
+    var pageModel = Model as dynamic;
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "Home";
+}
+
+@if (pageModel.TotalPages > 1)
+{
+    <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <!-- İlk Sayfa -->
+            <li class="page-item @(pageModel.PageIndex == 1 ? "disabled" : "")">
+                <a class="page-link" asp-controller="@controller" asp-action="@action"
+                   asp-route-pageNumber="1"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                    İlk
+                </a>
+            </li>
+
+            <!-- Önceki -->
+            <li class="page-item @(!pageModel.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link" asp-controller="@controller" asp-action="@action"
+                   asp-route-pageNumber="@(pageModel.PageIndex - 1)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                    Önceki
+                </a>
+            </li>
+
+            <!-- Sayfa Numaraları -->
+            @{
+                var startPage = Math.Max(1, pageModel.PageIndex - 2);
+                var endPage = Math.Min(pageModel.TotalPages, pageModel.PageIndex + 2);
+            }
+
+            @for (var i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == pageModel.PageIndex ? "active" : "")">
+                    <a class="page-link" asp-controller="@controller" asp-action="@action"
+                       asp-route-pageNumber="@i"
+                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                       asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Sonraki -->
+            <li class="page-item @(!pageModel.HasNextPage ? "disabled" : "")">
+                <a class="page-link" asp-controller="@controller" asp-action="@action"
+                   asp-route-pageNumber="@(pageModel.PageIndex + 1)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                    Sonraki
+                </a>
+            </li>
+
+            <!-- Son Sayfa -->
+            <li class="page-item @(pageModel.PageIndex == pageModel.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-controller="@controller" asp-action="@action"
+                   asp-route-pageNumber="@pageModel.TotalPages"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                    Son
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

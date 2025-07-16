@@ -11,21 +11,15 @@ namespace ProjectTracker.Service.Services.Implementations
     public class WorkLogService : IWorkLogService
     {
         private readonly IRepository<WorkLog> _workLogRepository;
-        private readonly IRepository<WorkLogDetail> _detailRepository;
-        private readonly IRepository<WorkLogAttachment> _attachmentRepository;
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
         public WorkLogService(
             IRepository<WorkLog> workLogRepository,
-            IRepository<WorkLogDetail> detailRepository,
-            IRepository<WorkLogAttachment> attachmentRepository,
             AppDbContext context,
             IMapper mapper)
         {
             _workLogRepository = workLogRepository;
-            _detailRepository = detailRepository;
-            _attachmentRepository = attachmentRepository;
             _context = context;
             _mapper = mapper;
         }
@@ -35,44 +29,7 @@ namespace ProjectTracker.Service.Services.Implementations
             var workLogs = await _context.WorkLogs
                 .Include(w => w.Project)
                 .Include(w => w.Employee)
-                .Include(w => w.Details)
-                .Include(w => w.Attachments)
                 .Where(w => w.IsActive)
-                .OrderByDescending(w => w.WorkDate)
-                .ToListAsync();
-
-            var workLogDtos = _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
-
-            foreach (var dto in workLogDtos)
-            {
-                var workLog = workLogs.First(w => w.Id == dto.Id);
-                dto.DetailCount = workLog.Details?.Count ?? 0;
-                dto.AttachmentCount = workLog.Attachments?.Count ?? 0;
-            }
-
-            return workLogDtos;
-        }
-
-        public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByProjectIdAsync(int projectId)
-        {
-            var workLogs = await _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Include(w => w.Details)
-                .Include(w => w.Attachments)
-                .Where(w => w.ProjectId == projectId && w.IsActive)
-                .OrderByDescending(w => w.WorkDate)
-                .ToListAsync();
-
-            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
-        }
-
-        public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByEmployeeIdAsync(int employeeId)
-        {
-            var workLogs = await _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Where(w => w.EmployeeId == employeeId && w.IsActive)
                 .OrderByDescending(w => w.WorkDate)
                 .ToListAsync();
 
@@ -86,58 +43,57 @@ namespace ProjectTracker.Service.Services.Implementations
                 .Include(w => w.Employee)
                 .Include(w => w.Details)
                 .Include(w => w.Attachments)
-                .FirstOrDefaultAsync(w => w.Id == id);
+                .FirstOrDefaultAsync(w => w.Id == id && w.IsActive);
 
             if (workLog == null) return null;
 
-            var dto = _mapper.Map<WorkLogDto>(workLog);
-            dto.DetailCount = workLog.Details?.Count ?? 0;
-            dto.AttachmentCount = workLog.Attachments?.Count ?? 0;
-
-            return dto;
+            return _mapper.Map<WorkLogDto>(workLog);
         }
 
-        public async Task<IEnumerable<WorkLogDetailDto>> GetWorkLogDetailsAsync(int workLogId)
+        public async Task<WorkLogDto> CreateWorkLogAsync(WorkLogDto workLogDto)
         {
-            var details = await _detailRepository.FindAsync(d => d.WorkLogId == workLogId);
-            return _mapper.Map<IEnumerable<WorkLogDetailDto>>(details.OrderBy(d => d.StepNumber));
-        }
+            var workLog = _mapper.Map<WorkLog>(workLogDto);
+            workLog.CreatedDate = DateTime.Now;
+            workLog.IsActive = true;
 
-        public async Task<IEnumerable<WorkLogAttachmentDto>> GetWorkLogAttachmentsAsync(int workLogId)
-        {
-            var attachments = await _attachmentRepository.FindAsync(a => a.WorkLogId == workLogId);
-            return _mapper.Map<IEnumerable<WorkLogAttachmentDto>>(attachments);
-        }
-
-        public async Task<WorkLogDto> CreateWorkLogAsync(CreateWorkLogDto createWorkLogDto)
-        {
-            var workLog = _mapper.Map<WorkLog>(createWorkLogDto);
             await _workLogRepository.AddAsync(workLog);
             await _workLogRepository.SaveAsync();
 
-            return await GetWorkLogByIdAsync(workLog.Id);
+            // Yeni oluşturulan kaydı ilişkileriyle birlikte geri getir
+            var createdWorkLog = await GetWorkLogByIdAsync(workLog.Id);
+            return createdWorkLog ?? workLogDto;
         }
 
-        public async Task UpdateWorkLogAsync(int id, WorkLogDto workLogDto)
+        public async Task<WorkLogDto?> UpdateWorkLogAsync(int id, WorkLogDto workLogDto)
         {
             var workLog = await _workLogRepository.GetByIdAsync(id);
-            if (workLog == null)
-                throw new Exception($"WorkLog with id {id} not found");
+            if (workLog == null) return null;
 
+            // ID'yi koruyarak güncelle
+            var currentId = workLog.Id;
             _mapper.Map(workLogDto, workLog);
+            workLog.Id = currentId;
+            workLog.UpdatedDate = DateTime.Now;
+
             _workLogRepository.Update(workLog);
             await _workLogRepository.SaveAsync();
+
+            return await GetWorkLogByIdAsync(id);
         }
 
-        public async Task DeleteWorkLogAsync(int id)
+        public async Task<bool> DeleteWorkLogAsync(int id)
         {
             var workLog = await _workLogRepository.GetByIdAsync(id);
-            if (workLog == null)
-                throw new Exception($"WorkLog with id {id} not found");
+            if (workLog == null) return false;
 
+            // Soft delete
             workLog.IsActive = false;
+            workLog.UpdatedDate = DateTime.Now;
+
             _workLogRepository.Update(workLog);
             await _workLogRepository.SaveAsync();
+
+            return true;
         }
 
         public async Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count)
@@ -151,6 +107,28 @@ namespace ProjectTracker.Service.Services.Implementations
                 .ToListAsync();
 
             return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
+        }
+
+        public async Task<IQueryable<WorkLogDto>> GetAllWorkLogsQueryableAsync()
+        {
+            var workLogs = _context.WorkLogs
+                .Include(w => w.Project)
+                .Include(w => w.Employee)
+                .Where(w => w.IsActive)
+                .Select(w => new WorkLogDto
+                {
+                    Id = w.Id,
+                    Title = w.Title,
+                    Description = w.Description,
+                    WorkDate = w.WorkDate,
+                    HoursSpent = w.HoursSpent,
+                    ProjectId = w.ProjectId,
+                    ProjectName = w.Project.Name,
+                    EmployeeId = w.EmployeeId,
+                    EmployeeName = w.Employee.FirstName + " " + w.Employee.LastName
+                });
+
+            return await Task.FromResult(workLogs);
         }
     }
 }
