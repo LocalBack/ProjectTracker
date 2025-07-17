@@ -1,0 +1,171 @@
+﻿@page "{id:int}"
+@model ProjectTracker.Admin.Pages.Users.ManageRolesModel
+@{
+    ViewData["Title"] = "Manage User Roles";
+}
+
+<h1>Manage User Roles</h1>
+
+<hr />
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">User Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Username:</dt>
+                    <dd class="col-sm-9">@Model.UserRoles.UserName</dd>
+
+                    <dt class="col-sm-3">Email:</dt>
+                    <dd class="col-sm-9">@Model.UserRoles.Email</dd>
+
+                    <dt class="col-sm-3">Full Name:</dt>
+                    <dd class="col-sm-9">@Model.UserRoles.FullName</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h4 class="card-title">Assign Roles</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" asp-for="UserRoles.UserId" />
+                    <input type="hidden" asp-for="UserRoles.UserName" />
+                    <input type="hidden" asp-for="UserRoles.Email" />
+                    <input type="hidden" asp-for="UserRoles.FullName" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Assign</th>
+                                    <th>Role Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.UserRoles.Roles.Count; i++)
+                                {
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="hidden" asp-for="UserRoles.Roles[i].RoleId" />
+                                            <input type="hidden" asp-for="UserRoles.Roles[i].RoleName" />
+                                            <input type="hidden" asp-for="UserRoles.Roles[i].Description" />
+                                            <input type="checkbox" asp-for="UserRoles.Roles[i].IsAssigned"
+                                                   class="form-check-input" />
+                                        </td>
+                                        <td>
+                                            <strong>@Model.UserRoles.Roles[i].RoleName</strong>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@Model.UserRoles.Roles[i].Description</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a asp-page="./Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Role Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>Available Roles:</h6>
+                <ul class="mb-0">
+                    <li><strong>Admin:</strong> Complete system access</li>
+                    <li><strong>Manager:</strong> Project and team management</li>
+                    <li><strong>Employee:</strong> Standard user access</li>
+                    <li><strong>ReadOnly:</strong> View-only permissions</li>
+                </ul>
+
+                <hr />
+
+                <div class="alert alert-warning mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>You cannot remove your own Admin role</li>
+                        <li>At least one user must have Admin role</li>
+                        <li>Role changes take effect immediately</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">Tips</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Best Practices:</strong></p>
+                <ul class="small mb-0">
+                    <li>Assign minimal roles needed for job function</li>
+                    <li>Regularly review user permissions</li>
+                    <li>Document role assignments in user notes</li>
+                    <li>Consider using Manager role instead of Admin when possible</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add visual feedback when checkboxes are changed
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var row = this.closest('tr');
+                if (this.checked) {
+                    row.classList.add('table-success');
+                } else {
+                    row.classList.remove('table-success');
+                }
+            });
+
+            // Set initial state
+            if (checkbox.checked) {
+                checkbox.closest('tr').classList.add('table-success');
+            }
+        });
+
+        // Confirm dialog for admin role removal
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var adminCheckbox = document.querySelector('input[type="checkbox"][name*="Admin"]');
+            if (adminCheckbox && !adminCheckbox.checked) {
+                if (!confirm('Are you sure you want to remove Admin role? This action may limit system access.')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    </script>
+}
