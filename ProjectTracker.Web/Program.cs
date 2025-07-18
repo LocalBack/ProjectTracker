@@ -18,7 +18,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<AppDbContext>();
+// Note: No need to add AppDbContext separately as AddDbContext already registers it
 
 // Identity Configuration
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -62,9 +62,10 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
+// Authorization Configuration
 builder.Services.AddAuthorization(options =>
 {
-    // Bu politika TÜM UYGULAMAYI login gerektirir hale getirir
+    // This policy makes the ENTIRE APPLICATION require login
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
@@ -72,25 +73,22 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Seed Data - DÜZELTÝLMÝÞ KISIM BURASI!
+// Seed Data - UPDATED VERSION
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-
-        // Seed metodunu çaðýr
-        IdentitySeed.SeedAsync(userManager, roleManager).GetAwaiter().GetResult();
+        // Call SeedAsync with IServiceProvider
+        await IdentitySeed.SeedAsync(services);
 
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Identity seed data baþarýyla oluþturuldu!");
+        logger.LogInformation("Identity seed data successfully created!");
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Identity seed data oluþturulurken hata oluþtu!");
+        logger.LogError(ex, "An error occurred while seeding identity data!");
     }
 }
 
@@ -98,6 +96,7 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios.
     app.UseHsts();
 }
 
@@ -106,7 +105,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Authentication middleware - Authorization'dan önce olmalý!
+// Authentication middleware - Must be before Authorization!
 app.UseAuthentication();
 app.UseAuthorization();
 

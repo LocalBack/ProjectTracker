@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
+using ProjectTracker.Data.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +75,8 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+await IdentitySeed.SeedAsync(app.Services);
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

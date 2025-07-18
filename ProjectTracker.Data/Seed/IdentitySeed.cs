@@ -1,55 +1,72 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ProjectTracker.Core.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ProjectTracker.Data.Seed
 {
     public static class IdentitySeed
     {
-        public static async Task SeedAsync(UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+        public static async Task SeedRolesAsync(RoleManager<ApplicationRole> roleManager)
         {
-            // Rolleri oluştur
-            if (!await roleManager.RoleExistsAsync("Admin"))
+            var roles = new[]
             {
-                await roleManager.CreateAsync(new ApplicationRole
+                new { Name = "Admin", Description = "Full administrative access to the system" },
+                new { Name = "Manager", Description = "Can manage projects and employees" },
+                new { Name = "Employee", Description = "Basic user access with work logging capabilities" },
+                new { Name = "ReadOnly", Description = "View-only access to the system" }
+            };
+
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role.Name))
                 {
-                    Name = "Admin",
-                    Description = "Sistem yöneticisi"
-                });
+                    await roleManager.CreateAsync(new ApplicationRole
+                    {
+                        Name = role.Name,
+                        // Add Description property if your ApplicationRole has it
+                        // Description = role.Description 
+                    });
+                }
             }
+        }
 
-            if (!await roleManager.RoleExistsAsync("User"))
+        public static async Task SeedDefaultAdminAsync(UserManager<ApplicationUser> userManager)
+        {
+            const string adminEmail = "admin@projecttracker.com";
+            const string adminPassword = "Admin@123!";
+
+            if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
-                await roleManager.CreateAsync(new ApplicationRole
-                {
-                    Name = "User",
-                    Description = "Standart kullanıcı"
-                });
-            }
-
-            // Admin kullanıcı oluştur
-            var adminEmail = "admin@projecttracker.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
-            {
-                adminUser = new ApplicationUser
+                var adminUser = new ApplicationUser
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    FirstName = "Sistem",
-                    LastName = "Yöneticisi",
-                    EmailConfirmed = true,
-                    CreatedDate = DateTime.Now
+                    FirstName = "System",
+                    LastName = "Administrator",
+                    EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                var result = await userManager.CreateAsync(adminUser, adminPassword);
 
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
             }
+        }
+
+        public static async Task SeedAsync(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            // Seed roles first
+            await SeedRolesAsync(roleManager);
+
+            // Then seed default admin user
+            await SeedDefaultAdminAsync(userManager);
         }
     }
 }
