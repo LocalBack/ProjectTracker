@@ -1,134 +1,130 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
-using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using System;
 
 namespace ProjectTracker.Service.Services.Implementations
 {
     public class WorkLogService : IWorkLogService
     {
         private readonly IRepository<WorkLog> _workLogRepository;
-        private readonly AppDbContext _context;
+        private readonly IRepository<Employee> _employeeRepository;
         private readonly IMapper _mapper;
 
         public WorkLogService(
             IRepository<WorkLog> workLogRepository,
-            AppDbContext context,
+            IRepository<Employee> employeeRepository,
             IMapper mapper)
         {
             _workLogRepository = workLogRepository;
-            _context = context;
+            _employeeRepository = employeeRepository;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<WorkLogDto>> GetAllWorkLogsAsync()
         {
-            var workLogs = await _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Where(w => w.IsActive)
-                .OrderByDescending(w => w.WorkDate)
-                .ToListAsync();
+            var workLogs = await _workLogRepository.GetAsync(
+                includes: new Expression<Func<WorkLog, object>>[]
+                {
+                    w => w.Project,
+                    w => w.Employee
+                });
+            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
+        }
+
+        public async Task<WorkLogDto> GetWorkLogByIdAsync(int id)
+        {
+            var workLog = await _workLogRepository.GetByIdAsync(id);
+            return _mapper.Map<WorkLogDto>(workLog);
+        }
+
+        // Add this method
+        public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByUserIdAsync(int userId)
+        {
+            // First get the employee for this user
+            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+            var employee = employees.FirstOrDefault();
+
+            if (employee == null)
+                return new List<WorkLogDto>();
+
+            // Then get work logs for this employee
+            return await GetWorkLogsByEmployeeIdAsync(employee.Id);
+        }
+
+        // Add this method
+        public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByProjectIdAsync(int projectId)
+        {
+            var workLogs = await _workLogRepository.GetAsync(
+                w => w.ProjectId == projectId,
+                includes: new Expression<Func<WorkLog, object>>[]
+                {
+                    w => w.Employee,
+                    w => w.Project
+                });
 
             return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
         }
 
-        public async Task<WorkLogDto?> GetWorkLogByIdAsync(int id)
+        // Add this method
+        public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByEmployeeIdAsync(int employeeId)
         {
-            var workLog = await _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Include(w => w.Details)
-                .Include(w => w.Attachments)
-                .FirstOrDefaultAsync(w => w.Id == id && w.IsActive);
+            var workLogs = await _workLogRepository.GetAsync(
+                w => w.EmployeeId == employeeId,
+                includes: new Expression<Func<WorkLog, object>>[]
+                {
+                    w => w.Project,
+                    w => w.Employee
+                });
 
-            if (workLog == null) return null;
-
-            return _mapper.Map<WorkLogDto>(workLog);
+            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
         }
 
         public async Task<WorkLogDto> CreateWorkLogAsync(WorkLogDto workLogDto)
         {
             var workLog = _mapper.Map<WorkLog>(workLogDto);
-            workLog.CreatedDate = DateTime.Now;
-            workLog.IsActive = true;
-
             await _workLogRepository.AddAsync(workLog);
-            await _workLogRepository.SaveAsync();
-
-            // Yeni oluşturulan kaydı ilişkileriyle birlikte geri getir
-            var createdWorkLog = await GetWorkLogByIdAsync(workLog.Id);
-            return createdWorkLog ?? workLogDto;
+            return _mapper.Map<WorkLogDto>(workLog);
         }
 
-        public async Task<WorkLogDto?> UpdateWorkLogAsync(int id, WorkLogDto workLogDto)
+        public async Task<WorkLogDto> UpdateWorkLogAsync(int id, WorkLogDto workLogDto)
         {
             var workLog = await _workLogRepository.GetByIdAsync(id);
-            if (workLog == null) return null;
+            if (workLog == null)
+                return null;
 
-            // ID'yi koruyarak güncelle
-            var currentId = workLog.Id;
             _mapper.Map(workLogDto, workLog);
-            workLog.Id = currentId;
-            workLog.UpdatedDate = DateTime.Now;
-
-            _workLogRepository.Update(workLog);
-            await _workLogRepository.SaveAsync();
-
-            return await GetWorkLogByIdAsync(id);
+            await _workLogRepository.UpdateAsync(workLog);
+            return _mapper.Map<WorkLogDto>(workLog);
         }
 
         public async Task<bool> DeleteWorkLogAsync(int id)
         {
             var workLog = await _workLogRepository.GetByIdAsync(id);
-            if (workLog == null) return false;
+            if (workLog == null)
+                return false;
 
-            // Soft delete
-            workLog.IsActive = false;
-            workLog.UpdatedDate = DateTime.Now;
-
-            _workLogRepository.Update(workLog);
-            await _workLogRepository.SaveAsync();
-
+            await _workLogRepository.DeleteAsync(workLog);
             return true;
         }
-
-        public async Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count)
+        public async Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count = 10)
         {
-            var workLogs = await _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Where(w => w.IsActive)
-                .OrderByDescending(w => w.WorkDate)
-                .Take(count)
-                .ToListAsync();
-
-            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs);
-        }
-
-        public async Task<IQueryable<WorkLogDto>> GetAllWorkLogsQueryableAsync()
-        {
-            var workLogs = _context.WorkLogs
-                .Include(w => w.Project)
-                .Include(w => w.Employee)
-                .Where(w => w.IsActive)
-                .Select(w => new WorkLogDto
+            var workLogs = await _workLogRepository.GetAsync(
+                orderBy: q => q.OrderByDescending(w => w.WorkDate),
+                includes: new Expression<Func<WorkLog, object>>[]
                 {
-                    Id = w.Id,
-                    Title = w.Title,
-                    Description = w.Description,
-                    WorkDate = w.WorkDate,
-                    HoursSpent = w.HoursSpent,
-                    ProjectId = w.ProjectId,
-                    ProjectName = w.Project.Name,
-                    EmployeeId = w.EmployeeId,
-                    EmployeeName = w.Employee.FirstName + " " + w.Employee.LastName
+            w => w.Project,
+            w => w.Employee
                 });
 
-            return await Task.FromResult(workLogs);
+            return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs.Take(count));
         }
     }
 }

@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProjectTracker.Service.Services.Implementations
 {
@@ -29,34 +33,47 @@ namespace ProjectTracker.Service.Services.Implementations
             return _mapper.Map<EmployeeDto>(employee);
         }
 
+        // Add this method
+        public async Task<EmployeeDto> GetEmployeeByUserIdAsync(int userId)
+        {
+            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+            var employee = employees.FirstOrDefault();
+            return _mapper.Map<EmployeeDto>(employee);
+        }
+
         public async Task<EmployeeDto> CreateEmployeeAsync(EmployeeDto employeeDto)
         {
             var employee = _mapper.Map<Employee>(employeeDto);
             await _employeeRepository.AddAsync(employee);
-            await _employeeRepository.SaveAsync();
             return _mapper.Map<EmployeeDto>(employee);
         }
 
         public async Task<EmployeeDto> UpdateEmployeeAsync(int id, EmployeeDto employeeDto)
         {
             var employee = await _employeeRepository.GetByIdAsync(id);
-            if (employee == null) return null;
+            if (employee == null)
+                return null;
 
             _mapper.Map(employeeDto, employee);
-            _employeeRepository.Update(employee);
-            await _employeeRepository.SaveAsync();
-
+            await _employeeRepository.UpdateAsync(employee);
             return _mapper.Map<EmployeeDto>(employee);
         }
 
         public async Task<bool> DeleteEmployeeAsync(int id)
         {
             var employee = await _employeeRepository.GetByIdAsync(id);
-            if (employee == null) return false;
+            if (employee == null)
+                return false;
 
-            _employeeRepository.Remove(employee);
-            await _employeeRepository.SaveAsync();
+            await _employeeRepository.DeleteAsync(employee);
             return true;
+        }
+
+        // Add this method
+        public async Task<bool> EmployeeExistsAsync(int id)
+        {
+            var employee = await _employeeRepository.GetByIdAsync(id);
+            return employee != null;
         }
     }
 }

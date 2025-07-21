@@ -1,23 +1,22 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
-using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ProjectTracker.Service.Services.Implementations
+namespace ProjectTracker.Service.Implementations
 {
     public class ProjectService : IProjectService
     {
         private readonly IRepository<Project> _projectRepository;
-        private readonly AppDbContext _context; // Bu satırı ekleyin
         private readonly IMapper _mapper;
 
-        public ProjectService(IRepository<Project> projectRepository, AppDbContext context, IMapper mapper)
+        public ProjectService(IRepository<Project> projectRepository, IMapper mapper)
         {
             _projectRepository = projectRepository;
-            _context = context; // Bu satırı ekleyin
             _mapper = mapper;
         }
 
@@ -27,64 +26,55 @@ namespace ProjectTracker.Service.Services.Implementations
             return _mapper.Map<IEnumerable<ProjectDto>>(projects);
         }
 
-        public async Task<IQueryable<ProjectDto>> GetAllProjectsQueryableAsync()
-        {
-            var projects = _context.Projects
-                .Where(p => p.IsActive)
-                .Select(p => new ProjectDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    StartDate = p.StartDate,
-                    EndDate = p.EndDate,
-                    Budget = p.Budget,
-                    ActualCost = p.ActualCost
-                });
-
-            return await Task.FromResult(projects); // await ekledik
-        }
-
-        public async Task<ProjectDto?> GetProjectByIdAsync(int id)
+        public async Task<ProjectDto> GetProjectByIdAsync(int id)
         {
             var project = await _projectRepository.GetByIdAsync(id);
             return _mapper.Map<ProjectDto>(project);
+        }
+
+        public async Task<int> GetProjectCountAsync()
+        {
+            return await _projectRepository.CountAsync();
+        }
+
+        public async Task<IQueryable<ProjectDto>> GetAllProjectsQueryableAsync()
+        {
+            var projects = await _projectRepository.GetAllAsync();
+            var projectDtos = _mapper.Map<IEnumerable<ProjectDto>>(projects);
+            return await Task.FromResult(projectDtos.AsQueryable());
         }
 
         public async Task<ProjectDto> CreateProjectAsync(ProjectDto projectDto)
         {
             var project = _mapper.Map<Project>(projectDto);
             await _projectRepository.AddAsync(project);
-            await _projectRepository.SaveAsync();
             return _mapper.Map<ProjectDto>(project);
         }
 
-        public async Task<ProjectDto?> UpdateProjectAsync(int id, ProjectDto projectDto)
+        public async Task<ProjectDto> UpdateProjectAsync(int id, ProjectDto projectDto)
         {
             var project = await _projectRepository.GetByIdAsync(id);
-            if (project == null) return null;
+            if (project == null)
+                return null;
 
             _mapper.Map(projectDto, project);
-            _projectRepository.Update(project);
-            await _projectRepository.SaveAsync();
-
+            await _projectRepository.UpdateAsync(project);
             return _mapper.Map<ProjectDto>(project);
         }
 
         public async Task<bool> DeleteProjectAsync(int id)
         {
             var project = await _projectRepository.GetByIdAsync(id);
-            if (project == null) return false;
+            if (project == null)
+                return false;
 
-            _projectRepository.Remove(project);
-            await _projectRepository.SaveAsync();
+            await _projectRepository.DeleteAsync(project);
             return true;
         }
 
-        public async Task<int> GetProjectCountAsync()
+        public async Task<bool> ProjectExistsAsync(int id)
         {
-            var projects = await _projectRepository.GetAllAsync();
-            return projects.Count();
+            return await _projectRepository.ExistsAsync(p => p.Id == id);
         }
     }
 }

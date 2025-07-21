@@ -54,24 +54,53 @@ namespace ProjectTracker.Data.Context
             // Employee Configuration
             modelBuilder.Entity<Employee>(entity =>
             {
+                entity.HasKey(e => e.Id);
+
+                // Change from:
+                // entity.Property(e => e.Name)...     // Line 59
+                // entity.Property(e => e.Position)... // Line 69
+
+                // To:
                 entity.Property(e => e.FirstName)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(50);
 
                 entity.Property(e => e.LastName)
                     .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Title)      // Changed from Position
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.EmployeeCode)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Department)
                     .HasMaxLength(100);
 
                 entity.Property(e => e.Email)
-                    .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Title)
-                    .IsRequired()
-                    .HasMaxLength(100);
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(20);
 
-                entity.HasIndex(e => e.Email)
-                    .IsUnique();
+                entity.Property(e => e.HireDate)
+                    .IsRequired();
+
+                // Configure the relationship with ApplicationUser
+                entity.HasOne(e => e.User)
+                    .WithOne()
+                    .HasForeignKey<Employee>(e => e.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                // Configure relationships
+                entity.HasMany(e => e.WorkLogs)
+                    .WithOne(w => w.Employee)
+                    .HasForeignKey(w => w.EmployeeId);
+
+                entity.HasMany(e => e.ProjectEmployees)
+                    .WithOne(pe => pe.Employee)
+                    .HasForeignKey(pe => pe.EmployeeId);
             });
 
             // WorkLog Configuration

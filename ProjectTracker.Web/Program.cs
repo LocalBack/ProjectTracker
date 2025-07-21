@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
@@ -7,7 +8,8 @@ using ProjectTracker.Data.Seed;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
+using ProjectTracker.Web.Authorization;
+using ProjectTracker.Service.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,34 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
+// Add after Identity configuration
+builder.Services.AddAuthorization(options =>
+{
+    // Existing fallback policy
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    // Custom policies
+    options.AddPolicy("EmployeeOnly", policy =>
+        policy.RequireRole("Employee", "Manager", "Admin"));
+
+    options.AddPolicy("ManagerOnly", policy =>
+        policy.RequireRole("Manager", "Admin"));
+
+    options.AddPolicy("CanManageProjects", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("Manager") ||
+            context.User.IsInRole("Admin")));
+
+    options.AddPolicy("CanViewReports", policy =>
+        policy.RequireAssertion(context =>
+            context.User.IsInRole("User") ||
+            context.User.IsInRole("Employee") ||
+            context.User.IsInRole("Manager") ||
+            context.User.IsInRole("Admin")));
+});
+
 // Cookie Configuration
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -70,6 +100,8 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+
+builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
 
 var app = builder.Build();
 
