@@ -1,0 +1,45 @@
+﻿@page
+@model ProjectTracker.Admin.Pages.Projects.IndexModel
+@{
+    ViewData["Title"] = "Projects Management";
+}
+
+<h1>Projects Management</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">Create New Project</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Projects[0].Name)</th>
+            <th>@Html.DisplayNameFor(model => model.Projects[0].StartDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Projects[0].EndDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Projects[0].Status)</th>
+            <th>@Html.DisplayNameFor(model => model.Projects[0].Budget)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Projects)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                <td>
+                    <span class="badge bg-@(item.Status == Core.Entities.ProjectStatus.Active ? "success" : item.Status == Core.Entities.ProjectStatus.Completed ? "info" : "warning")">
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Budget)</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
