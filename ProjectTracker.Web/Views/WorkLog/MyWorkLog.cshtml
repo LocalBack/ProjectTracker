@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ProjectTracker.Service.DTOs.WorkLogDto>
+@{
+    ViewData["Title"] = "İş Kayıtlarım";
+}
+
+<h1>İş Kayıtlarım</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni İş Kaydı
+    </a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Proje</th>
+            <th>Başlık</th>
+            <th>Tarih</th>
+            <th>Süre</th>
+            <th>İşlem</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ProjectName</td>
+                <td>@item.Description</td>
+                <td>@item.WorkDate.ToString("dd.MM.yyyy")</td>
+                <td>@item.HoursSpent saat</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                        <i class="fas fa-eye"></i> Detay
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> Sil
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

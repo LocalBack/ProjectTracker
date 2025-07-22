@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.ViewModels;
-using ProjectTracker.Service.DTOs;
+using System.Security.Claims;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -206,6 +207,27 @@ namespace ProjectTracker.Web.Controllers
         {
             await _workLogService.DeleteWorkLogAsync(id);
             return RedirectToAction(nameof(Index));
+
+
+        }
+            public async Task<IActionResult> MyWorkLogs()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Get employee by user ID
+            var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+            if (employee == null)
+            {
+                TempData["Warning"] = "Çalışan profili bulunamadı.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var workLogs = await _workLogService.GetWorkLogsByEmployeeIdAsync(employee.Id);
+            return View(workLogs);
+            }
         }
     }
-}

@@ -1,0 +1,60 @@
+﻿@model ProjectTracker.Service.DTOs.DashboardDto
+@{
+    ViewData["Title"] = "Kontrol Paneli";
+}
+
+<h1>Kontrol Paneli</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Hoş Geldiniz, @Model.UserName!</h2>
+        <p>
+            Sistem rolleri:
+            @foreach (var role in Model.UserRoles)
+            {
+                <span class="badge bg-info">@role</span>
+            }
+        </p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Toplam Proje</h5>
+                <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Son İş Kayıtları</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Proje</th>
+                        <th>Açıklama</th>
+                        <th>Tarih</th>
+                        <th>Süre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var workLog in Model.RecentWorkLogs)
+                    {
+                        <tr>
+                            <td>@workLog.ProjectName</td>
+                            <td>@workLog.Description</td>
+                            <td>@workLog.WorkDate.ToString("dd.MM.yyyy")</td>
+                            <td>@workLog.HoursSpent saat</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

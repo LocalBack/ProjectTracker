@@ -18,7 +18,7 @@ namespace ProjectTracker.Core.Entities
         public DateTime? EndDate { get; set; }
         public decimal Budget { get; set; }
         public decimal? ActualCost { get; set; }
-
+        public ProjectStatus Status { get; set; } = ProjectStatus.Active;
         public ICollection<WorkLog> WorkLogs { get; set; }
         public ICollection<ProjectEmployee> ProjectEmployees { get; set; }
         public virtual ICollection<Equipment> Equipments { get; set; } // Yeni eklendi

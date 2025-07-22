@@ -1,31 +1,45 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using ProjectTracker.Service.Services.Interfaces;
+using ProjectTracker.Service.DTOs;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace ProjectTracker.Web.Controllers
 {
-    [Authorize(Roles = "User,Employee,Manager,Admin")] // Basic User role and above
+    [Authorize]
     public class UserDashboardController : Controller
     {
-        // Any authenticated user with at least "User" role can access
-        public IActionResult Index()
+        private readonly IUserDashboardService _userDashboardService;
+
+        public UserDashboardController(IUserDashboardService userDashboardService)
         {
-            ViewBag.UserName = User.Identity.Name;
-            ViewBag.Roles = User.FindAll(System.Security.Claims.ClaimTypes.Role)
+            _userDashboardService = userDashboardService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            // Get current user info
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userName = User.Identity?.Name ?? "Guest";
+
+            // Get dashboard data
+            var dashboardData = await _userDashboardService.GetDashboardDataAsync(userId);
+
+            // Set user info
+            dashboardData.UserName = userName;
+            dashboardData.UserRoles = User.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value)
                 .ToList();
 
-            return View();
-        }
-
-        // User-specific actions
-        public IActionResult MySettings()
-        {
-            return View();
-        }
-
-        public IActionResult ChangePassword()
-        {
-            return View();
+            return View(dashboardData);
         }
     }
 }

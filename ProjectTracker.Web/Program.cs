@@ -10,6 +10,7 @@ using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.Authorization;
 using ProjectTracker.Service.Implementations;
+using Microsoft.AspNetCore.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +103,19 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
+
+// Add before builder.Build()
+builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
+
+// In your Program.cs, modify your DbContext configuration:
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer("DefaultConnection")
+           .LogTo(Console.WriteLine, LogLevel.Information)
+           .EnableSensitiveDataLogging();
+});
+
+
 
 var app = builder.Build();
 

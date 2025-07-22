@@ -32,9 +32,9 @@ namespace ProjectTracker.Web.Controllers
                 {
                     TotalProjects = await _projectService.GetProjectCountAsync(),
                     TotalEmployees = 8,
-                    ActiveWorkLogs = 24,
-                    UpcomingMaintenances = 3,
-                    RecentWorkLogs = await _workLogService.GetRecentWorkLogsAsync(5)
+                    ActiveWorkLogs = 24,  // This is now int, not List
+                    UpcomingMaintenances = 3,  // This is now int, not List
+                    RecentWorkLogs = (await _workLogService.GetRecentWorkLogsAsync(5)).ToList()  // Add .ToList()
                 };
 
                 return View(viewModel);
