@@ -1,46 +1,185 @@
-﻿@model IEnumerable<ProjectTracker.Service.DTOs.WorkLogDto>
+﻿@model PaginatedList<ProjectTracker.Service.DTOs.WorkLogDto>
 @{
     ViewData["Title"] = "İş Kayıtlarım";
 }
 
-<h1>İş Kayıtlarım</h1>
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Yeni İş Kaydı
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-user-clock fa-2x me-3"></i>
+        <h1 class="mb-0">@ViewData["Title"]</h1>
+    </div>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="fas fa-plus me-2"></i>Yeni İş Kaydı
     </a>
-</p>
+</div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Proje</th>
-            <th>Başlık</th>
-            <th>Tarih</th>
-            <th>Süre</th>
-            <th>İşlem</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<div class="card">
+    <div class="card-body">
+        <form asp-action="MyWorkLog" method="get" class="mb-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
+                               class="form-control" placeholder="Başlık, proje veya açıklama ara..." />
+                        <button type="submit" class="btn btn-primary">Ara</button>
+                        @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+                        {
+                            <a asp-action="MyWorkLog" class="btn btn-secondary">Temizle</a>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="10" selected="@(ViewData["CurrentPageSize"]?.ToString() == "10")">10 kayıt göster</option>
+                        <option value="20" selected="@(ViewData["CurrentPageSize"]?.ToString() == "20")">20 kayıt göster</option>
+                        <option value="50" selected="@(ViewData["CurrentPageSize"]?.ToString() == "50")">50 kayıt göster</option>
+                        <option value="100" selected="@(ViewData["CurrentPageSize"]?.ToString() == "100")">100 kayıt göster</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <p class="mb-0 text-muted">
+                        Toplam @ViewData["TotalRecords"] kayıt |
+                        Toplam @((decimal?)ViewData["TotalHours"] ?? 0) saat
+                    </p>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>
+                            <a asp-action="MyWorkLog" asp-route-sortOrder="@ViewData["DateSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                Tarih <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="MyWorkLog" asp-route-sortOrder="@ViewData["TitleSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                Başlık <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="MyWorkLog" asp-route-sortOrder="@ViewData["ProjectSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                Proje <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="MyWorkLog" asp-route-sortOrder="@ViewData["HoursSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                                Süre (Saat) <i class="fas fa-sort"></i>
+                            </a>
+                        </th>
+                        <th>Detaylar</th>
+                        <th>Ekler</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.WorkDate.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                                    @item.Title
+                                </a>
+                            </td>
+                            <td>@item.ProjectName</td>
+                            <td>@item.HoursSpent</td>
+                            <td>
+                                @if (item.DetailCount > 0)
+                                {
+                                    <span class="badge bg-info">@item.DetailCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.AttachmentCount > 0)
+                                {
+                                    <span class="badge bg-secondary">@item.AttachmentCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a asp-action="Details" asp-route-id="@item.Id"
+                                       class="btn btn-info" title="Detaylar">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id"
+                                       class="btn btn-warning" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id"
+                                       class="btn btn-danger" title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
         {
-            <tr>
-                <td>@item.ProjectName</td>
-                <td>@item.Description</td>
-                <td>@item.WorkDate.ToString("dd.MM.yyyy")</td>
-                <td>@item.HoursSpent saat</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
-                        <i class="fas fa-eye"></i> Detay
-                    </a>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> Düzenle
-                    </a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash"></i> Sil
-                    </a>
-                </td>
-            </tr>
+            <nav aria-label="WorkLog pagination">
+                <ul class="pagination justify-content-center">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="MyWorkLog"
+                               asp-route-sortOrder="@ViewData["CurrentSort"]"
+                               asp-route-pageNumber="@(Model.PageIndex - 1)"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                <i class="fas fa-chevron-left"></i> Önceki
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" asp-action="MyWorkLog"
+                               asp-route-sortOrder="@ViewData["CurrentSort"]"
+                               asp-route-pageNumber="@i"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="MyWorkLog"
+                               asp-route-sortOrder="@ViewData["CurrentSort"]"
+                               asp-route-pageNumber="@(Model.PageIndex + 1)"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                Sonraki <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+            <div class="text-center text-muted">
+                Sayfa @Model.PageIndex / @Model.TotalPages
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+</div>

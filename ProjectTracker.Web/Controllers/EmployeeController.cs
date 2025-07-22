@@ -1,126 +1,145 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using ProjectTracker.Service.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Service.Services.Interfaces;
-using System.Security.Claims;
+using ProjectTracker.Service.DTOs;
+using ProjectTracker.Web.ViewModels;
+using System.Threading.Tasks;
+using System.Linq;
+using System;
 
 namespace ProjectTracker.Web.Controllers
 {
-    [Authorize(Roles = "Employee,Manager,Admin")]
+    [Authorize]
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService _employeeService;
-        private readonly IWorkLogService _workLogService;
 
-        public EmployeeController(IEmployeeService employeeService, IWorkLogService workLogService)
+        public EmployeeController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
-            _workLogService = workLogService;
         }
 
-        // GET: Employee/MyProfile
-        public async Task<IActionResult> MyProfile()
+        // GET: Employee
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            // Sorting parameters
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = string.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["TitleSortParm"] = sortOrder == "Title" ? "title_desc" : "Title";
+            ViewData["HireDateSortParm"] = sortOrder == "HireDate" ? "hiredate_desc" : "HireDate";
 
-            // Check if userId is null or empty
-            if (string.IsNullOrEmpty(userIdClaim))
+            // Search/Filter
+            if (searchString != null)
             {
-                return NotFound("User ID not found.");
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
             }
 
-            // Try to parse the userId
-            if (!int.TryParse(userIdClaim, out int userId))
-            {
-                return NotFound("Invalid user ID format.");
-            }
+            ViewData["CurrentFilter"] = searchString;
 
-            var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-
-            if (employee == null)
-            {
-                TempData["Warning"] = "Çalışan profili bulunamadı. Lütfen yöneticinizle iletişime geçin.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            return View(employee);
-        }
-
-        // GET: Employee/MyWorkLogs
-        public async Task<IActionResult> MyWorkLogs()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Check if userId is null or empty
-            if (string.IsNullOrEmpty(userIdClaim))
-            {
-                return NotFound("User ID not found.");
-            }
-
-            // Try to parse the userId
-            if (!int.TryParse(userIdClaim, out int userId))
-            {
-                return NotFound("Invalid user ID format.");
-            }
-
-            var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-            if (employee == null)
-            {
-                TempData["Warning"] = "Çalışan profili bulunamadı.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            var workLogs = await _workLogService.GetWorkLogsByEmployeeIdAsync(employee.Id);
-            return View(workLogs);
-        }
-
-        // GET: Employee (List all employees - Manager/Admin only)
-        [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Index()
-        {
+            // Get all employees
             var employees = await _employeeService.GetAllEmployeesAsync();
-            return View(employees);
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                employees = employees.Where(e =>
+                    e.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    e.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    e.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    (e.Title != null && e.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            // Apply sorting
+            employees = sortOrder switch
+            {
+                "name_desc" => employees.OrderByDescending(e => e.LastName).ThenByDescending(e => e.FirstName).ToList(),
+                "Title" => employees.OrderBy(e => e.Title).ToList(),
+                "title_desc" => employees.OrderByDescending(e => e.Title).ToList(),
+                "HireDate" => employees.OrderBy(e => e.HireDate).ToList(),
+                "hiredate_desc" => employees.OrderByDescending(e => e.HireDate).ToList(),
+                _ => employees.OrderBy(e => e.LastName).ThenBy(e => e.FirstName).ToList(),
+            };
+
+            // Pagination
+            int currentPageSize = pageSize ?? 10;
+            ViewData["CurrentPageSize"] = currentPageSize;
+
+            var employeesList = employees.ToList();
+            var count = employeesList.Count();
+
+            // Create paginated list
+            var paginatedEmployees = new PaginatedList<EmployeeDto>(
+                employeesList.Skip(((pageNumber ?? 1) - 1) * currentPageSize).Take(currentPageSize).ToList(),
+                count,
+                pageNumber ?? 1,
+                currentPageSize,
+                searchString ?? "",
+                sortOrder ?? ""
+            );
+
+            ViewData["TotalRecords"] = count;
+
+            return View(paginatedEmployees);
         }
 
         // GET: Employee/Details/5
-        [Authorize(Roles = "Manager,Admin")]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
             if (employee == null)
             {
                 return NotFound();
             }
+
             return View(employee);
         }
 
         // GET: Employee/Create
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public IActionResult Create()
         {
-            return View();
+            var model = new EmployeeDto
+            {
+                HireDate = DateTime.Today
+            };
+            return View(model);
         }
 
         // POST: Employee/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(EmployeeDto employeeDto)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([Bind("FirstName,LastName,Email,Title,HireDate")] EmployeeDto employeeDto)
         {
             if (ModelState.IsValid)
             {
                 await _employeeService.CreateEmployeeAsync(employeeDto);
-                TempData["Success"] = "Çalışan başarıyla oluşturuldu.";
+                TempData["SuccessMessage"] = "Çalışan başarıyla oluşturuldu.";
                 return RedirectToAction(nameof(Index));
             }
             return View(employeeDto);
         }
 
         // GET: Employee/Edit/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Edit(int? id)
         {
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
             if (employee == null)
             {
                 return NotFound();
@@ -131,8 +150,8 @@ namespace ProjectTracker.Web.Controllers
         // POST: Employee/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, EmployeeDto employeeDto)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Title,HireDate")] EmployeeDto employeeDto)
         {
             if (id != employeeDto.Id)
             {
@@ -141,12 +160,16 @@ namespace ProjectTracker.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                var result = await _employeeService.UpdateEmployeeAsync(id, employeeDto);
-                if (result == null)
+                try
                 {
-                    return NotFound();
+                    await _employeeService.UpdateEmployeeAsync(id, employeeDto);
+                    TempData["SuccessMessage"] = "Çalışan başarıyla güncellendi.";
                 }
-                TempData["Success"] = "Çalışan başarıyla güncellendi.";
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = "Çalışan güncellenirken bir hata oluştu.";
+                    return View(employeeDto);
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(employeeDto);
@@ -154,13 +177,19 @@ namespace ProjectTracker.Web.Controllers
 
         // GET: Employee/Delete/5
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
             if (employee == null)
             {
                 return NotFound();
             }
+
             return View(employee);
         }
 
@@ -170,12 +199,15 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var result = await _employeeService.DeleteEmployeeAsync(id);
-            if (!result)
+            try
             {
-                return NotFound();
+                await _employeeService.DeleteEmployeeAsync(id);
+                TempData["SuccessMessage"] = "Çalışan başarıyla silindi.";
             }
-            TempData["Success"] = "Çalışan başarıyla silindi.";
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Çalışan silinirken bir hata oluştu.";
+            }
             return RedirectToAction(nameof(Index));
         }
     }

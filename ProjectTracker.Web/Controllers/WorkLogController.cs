@@ -29,20 +29,17 @@ namespace ProjectTracker.Web.Controllers
         }
 
         // GET: WorkLog
-        public async Task<IActionResult> Index(
-            string sortOrder,
-            string currentFilter,
-            string searchString,
-            int? pageNumber,
-            int? pageSize)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
-            // ViewData ayarları
+            // Sorting parameters
             ViewData["CurrentSort"] = sortOrder;
-            ViewData["DateSortParm"] = String.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
+            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
+            ViewData["TitleSortParm"] = sortOrder == "Title" ? "title_desc" : "Title";
             ViewData["ProjectSortParm"] = sortOrder == "Project" ? "project_desc" : "Project";
             ViewData["EmployeeSortParm"] = sortOrder == "Employee" ? "employee_desc" : "Employee";
+            ViewData["HoursSortParm"] = sortOrder == "Hours" ? "hours_desc" : "Hours";
 
-            // Arama
+            // Search/Filter
             if (searchString != null)
             {
                 pageNumber = 1;
@@ -53,65 +50,135 @@ namespace ProjectTracker.Web.Controllers
             }
 
             ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentPageSize"] = pageSize ?? 10;
 
-            // Tüm WorkLog'ları al
+            // Get all work logs
             var workLogs = await _workLogService.GetAllWorkLogsAsync();
 
-            // IEnumerable'ı IQueryable'a çevir
-            var queryableWorkLogs = workLogs.AsQueryable();
-
-            // Filtreleme
-            if (!String.IsNullOrEmpty(searchString))
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchString))
             {
-                queryableWorkLogs = queryableWorkLogs.Where(s =>
-                    s.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                    s.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                    s.ProjectName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                    s.EmployeeName.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+                workLogs = workLogs.Where(w =>
+                    w.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    w.ProjectName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    w.EmployeeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    (w.Description != null && w.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
             }
 
-            // Sıralama
-            switch (sortOrder)
+            // Apply sorting
+            workLogs = sortOrder switch
             {
-                case "date_desc":
-                    queryableWorkLogs = queryableWorkLogs.OrderByDescending(s => s.WorkDate);
-                    break;
-                case "Project":
-                    queryableWorkLogs = queryableWorkLogs.OrderBy(s => s.ProjectName);
-                    break;
-                case "project_desc":
-                    queryableWorkLogs = queryableWorkLogs.OrderByDescending(s => s.ProjectName);
-                    break;
-                case "Employee":
-                    queryableWorkLogs = queryableWorkLogs.OrderBy(s => s.EmployeeName);
-                    break;
-                case "employee_desc":
-                    queryableWorkLogs = queryableWorkLogs.OrderByDescending(s => s.EmployeeName);
-                    break;
-                default:
-                    queryableWorkLogs = queryableWorkLogs.OrderBy(s => s.WorkDate);
-                    break;
-            }
+                "date_desc" => workLogs.OrderByDescending(w => w.WorkDate).ToList(),
+                "Title" => workLogs.OrderBy(w => w.Title).ToList(),
+                "title_desc" => workLogs.OrderByDescending(w => w.Title).ToList(),
+                "Project" => workLogs.OrderBy(w => w.ProjectName).ToList(),
+                "project_desc" => workLogs.OrderByDescending(w => w.ProjectName).ToList(),
+                "Employee" => workLogs.OrderBy(w => w.EmployeeName).ToList(),
+                "employee_desc" => workLogs.OrderByDescending(w => w.EmployeeName).ToList(),
+                "Hours" => workLogs.OrderBy(w => w.HoursSpent).ToList(),
+                "hours_desc" => workLogs.OrderByDescending(w => w.HoursSpent).ToList(),
+                _ => workLogs.OrderBy(w => w.WorkDate).ToList(),
+            };
 
-            // Sayfalama için önce listeye çevir
-            var totalCount = queryableWorkLogs.Count();
-            int selectedPageSize = pageSize ?? 10;
-            var paginatedItems = queryableWorkLogs
-                .Skip((pageNumber ?? 1 - 1) * selectedPageSize)
-                .Take(selectedPageSize)
-                .ToList();
+            // Pagination
+            int currentPageSize = pageSize ?? 10;
+            ViewData["CurrentPageSize"] = currentPageSize;
 
-            var paginatedList = new PaginatedList<WorkLogDto>(
-                paginatedItems,
-                totalCount,
+            var workLogsList = workLogs.ToList();
+            var count = workLogsList.Count();
+
+            // Create paginated list
+            var paginatedWorkLogs = new PaginatedList<WorkLogDto>(
+                workLogsList.Skip(((pageNumber ?? 1) - 1) * currentPageSize).Take(currentPageSize).ToList(),
+                count,
                 pageNumber ?? 1,
-                selectedPageSize,
-                searchString,
-                sortOrder);
+                currentPageSize,
+                searchString ?? "",
+                sortOrder ?? ""
+            );
 
-            return View(paginatedList);
+            // Calculate total hours
+            ViewData["TotalHours"] = workLogsList.Sum(w => w.HoursSpent);
+            ViewData["TotalRecords"] = count;
+
+            return View(paginatedWorkLogs);
         }
+
+        // GET: WorkLog/MyWorkLog
+        public async Task<IActionResult> MyWorkLog(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
+        {
+            // Get current user's work logs
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int userIdInt))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Similar logic as Index but filtered by user
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["DateSortParm"] = string.IsNullOrEmpty(sortOrder) ? "date_desc" : "";
+            ViewData["TitleSortParm"] = sortOrder == "Title" ? "title_desc" : "Title";
+            ViewData["ProjectSortParm"] = sortOrder == "Project" ? "project_desc" : "Project";
+            ViewData["HoursSortParm"] = sortOrder == "Hours" ? "hours_desc" : "Hours";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var workLogs = await _workLogService.GetWorkLogsByUserIdAsync(userIdInt);
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                workLogs = workLogs.Where(w =>
+                    w.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    w.ProjectName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                    (w.Description != null && w.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            // Apply sorting
+            workLogs = sortOrder switch
+            {
+                "date_desc" => workLogs.OrderByDescending(w => w.WorkDate).ToList(),
+                "Title" => workLogs.OrderBy(w => w.Title).ToList(),
+                "title_desc" => workLogs.OrderByDescending(w => w.Title).ToList(),
+                "Project" => workLogs.OrderBy(w => w.ProjectName).ToList(),
+                "project_desc" => workLogs.OrderByDescending(w => w.ProjectName).ToList(),
+                "Hours" => workLogs.OrderBy(w => w.HoursSpent).ToList(),
+                "hours_desc" => workLogs.OrderByDescending(w => w.HoursSpent).ToList(),
+                _ => workLogs.OrderBy(w => w.WorkDate).ToList(),
+            };
+
+            // Pagination
+            int currentPageSize = pageSize ?? 10;
+            ViewData["CurrentPageSize"] = currentPageSize;
+
+            var workLogsList = workLogs.ToList();
+            var count = workLogsList.Count();
+
+            var paginatedWorkLogs = new PaginatedList<WorkLogDto>(
+                workLogsList.Skip(((pageNumber ?? 1) - 1) * currentPageSize).Take(currentPageSize).ToList(),
+                count,
+                pageNumber ?? 1,
+                currentPageSize,
+                searchString ?? "",
+                sortOrder ?? ""
+            );
+
+            ViewData["TotalHours"] = workLogsList.Sum(w => w.HoursSpent);
+            ViewData["TotalRecords"] = count;
+
+            return View(paginatedWorkLogs);
+        }
+
 
         // GET: WorkLog/Details/5
         public async Task<IActionResult> Details(int id)

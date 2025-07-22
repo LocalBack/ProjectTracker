@@ -1,17 +1,36 @@
-﻿@model PaginatedList<ProjectTracker.Service.DTOs.WorkLogDto>
+﻿@model PaginatedList<ProjectTracker.Service.DTOs.EmployeeDto>
 @{
-    ViewData["Title"] = "İş Kayıtları";
+    ViewData["Title"] = "Çalışanlar";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center">
-        <i class="fas fa-clipboard-list fa-2x me-3"></i>
+        <i class="fas fa-users fa-2x me-3"></i>
         <h1 class="mb-0">@ViewData["Title"]</h1>
     </div>
-    <a asp-action="Create" class="btn btn-success">
-        <i class="fas fa-plus me-2"></i>Yeni İş Kaydı
-    </a>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Yeni Çalışan
+        </a>
+    }
 </div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <div class="card">
     <div class="card-body">
@@ -20,7 +39,7 @@
                 <div class="col-md-6">
                     <div class="input-group">
                         <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
-                               class="form-control" placeholder="Başlık, proje veya açıklama ara..." />
+                               class="form-control" placeholder="Ad, soyad, email veya ünvan ara..." />
                         <button type="submit" class="btn btn-primary">Ara</button>
                         @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
                         {
@@ -38,8 +57,7 @@
                 </div>
                 <div class="col-md-3 text-end">
                     <p class="mb-0 text-muted">
-                        Toplam @ViewData["TotalRecords"] kayıt |
-                        Toplam @((decimal?)ViewData["TotalHours"] ?? 0) saat
+                        Toplam @ViewData["TotalRecords"] çalışan
                     </p>
                 </div>
             </div>
@@ -50,37 +68,29 @@
                 <thead>
                     <tr>
                         <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]"
-                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                                Tarih <i class="fas fa-sort"></i>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                Ad Soyad <i class="fas fa-sort"></i>
                             </a>
                         </th>
+                        <th>Email</th>
                         <th>
                             <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]"
-                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                                Başlık <i class="fas fa-sort"></i>
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                Ünvan <i class="fas fa-sort"></i>
                             </a>
                         </th>
+                        <th>Departman</th>
+                        <th>Telefon</th>
                         <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["ProjectSortParm"]"
-                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                                Proje <i class="fas fa-sort"></i>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["HireDateSortParm"]"
+                               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                               asp-route-pageSize="@ViewData["CurrentPageSize"]">
+                                İşe Başlama <i class="fas fa-sort"></i>
                             </a>
                         </th>
-                        <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["EmployeeSortParm"]"
-                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                                Çalışan <i class="fas fa-sort"></i>
-                            </a>
-                        </th>
-                        <th>
-                            <a asp-action="Index" asp-route-sortOrder="@ViewData["HoursSortParm"]"
-                               asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                                Süre (Saat) <i class="fas fa-sort"></i>
-                            </a>
-                        </th>
-                        <th>Detaylar</th>
-                        <th>Ekler</th>
                         <th>İşlemler</th>
                     </tr>
                 </thead>
@@ -88,49 +98,40 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.WorkDate.ToString("dd.MM.yyyy")</td>
                             <td>
                                 <a asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
-                                    @item.Title
+                                    @item.FirstName @item.LastName
                                 </a>
                             </td>
-                            <td>@item.ProjectName</td>
-                            <td>@item.EmployeeName</td>
-                            <td>@item.HoursSpent</td>
                             <td>
-                                @if (item.DetailCount > 0)
-                                {
-                                    <span class="badge bg-info">@item.DetailCount</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
+                                <a href="mailto:@item.Email" class="text-decoration-none">
+                                    @item.Email
+                                </a>
                             </td>
-                            <td>
-                                @if (item.AttachmentCount > 0)
-                                {
-                                    <span class="badge bg-secondary">@item.AttachmentCount</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
-                            </td>
+                            <td>@(!string.IsNullOrEmpty(item.Title) ? item.Title : "-")</td>
+                            <td class="text-muted">-</td>
+                            <td class="text-muted">-</td>
+                            <td>@item.HireDate.ToString("dd.MM.yyyy")</td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a asp-action="Details" asp-route-id="@item.Id"
                                        class="btn btn-info" title="Detaylar">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id"
-                                       class="btn btn-warning" title="Düzenle">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id"
-                                       class="btn btn-danger" title="Sil">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-warning" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-danger" title="Sil">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    }
                                 </div>
                             </td>
                         </tr>
@@ -141,7 +142,7 @@
 
         @if (Model.TotalPages > 1)
         {
-            <nav aria-label="WorkLog pagination">
+            <nav aria-label="Employee pagination">
                 <ul class="pagination justify-content-center">
                     @if (Model.HasPreviousPage)
                     {
@@ -190,3 +191,12 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}
