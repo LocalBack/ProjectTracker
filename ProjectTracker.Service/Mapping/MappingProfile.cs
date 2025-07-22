@@ -27,6 +27,8 @@ namespace ProjectTracker.Service.Mapping
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.HireDate, opt => opt.MapFrom(src => src.HireDate))
+                .ForMember(dest => dest.Projects,
+        opt => opt.MapFrom(src => src.UserProjects.Select(up => up.Project)))
                 .ReverseMap();
 
             // WorkLog Mappings

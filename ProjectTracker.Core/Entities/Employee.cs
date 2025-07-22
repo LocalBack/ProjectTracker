@@ -37,6 +37,7 @@ public class Employee : BaseEntity
     // Navigation properties
     public virtual ICollection<ProjectEmployee> ProjectEmployees { get; set; }
     public virtual ICollection<WorkLog> WorkLogs { get; set; }
+    public virtual ICollection<UserProject> UserProjects { get; set; } = new List<UserProject>();
 
     public Employee()
     {

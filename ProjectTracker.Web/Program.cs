@@ -1,16 +1,19 @@
+using MediatR;
+using ProjectTracker.Core.Events; // Event'in bulunduðu assembly  
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Data.Seed;
+using ProjectTracker.Service.Events.Handlers;
+using ProjectTracker.Service.Implementations;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.Authorization;
-using ProjectTracker.Service.Implementations;
-using Microsoft.AspNetCore.Connections;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,6 +117,21 @@ builder.Services.AddDbContext<AppDbContext>(options =>
            .LogTo(Console.WriteLine, LogLevel.Information)
            .EnableSensitiveDataLogging();
 });
+
+builder.Services.AddMediatR(typeof(EmployeeUpdatedEventHandler).Assembly);
+builder.Services.AddScoped<IUserProjectService, UserProjectService>();
+
+
+
+builder.Services.AddScoped<IUserProjectSyncService, UserProjectSyncService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+
+
+
+
+
+
 
 
 

@@ -10,5 +10,6 @@
         public string Title { get; set; } = string.Empty;
         public DateTime HireDate { get; set; }
         public bool IsActive { get; set; }
+        public ICollection<ProjectDto> Projects { get; set; } = new List<ProjectDto>();
     }
 }

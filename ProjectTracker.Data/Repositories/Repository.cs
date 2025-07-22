@@ -34,18 +34,18 @@ namespace ProjectTracker.Data.Repositories
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
             params Expression<Func<T, object>>[] includes)
         {
-            IQueryable<T> query = _dbSet;
+            IQueryable<T> query = _dbSet.AsQueryable();
 
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
-            if (includes != null)
+            if (includes != null && includes.Length > 0)
             {
-                foreach (var include in includes)
+                foreach (var includeExpression in includes)
                 {
-                    query = query.Include(include);
+                    query = query.Include(includeExpression);
                 }
             }
 
@@ -95,6 +95,7 @@ namespace ProjectTracker.Data.Repositories
 
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> filter)
         {
+            if (filter == null) throw new ArgumentNullException(nameof(filter));
             return await _dbSet.AnyAsync(filter);
         }
 

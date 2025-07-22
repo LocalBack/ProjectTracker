@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
+using ProjectTracker.Core.Events;
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
@@ -14,11 +16,13 @@ namespace ProjectTracker.Service.Services.Implementations
     {
         private readonly IRepository<Employee> _employeeRepository;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public EmployeeService(IRepository<Employee> employeeRepository, IMapper mapper)
+        public EmployeeService(IRepository<Employee> employeeRepository, IMapper mapper, IMediator mediator)
         {
             _employeeRepository = employeeRepository;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync()
@@ -56,6 +60,7 @@ namespace ProjectTracker.Service.Services.Implementations
 
             _mapper.Map(employeeDto, employee);
             await _employeeRepository.UpdateAsync(employee);
+            await _mediator.Publish(new EmployeeUpdatedEvent(employee));
             return _mapper.Map<EmployeeDto>(employee);
         }
 
@@ -74,6 +79,29 @@ namespace ProjectTracker.Service.Services.Implementations
         {
             var employee = await _employeeRepository.GetByIdAsync(id);
             return employee != null;
+        }
+
+        public async Task<EmployeeDto> GetEmployeeByEmailAsync(string email)
+        {
+            // 1) IQueryable üzerinden Include / ThenInclude ile projeleri de yükle
+            var employee = await _employeeRepository
+                .GetQueryable()
+                .Include(e => e.ProjectEmployees)
+                    .ThenInclude(pe => pe.Project)
+                .FirstOrDefaultAsync(e => e.Email == email);
+
+            if (employee == null)
+                return null;
+
+            // 2) DTO'ya map et
+            var dto = _mapper.Map<EmployeeDto>(employee);
+
+            // 3) EmployeeDto.Projects koleksiyonunu elle doldur (MappingProfile'ın henüz projeleri map etmediği durumda)
+            dto.Projects = employee.ProjectEmployees
+                .Select(pe => _mapper.Map<ProjectDto>(pe.Project))
+                .ToList();
+
+            return dto;
         }
     }
 }
