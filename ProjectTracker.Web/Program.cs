@@ -97,14 +97,6 @@ builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 
-// Authorization Configuration
-builder.Services.AddAuthorization(options =>
-{
-    // This policy makes the ENTIRE APPLICATION require login
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
 
 builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
 
@@ -112,13 +104,6 @@ builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>()
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
 builder.Services.AddHostedService<MaintenanceNotificationService>();
 
-// In your Program.cs, modify your DbContext configuration:
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer("DefaultConnection")
-           .LogTo(Console.WriteLine, LogLevel.Information)
-           .EnableSensitiveDataLogging();
-});
 
 builder.Services.AddMediatR(typeof(EmployeeUpdatedEventHandler).Assembly);
 builder.Services.AddScoped<IUserProjectService, UserProjectService>();
@@ -126,7 +111,6 @@ builder.Services.AddScoped<IUserProjectService, UserProjectService>();
 
 
 builder.Services.AddScoped<IUserProjectSyncService, UserProjectSyncService>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 
 
