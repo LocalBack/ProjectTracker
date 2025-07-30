@@ -1,0 +1,58 @@
+@page
+@model ProjectTracker.Admin.Pages.Tasks.CreateModel
+@{
+    ViewData["Title"] = "Create Schedule";
+}
+
+<h1>Create Maintenance Schedule</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Schedule.EquipmentId" class="control-label"></label>
+                <select asp-for="Schedule.EquipmentId" asp-items="Model.EquipmentList" class="form-control"></select>
+                <span asp-validation-for="Schedule.EquipmentId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Schedule.MaintenanceType" class="control-label"></label>
+                <input asp-for="Schedule.MaintenanceType" class="form-control" />
+                <span asp-validation-for="Schedule.MaintenanceType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Schedule.IntervalDays" class="control-label"></label>
+                <input asp-for="Schedule.IntervalDays" class="form-control" />
+                <span asp-validation-for="Schedule.IntervalDays" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Schedule.LastMaintenanceDate" class="control-label"></label>
+                <input asp-for="Schedule.LastMaintenanceDate" type="date" class="form-control" />
+                <span asp-validation-for="Schedule.LastMaintenanceDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Schedule.NextMaintenanceDate" class="control-label"></label>
+                <input asp-for="Schedule.NextMaintenanceDate" type="date" class="form-control" />
+                <span asp-validation-for="Schedule.NextMaintenanceDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Schedule.Instructions" class="control-label"></label>
+                <textarea asp-for="Schedule.Instructions" class="form-control"></textarea>
+                <span asp-validation-for="Schedule.Instructions" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <input asp-for="Schedule.IsNotificationSent" class="form-check-input" />
+                <label asp-for="Schedule.IsNotificationSent" class="form-check-label"></label>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
