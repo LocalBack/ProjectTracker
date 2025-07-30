@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
+using ProjectTracker.Service.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,8 @@ builder.Services.AddRazorPages(opt =>
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
 });
+
+builder.Services.AddHostedService<MaintenanceNotificationService>();
 
 // ------------------------------------------------------------------
 // Adapter services so the stock Identity UI (which asks for
