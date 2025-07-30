@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectTracker.Core.Events; // Event'in bulunduðu assembly  
+using ProjectTracker.Core.Events; // Event'in bulunduÃ°u assembly  
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
@@ -95,6 +95,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 
 // Authorization Configuration
 builder.Services.AddAuthorization(options =>
