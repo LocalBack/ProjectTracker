@@ -1,0 +1,28 @@
+@page
+@model ProjectTracker.Admin.Pages.Tasks.DetailsModel
+@{
+    ViewData["Title"] = "Schedule Details";
+}
+
+<h1>Schedule Details</h1>
+
+<div>
+    <h4>Maintenance Schedule</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Equipment</dt>
+        <dd class="col-sm-9">@Model.Schedule.Equipment?.Name</dd>
+        <dt class="col-sm-3">Maintenance Type</dt>
+        <dd class="col-sm-9">@Model.Schedule.MaintenanceType</dd>
+        <dt class="col-sm-3">Interval Days</dt>
+        <dd class="col-sm-9">@Model.Schedule.IntervalDays</dd>
+        <dt class="col-sm-3">Last Maintenance</dt>
+        <dd class="col-sm-9">@Model.Schedule.LastMaintenanceDate.ToShortDateString()</dd>
+        <dt class="col-sm-3">Next Maintenance</dt>
+        <dd class="col-sm-9">@Model.Schedule.NextMaintenanceDate.ToShortDateString()</dd>
+        <dt class="col-sm-3">Instructions</dt>
+        <dd class="col-sm-9">@Model.Schedule.Instructions</dd>
+    </dl>
+    <a asp-page="Edit" asp-route-id="@Model.Schedule.Id" class="btn btn-primary">Edit</a>
+    <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+</div>
