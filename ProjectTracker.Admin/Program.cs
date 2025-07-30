@@ -8,6 +8,10 @@ using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Admin;
+using Microsoft.Extensions.Hosting;         // BackgroundService için
+using Microsoft.Extensions.Logging;         // ILogger için
+using Microsoft.Extensions.DependencyInjection; // CreateScope için
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +44,7 @@ builder.Services.AddRazorPages(opt =>
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
 });
+
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
