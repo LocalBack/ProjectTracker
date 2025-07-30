@@ -1,0 +1,40 @@
+@model ProjectTracker.Web.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Profilim";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="mb-0"><i class="fas fa-user"></i> @ViewData["Title"]</h3>
+            </div>
+            <div class="card-body p-4">
+                <dl class="row">
+                    <dt class="col-sm-4">Ad</dt>
+                    <dd class="col-sm-8">@Model.FirstName</dd>
+
+                    <dt class="col-sm-4">Soyad</dt>
+                    <dd class="col-sm-8">@Model.LastName</dd>
+
+                    <dt class="col-sm-4">E-posta</dt>
+                    <dd class="col-sm-8">
+                        <a href="mailto:@Model.Email">@Model.Email</a>
+                    </dd>
+
+                    <dt class="col-sm-4">Kayıt Tarihi</dt>
+                    <dd class="col-sm-8">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Son Giriş</dt>
+                    <dd class="col-sm-8">@(Model.LastLoginDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</dd>
+                </dl>
+            </div>
+            <div class="card-footer text-center">
+                <a asp-action="ChangePassword" class="btn btn-outline-primary">
+                    <i class="fas fa-key"></i> Şifre Değiştir
+                </a>
+            </div>
+        </div>
+    </div>
+</div> 

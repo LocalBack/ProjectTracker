@@ -5,8 +5,44 @@
 
 <h1>Kontrol Paneli</h1>
 
-<div class="row">
-    <div class="col-md-12">
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <img src="https://ui-avatars.com/api/?name=@Model.UserName&background=0D8ABC&color=fff&size=96" class="rounded-circle mb-3" alt="Avatar" width="96" height="96" />
+                <h4 class="card-title mb-1">@Model.FullName</h4>
+                <p class="text-muted mb-2">@User.Identity.Name</p>
+                <div class="mb-2">
+                    @foreach (var role in Model.UserRoles)
+                    {
+                        if (role == "Admin")
+                        {
+                            <span class="badge bg-danger me-1">Admin</span>
+                        }
+                        else if (role == "Manager")
+                        {
+                            <span class="badge bg-warning text-dark me-1">Yönetici</span>
+                        }
+                        else if (role == "Employee")
+                        {
+                            <span class="badge bg-info text-dark me-1">Çalışan</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary me-1">@role</span>
+                        }
+                    }
+                </div>
+                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-primary btn-sm mb-1">
+                    <i class="fas fa-user"></i> Profilim
+                </a>
+                <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-secondary btn-sm mb-1">
+                    <i class="fas fa-key"></i> Şifre Değiştir
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
         <h2>Hoş Geldiniz, @Model.UserName!</h2>
         <p>
             Sistem rolleri:
@@ -15,6 +51,90 @@
                 <span class="badge bg-info">@role</span>
             }
         </p>
+    </div>
+</div>
+
+<!-- Active Projects Widget -->
+@if (Model.ActiveProjects != null && Model.ActiveProjects.Any())
+{
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-project-diagram"></i> Aktif Projelerim
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var project in Model.ActiveProjects)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@project.Name</h5>
+                                        <p class="card-text text-muted">Durum: <span class="badge bg-info">@project.Status</span></p>
+                                        <!-- Placeholder progress bar -->
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                        </div>
+                                        <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-info-circle"></i> Detaylar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Work Log Summary Widget -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-clock"></i> Çalışma Özeti
+            </div>
+            <div class="card-body">
+                <p>Bu hafta: <strong>40</strong> saat</p>
+                <p>Bu ay: <strong>120</strong> saat</p>
+                <!-- Placeholder for chart -->
+                <div class="bg-light border rounded p-3 text-center">
+                    <em>Çalışma saatleri grafiği (placeholder)</em>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Notifications Widget -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-bell"></i> Bildirimler
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-envelope-open-text text-primary"></i> 2 yeni mesajınız var</li>
+                    <li><i class="fas fa-tasks text-success"></i> 1 onay bekleyen iş kaydı</li>
+                    <li><i class="fas fa-exclamation-circle text-danger"></i> 1 sistem uyarısı</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Quick Actions Row -->
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <a asp-controller="WorkLog" asp-action="Create" class="btn btn-success mx-2 mb-2">
+            <i class="fas fa-plus"></i> İş Kaydı Ekle
+        </a>
+        <a href="#" class="btn btn-outline-primary mx-2 mb-2">
+            <i class="fas fa-calendar-alt"></i> İzin Talep Et
+        </a>
+        <a asp-controller="Project" asp-action="Create" class="btn btn-outline-info mx-2 mb-2">
+            <i class="fas fa-folder-plus"></i> Proje Oluştur
+        </a>
     </div>
 </div>
 

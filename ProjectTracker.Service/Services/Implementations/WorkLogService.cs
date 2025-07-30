@@ -16,15 +16,18 @@ namespace ProjectTracker.Service.Services.Implementations
     {
         private readonly IRepository<WorkLog> _workLogRepository;
         private readonly IRepository<Employee> _employeeRepository;
+        private readonly IRepository<ApplicationUser> _userRepository;
         private readonly IMapper _mapper;
 
         public WorkLogService(
             IRepository<WorkLog> workLogRepository,
             IRepository<Employee> employeeRepository,
+            IRepository<ApplicationUser> userRepository,
             IMapper mapper)
         {
             _workLogRepository = workLogRepository;
             _employeeRepository = employeeRepository;
+            _userRepository = userRepository;
             _mapper = mapper;
         }
 
@@ -48,15 +51,16 @@ namespace ProjectTracker.Service.Services.Implementations
         // Add this method
         public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByUserIdAsync(int userId)
         {
-            // First get the employee for this user
-            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
-            var employee = employees.FirstOrDefault();
+            // Find ApplicationUser by userId
+            var users = await _userRepository.GetAsync(u => u.Id == userId);
+            var user = users.FirstOrDefault();
+            var employeeId = user?.EmployeeId;
 
-            if (employee == null)
+            if (employeeId == null)
                 return new List<WorkLogDto>();
 
             // Then get work logs for this employee
-            return await GetWorkLogsByEmployeeIdAsync(employee.Id);
+            return await GetWorkLogsByEmployeeIdAsync(employeeId.Value);
         }
 
         // Add this method
