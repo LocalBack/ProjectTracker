@@ -1,0 +1,41 @@
+@page
+@model ProjectTracker.Admin.Pages.Tasks.IndexModel
+@{
+    ViewData["Title"] = "Maintenance Schedules";
+}
+
+<h1>Maintenance Schedules</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">Create New Schedule</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Equipment</th>
+            <th>Type</th>
+            <th>Interval (Days)</th>
+            <th>Last</th>
+            <th>Next</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Schedules)
+{
+        <tr>
+            <td>@item.Equipment?.Name</td>
+            <td>@item.MaintenanceType</td>
+            <td>@item.IntervalDays</td>
+            <td>@item.LastMaintenanceDate.ToShortDateString()</td>
+            <td>@item.NextMaintenanceDate.ToShortDateString()</td>
+            <td>
+                <a asp-page="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
