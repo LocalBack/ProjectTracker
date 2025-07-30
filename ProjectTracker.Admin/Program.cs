@@ -6,6 +6,7 @@ using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
 
 using ProjectTracker.Service.Services.Implementations;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.Services.Implementations;
@@ -46,6 +47,7 @@ builder.Services.AddRazorPages(opt =>
 });
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 
 builder.Services.AddHostedService<MaintenanceNotificationService>();

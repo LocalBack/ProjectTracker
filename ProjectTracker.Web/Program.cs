@@ -14,6 +14,7 @@ using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +88,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Email sender implementation
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 // Repositories
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
