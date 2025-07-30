@@ -6,6 +6,7 @@ using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Service.Services.Implementations;
+using ProjectTracker.Service.Mapping;
 using ProjectTracker.Admin;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,7 @@ builder.Services.AddRazorPages(opt =>
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
 });
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 builder.Services.AddHostedService<MaintenanceNotificationService>();
