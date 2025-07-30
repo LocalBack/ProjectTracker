@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
+using ProjectTracker.Service.Services.Interfaces;
+using ProjectTracker.Service.Services.Implementations;
+using ProjectTracker.Admin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +39,9 @@ builder.Services.AddRazorPages(opt =>
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
 });
+
+builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
+builder.Services.AddHostedService<MaintenanceNotificationService>();
 
 // ------------------------------------------------------------------
 // Adapter services so the stock Identity UI (which asks for
@@ -79,6 +85,12 @@ else
 }
 
 await IdentitySeed.SeedAsync(app.Services);
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -1,0 +1,29 @@
+@page
+@model ProjectTracker.Admin.Pages.Tasks.IndexModel
+@{
+    ViewData["Title"] = "Maintenance Tasks";
+}
+
+<h1>Maintenance Tasks</h1>
+<a asp-page="Create" class="btn btn-primary mb-3">Add Task</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Equipment</th>
+            <th>Type</th>
+            <th>Next Date</th>
+            <th>Notified</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var task in Model.Tasks)
+    {
+        <tr>
+            <td>@task.EquipmentName</td>
+            <td>@task.MaintenanceType</td>
+            <td>@task.NextMaintenanceDate.ToShortDateString()</td>
+            <td>@task.IsNotificationSent</td>
+        </tr>
+    }
+    </tbody>
+</table>
