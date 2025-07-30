@@ -110,6 +110,7 @@ builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>()
 
 // Add before builder.Build()
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
+builder.Services.AddHostedService<MaintenanceNotificationService>();
 
 // In your Program.cs, modify your DbContext configuration:
 builder.Services.AddDbContext<AppDbContext>(options =>

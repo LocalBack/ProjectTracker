@@ -4,10 +4,14 @@ using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
+
+using ProjectTracker.Service.Services.Implementations;
+
 using ProjectTracker.Data.Repositories;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Service.Mapping;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +47,8 @@ builder.Services.AddRazorPages(opt =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
+
+builder.Services.AddHostedService<MaintenanceNotificationService>();
 
 // ------------------------------------------------------------------
 // Adapter services so the stock Identity UI (which asks for
