@@ -1,0 +1,31 @@
+@page
+@model ProjectTracker.Admin.Pages.Tasks.CreateModel
+@{
+    ViewData["Title"] = "Add Task";
+}
+
+<h1>Add Maintenance Task</h1>
+
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Task.EquipmentId" class="form-label"></label>
+        <select asp-for="Task.EquipmentId" asp-items="Model.EquipmentOptions" class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Task.MaintenanceType" class="form-label"></label>
+        <input asp-for="Task.MaintenanceType" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Task.IntervalDays" class="form-label"></label>
+        <input asp-for="Task.IntervalDays" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Task.LastMaintenanceDate" class="form-label"></label>
+        <input asp-for="Task.LastMaintenanceDate" class="form-control" type="date" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Task.Instructions" class="form-label"></label>
+        <textarea asp-for="Task.Instructions" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
