@@ -12,18 +12,85 @@ using ProjectTracker.Data.Context;
 namespace ProjectTracker.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250714113806_AddIdentityTablesOnly")]
-    partial class AddIdentityTablesOnly
+    [Migration("20250801073307_AddMaintenanceModules")]
+    partial class AddMaintenanceModules
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Employee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("EmployeeCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Employees");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
@@ -253,54 +320,6 @@ namespace ProjectTracker.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ProjectTracker.Core.Entities.Employee", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("HireDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Employees");
-                });
-
             modelBuilder.Entity("ProjectTracker.Core.Entities.Equipment", b =>
                 {
                     b.Property<int>("Id")
@@ -320,10 +339,7 @@ namespace ProjectTracker.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectId1")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PurchaseDate")
@@ -345,8 +361,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("ProjectId1");
 
                     b.HasIndex("SerialNumber")
                         .IsUnique();
@@ -382,11 +396,13 @@ namespace ProjectTracker.Data.Migrations
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -395,7 +411,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("MaintenanceScheduleId");
 
-                    b.ToTable("MaintenanceLogs");
+                    b.ToTable("MaintenanceLogs", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceSchedule", b =>
@@ -484,6 +500,9 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -545,7 +564,12 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<bool>("CanView")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ProjectId");
 
@@ -701,6 +725,16 @@ namespace ProjectTracker.Data.Migrations
                     b.ToTable("WorkLogDetails");
                 });
 
+            modelBuilder.Entity("Employee", b =>
+                {
+                    b.HasOne("ProjectTracker.Core.Entities.ApplicationUser", "User")
+                        .WithOne()
+                        .HasForeignKey("Employee", "UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("ProjectTracker.Core.Entities.ApplicationRole", null)
@@ -754,7 +788,7 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ApplicationUser", b =>
                 {
-                    b.HasOne("ProjectTracker.Core.Entities.Employee", "Employee")
+                    b.HasOne("Employee", "Employee")
                         .WithOne()
                         .HasForeignKey("ProjectTracker.Core.Entities.ApplicationUser", "EmployeeId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -765,14 +799,9 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.Equipment", b =>
                 {
                     b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ProjectTracker.Core.Entities.Project", null)
                         .WithMany("Equipments")
-                        .HasForeignKey("ProjectId1");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Project");
                 });
@@ -801,7 +830,7 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
                 {
-                    b.HasOne("ProjectTracker.Core.Entities.Employee", "Employee")
+                    b.HasOne("Employee", "Employee")
                         .WithMany("ProjectEmployees")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -820,6 +849,10 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.UserProject", b =>
                 {
+                    b.HasOne("Employee", null)
+                        .WithMany("UserProjects")
+                        .HasForeignKey("EmployeeId");
+
                     b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
@@ -839,7 +872,7 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.WorkLog", b =>
                 {
-                    b.HasOne("ProjectTracker.Core.Entities.Employee", "Employee")
+                    b.HasOne("Employee", "Employee")
                         .WithMany("WorkLogs")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -878,16 +911,18 @@ namespace ProjectTracker.Data.Migrations
                     b.Navigation("WorkLog");
                 });
 
-            modelBuilder.Entity("ProjectTracker.Core.Entities.ApplicationUser", b =>
-                {
-                    b.Navigation("UserProjects");
-                });
-
-            modelBuilder.Entity("ProjectTracker.Core.Entities.Employee", b =>
+            modelBuilder.Entity("Employee", b =>
                 {
                     b.Navigation("ProjectEmployees");
 
+                    b.Navigation("UserProjects");
+
                     b.Navigation("WorkLogs");
+                });
+
+            modelBuilder.Entity("ProjectTracker.Core.Entities.ApplicationUser", b =>
+                {
+                    b.Navigation("UserProjects");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.Equipment", b =>

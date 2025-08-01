@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ProjectTracker.Service.Services.Interfaces;
 
-namespace ProjectTracker.Admin
+namespace ProjectTracker.Service.Services.Implementations
 {
     public class MaintenanceNotificationService : BackgroundService
     {

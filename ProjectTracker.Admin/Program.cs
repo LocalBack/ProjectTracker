@@ -1,26 +1,33 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;              // BackgroundService
+using Microsoft.Extensions.Logging;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
-using ProjectTracker.Service.Services.Interfaces;
-using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Mapping;
-using ProjectTracker.Admin;
-using Microsoft.Extensions.Hosting;         // BackgroundService i�in
-using Microsoft.Extensions.Logging;         // ILogger i�in
-using Microsoft.Extensions.DependencyInjection; // CreateScope i�in
-
+using ProjectTracker.Service.Services.Implementations;
+using ProjectTracker.Service.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. DbContext
+/*──────────────────────────── 1) DbContext ───────────────────────────*/
 var cs = builder.Configuration.GetConnectionString("DefaultConnection")
          ?? throw new InvalidOperationException("Missing conn-string");
-builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(cs));
 
-// 2. Identity
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseSqlServer(cs, sql =>
+    {
+        sql.CommandTimeout(120);                // CHANGED: 30 s → 120 s
+        sql.EnableRetryOnFailure(5);            // NEW: transient retry
+    });
+});
+
+/*──────────────────────────── 2) Identity  ───────────────────────────*/
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 {
     opt.SignIn.RequireConfirmedAccount = false;
@@ -30,7 +37,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(opt =>
 .AddDefaultTokenProviders()
 .AddDefaultUI();
 
-// 3. Authorization
+/*──────────────────────────── 3) Authorization ───────────────────────*/
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", p => p.RequireRole("Admin"))
     .SetFallbackPolicy(new AuthorizationPolicyBuilder()
@@ -38,26 +45,35 @@ builder.Services.AddAuthorizationBuilder()
         .RequireRole("Admin")
         .Build());
 
-// 4. Razor Pages
+/*──────────────────────────── 4) Razor Pages ─────────────────────────*/
 builder.Services.AddRazorPages(opt =>
 {
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
 });
 
+/*──────────────────────────── 5) Mapping / Services ──────────────────*/
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 builder.Services.AddHostedService<MaintenanceNotificationService>();
 
-// ------------------------------------------------------------------
-// Adapter services so the stock Identity UI (which asks for
-// <IdentityUser>) can reuse the instances registered for <ApplicationUser>
-// ------------------------------------------------------------------
+/*──────────────────────────── 6) HttpClient  (NEW) ───────────────────
+   Yavaş/arıza yapan dış API çağrıları “task cancelled” üretmesin */
+builder.Services.AddHttpClient("Default", c =>
+{
+    c.Timeout = TimeSpan.FromSeconds(100);      // default 100 s > çoğu senaryo
+}).SetHandlerLifetime(TimeSpan.FromMinutes(5)); // soket sızıntısına karşı
 
+/*──────────────────────────── 7) Host seçenekleri (NEW) ──────────────
+   Graceful shutdown → uzun süren BG görevleri iptal edilmeden tamamlayabilsin */
+builder.Services.Configure<HostOptions>(o =>
+{
+    o.ShutdownTimeout = TimeSpan.FromSeconds(30);
+});
+
+/*──────────────────────────── 8) Identity ayrıntılı ayarlar ──────────*/
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Password settings
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -65,29 +81,39 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 6;
     options.Password.RequiredUniqueChars = 1;
 
-    // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 
-    // User settings
     options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
 });
 
-
-
 var app = builder.Build();
 
-// 5. HTTP pipeline
+/*────────────────────── 9) Global exception / cancellation log (NEW) ─*/
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async ctx =>
+    {
+        var ex = ctx.Features.Get<IExceptionHandlerPathFeature>()?.Error;
+        if (ex is TaskCanceledException)
+            app.Logger.LogWarning(ex, "Request or background task was cancelled.");
+        else
+            app.Logger.LogError(ex, "Unhandled exception");
+
+        await Results.Problem().ExecuteAsync(ctx);
+    });
+});
+
+/*────────────────────────── 10) HTTP pipeline ───────────────────────*/
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
 }
 else
 {
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 

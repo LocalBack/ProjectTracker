@@ -12,8 +12,8 @@ using ProjectTracker.Data.Context;
 namespace ProjectTracker.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250721105354_UpdateEmployeeStructure")]
-    partial class UpdateEmployeeStructure
+    [Migration("20250801071519_Baseline_2025Aug")]
+    partial class Baseline_2025Aug
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -401,11 +401,13 @@ namespace ProjectTracker.Data.Migrations
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -414,7 +416,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("MaintenanceScheduleId");
 
-                    b.ToTable("MaintenanceLogs");
+                    b.ToTable("MaintenanceLogs", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceSchedule", b =>
@@ -503,6 +505,9 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -564,7 +569,12 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<bool>("CanView")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ProjectId");
 
@@ -849,6 +859,10 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.UserProject", b =>
                 {
+                    b.HasOne("Employee", null)
+                        .WithMany("UserProjects")
+                        .HasForeignKey("EmployeeId");
+
                     b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
@@ -910,6 +924,8 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("Employee", b =>
                 {
                     b.Navigation("ProjectEmployees");
+
+                    b.Navigation("UserProjects");
 
                     b.Navigation("WorkLogs");
                 });
