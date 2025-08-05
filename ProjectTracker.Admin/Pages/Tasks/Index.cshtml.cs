@@ -23,6 +23,7 @@ namespace ProjectTracker.Admin.Pages.Tasks
         {
             var schedules = await _context.MaintenanceSchedules
                 .Include(m => m.Equipment)
+                .Include(m => m.Project)
                 .ToListAsync();
             Tasks = _mapper.Map<IList<MaintenanceScheduleDto>>(schedules);
         }
