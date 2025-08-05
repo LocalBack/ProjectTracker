@@ -15,12 +15,18 @@ namespace ProjectTracker.Service.Services.Implementations
     public class EmployeeService : IEmployeeService
     {
         private readonly IRepository<Employee> _employeeRepository;
+        private readonly IRepository<ApplicationUser> _userRepository;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public EmployeeService(IRepository<Employee> employeeRepository, IMapper mapper, IMediator mediator)
+        public EmployeeService(
+            IRepository<Employee> employeeRepository,
+            IRepository<ApplicationUser> userRepository,
+            IMapper mapper,
+            IMediator mediator)
         {
             _employeeRepository = employeeRepository;
+            _userRepository = userRepository;
             _mapper = mapper;
             _mediator = mediator;
         }
@@ -40,8 +46,20 @@ namespace ProjectTracker.Service.Services.Implementations
         // Add this method
         public async Task<EmployeeDto> GetEmployeeByUserIdAsync(int userId)
         {
-            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
-            var employee = employees.FirstOrDefault();
+            // Önce doğrudan Employee.UserId eşleşmesine bak
+            var employee = (await _employeeRepository.GetAsync(e => e.UserId == userId))
+                .FirstOrDefault();
+
+            // Eğer ilişki Employee tarafında kurulmamışsa, ApplicationUser üzerinden çöz
+            if (employee == null)
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user?.EmployeeId != null)
+                {
+                    employee = await _employeeRepository.GetByIdAsync(user.EmployeeId.Value);
+                }
+            }
+
             return _mapper.Map<EmployeeDto>(employee);
         }
 
