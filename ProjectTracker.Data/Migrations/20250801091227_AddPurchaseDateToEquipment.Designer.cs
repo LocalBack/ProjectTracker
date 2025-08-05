@@ -12,8 +12,8 @@ using ProjectTracker.Data.Context;
 namespace ProjectTracker.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250721125740_AddStatusToProjects")]
-    partial class AddStatusToProjects
+    [Migration("20250801091227_AddPurchaseDateToEquipment")]
+    partial class AddPurchaseDateToEquipment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -339,10 +339,7 @@ namespace ProjectTracker.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProjectId1")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PurchaseDate")
@@ -364,8 +361,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("ProjectId1");
 
                     b.HasIndex("SerialNumber")
                         .IsUnique();
@@ -401,11 +396,13 @@ namespace ProjectTracker.Data.Migrations
 
                     b.Property<string>("Notes")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("PerformedBy")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
@@ -414,7 +411,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("MaintenanceScheduleId");
 
-                    b.ToTable("MaintenanceLogs");
+                    b.ToTable("MaintenanceLogs", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceSchedule", b =>
@@ -567,7 +564,12 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<bool>("CanView")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.HasKey("UserId", "ProjectId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ProjectId");
 
@@ -797,14 +799,9 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.Equipment", b =>
                 {
                     b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ProjectTracker.Core.Entities.Project", null)
                         .WithMany("Equipments")
-                        .HasForeignKey("ProjectId1");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Project");
                 });
@@ -852,6 +849,10 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.UserProject", b =>
                 {
+                    b.HasOne("Employee", null)
+                        .WithMany("UserProjects")
+                        .HasForeignKey("EmployeeId");
+
                     b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
@@ -913,6 +914,8 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("Employee", b =>
                 {
                     b.Navigation("ProjectEmployees");
+
+                    b.Navigation("UserProjects");
 
                     b.Navigation("WorkLogs");
                 });

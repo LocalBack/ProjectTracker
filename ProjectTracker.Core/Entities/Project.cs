@@ -21,6 +21,6 @@ namespace ProjectTracker.Core.Entities
         public ProjectStatus Status { get; set; } = ProjectStatus.Active;
         public ICollection<WorkLog> WorkLogs { get; set; }
         public ICollection<ProjectEmployee> ProjectEmployees { get; set; }
-        public virtual ICollection<Equipment> Equipments { get; set; } // Yeni eklendi
+        public virtual ICollection<Equipment> Equipments { get; set; } = [];// Yeni eklendi
     }
 }

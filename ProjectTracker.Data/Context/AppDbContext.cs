@@ -220,7 +220,7 @@ namespace ProjectTracker.Data.Context
                     .IsUnique();
 
                 entity.HasOne(e => e.Project)
-                    .WithMany()
+                    .WithMany(p => p.Equipments)
                     .HasForeignKey(e => e.ProjectId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
@@ -242,6 +242,36 @@ namespace ProjectTracker.Data.Context
 
                 entity.HasIndex(e => e.NextMaintenanceDate);
             });
+
+            // MaintenanceLog Configuration
+            modelBuilder.Entity<MaintenanceLog>(entity =>
+            {
+                entity.ToTable("MaintenanceLogs");
+
+                entity.Property(e => e.MaintenanceDate)
+                    .IsRequired();
+
+                entity.Property(e => e.PerformedBy)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Notes)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Cost)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.IsCompleted)
+                    .IsRequired();
+
+                entity.HasOne(e => e.MaintenanceSchedule)
+                    .WithMany(ms => ms.MaintenanceLogs)
+                    .HasForeignKey(e => e.MaintenanceScheduleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.MaintenanceScheduleId);
+            });
+            // ------------------------------------------------
 
             // ApplicationUser Configuration
             modelBuilder.Entity<ApplicationUser>(entity =>
