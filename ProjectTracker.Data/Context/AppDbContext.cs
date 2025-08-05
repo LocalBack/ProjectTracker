@@ -240,6 +240,12 @@ namespace ProjectTracker.Data.Context
                     .HasForeignKey(e => e.EquipmentId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+                entity.HasOne(e => e.Project)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => e.ProjectId);
                 entity.HasIndex(e => e.NextMaintenanceDate);
             });
 

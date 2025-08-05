@@ -1,7 +1,6 @@
 @page
 @model ProjectTracker.Admin.Pages.Tasks.IndexModel
 @{
-<<<<<<< HEAD
     ViewData["Title"] = "Maintenance Schedules";
 }
 
@@ -12,19 +11,11 @@
 </p>
 
 <table class="table table-striped">
-=======
-    ViewData["Title"] = "Maintenance Tasks";
-}
-
-<h1>Maintenance Tasks</h1>
-<a asp-page="Create" class="btn btn-primary mb-3">Add Task</a>
-<table class="table">
->>>>>>> change-tests
     <thead>
         <tr>
+            <th>Project</th>
             <th>Equipment</th>
             <th>Type</th>
-<<<<<<< HEAD
             <th>Interval (Days)</th>
             <th>Last</th>
             <th>Next</th>
@@ -32,9 +23,10 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Schedules)
-{
+    @foreach (var item in Model.Schedules)
+    {
         <tr>
+            <td>@item.Project?.Name</td>
             <td>@item.Equipment?.Name</td>
             <td>@item.MaintenanceType</td>
             <td>@item.IntervalDays</td>
@@ -46,22 +38,6 @@
                 <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
             </td>
         </tr>
-}
-=======
-            <th>Next Date</th>
-            <th>Notified</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var task in Model.Tasks)
-    {
-        <tr>
-            <td>@task.EquipmentName</td>
-            <td>@task.MaintenanceType</td>
-            <td>@task.NextMaintenanceDate.ToShortDateString()</td>
-            <td>@task.IsNotificationSent</td>
-        </tr>
     }
->>>>>>> change-tests
     </tbody>
 </table>

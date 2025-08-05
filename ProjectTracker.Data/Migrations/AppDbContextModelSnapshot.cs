@@ -425,6 +425,9 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<int>("EquipmentId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Instructions")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -455,6 +458,8 @@ namespace ProjectTracker.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EquipmentId");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("NextMaintenanceDate");
 
@@ -823,6 +828,14 @@ namespace ProjectTracker.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Equipment");
+
+                    b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
