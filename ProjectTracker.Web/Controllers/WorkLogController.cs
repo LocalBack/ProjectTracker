@@ -230,6 +230,9 @@ namespace ProjectTracker.Web.Controllers
         public async Task<IActionResult> Create()
         {
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name");
+
+            var model = new WorkLogDto();
+
             if (User.IsInRole("Employee"))
             {
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -237,19 +240,22 @@ namespace ProjectTracker.Web.Controllers
                 {
                     return Unauthorized();
                 }
+
                 var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
                 if (employee == null)
                 {
                     return Forbid();
                 }
-                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName");
+
+                model.EmployeeId = employee.Id;
+                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", employee.Id);
             }
             else
             {
                 ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName");
             }
 
-            return View();
+            return View(model);
         }
 
         // POST: WorkLog/Create
@@ -265,11 +271,15 @@ namespace ProjectTracker.Web.Controllers
                 {
                     return Unauthorized();
                 }
+
                 var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                if (employee == null || workLogDto.EmployeeId != employee.Id)
+                if (employee == null)
                 {
                     return Forbid();
                 }
+
+                // Force the work log to use the current employee's id to prevent tampering
+                workLogDto.EmployeeId = employee.Id;
             }
 
             if (ModelState.IsValid)
@@ -285,7 +295,8 @@ namespace ProjectTracker.Web.Controllers
                 if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
                 {
                     var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLogDto.EmployeeId);
+                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", employee?.Id);
+                    workLogDto.EmployeeId = employee?.Id ?? workLogDto.EmployeeId;
                 }
             }
             else

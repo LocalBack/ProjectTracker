@@ -64,13 +64,23 @@ namespace ProjectTracker.Service.Services.Implementations
         // Add this method
         public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByUserIdAsync(int userId)
         {
-            // Find ApplicationUser by userId
-            var users = await _userRepository.GetAsync(u => u.Id == userId);
+            // Attempt to resolve the employee id from the user record or by reverse lookup
+            var users = await _userRepository.GetAsync(u => u.Id == userId, null, u => u.Employee);
             var user = users.FirstOrDefault();
-            var employeeId = user?.EmployeeId;
+
+            int? employeeId = user?.EmployeeId ?? user?.Employee?.Id;
 
             if (employeeId == null)
+            {
+                var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+                var employee = employees.FirstOrDefault();
+                employeeId = employee?.Id;
+            }
+
+            if (employeeId == null)
+            {
                 return new List<WorkLogDto>();
+            }
 
             // Then get work logs for this employee
             return await GetWorkLogsByEmployeeIdAsync(employeeId.Value);
