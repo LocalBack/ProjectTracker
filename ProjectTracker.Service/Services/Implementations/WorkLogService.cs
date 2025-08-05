@@ -17,17 +17,20 @@ namespace ProjectTracker.Service.Services.Implementations
         private readonly IRepository<WorkLog> _workLogRepository;
         private readonly IRepository<Employee> _employeeRepository;
         private readonly IRepository<ApplicationUser> _userRepository;
+        private readonly IRepository<Project> _projectRepository;
         private readonly IMapper _mapper;
 
         public WorkLogService(
             IRepository<WorkLog> workLogRepository,
             IRepository<Employee> employeeRepository,
             IRepository<ApplicationUser> userRepository,
+            IRepository<Project> projectRepository,
             IMapper mapper)
         {
             _workLogRepository = workLogRepository;
             _employeeRepository = employeeRepository;
             _userRepository = userRepository;
+            _projectRepository = projectRepository;
             _mapper = mapper;
         }
 
@@ -118,6 +121,17 @@ namespace ProjectTracker.Service.Services.Implementations
         {
             var workLog = _mapper.Map<WorkLog>(workLogDto);
             await _workLogRepository.AddAsync(workLog);
+
+            if (workLog.Cost > 0)
+            {
+                var project = await _projectRepository.GetByIdAsync(workLog.ProjectId);
+                if (project != null)
+                {
+                    project.ActualCost = (project.ActualCost ?? 0) + workLog.Cost;
+                    await _projectRepository.UpdateAsync(project);
+                }
+            }
+
             return _mapper.Map<WorkLogDto>(workLog);
         }
 
@@ -127,8 +141,20 @@ namespace ProjectTracker.Service.Services.Implementations
             if (workLog == null)
                 return null;
 
+            var oldCost = workLog.Cost;
             _mapper.Map(workLogDto, workLog);
             await _workLogRepository.UpdateAsync(workLog);
+
+            if (oldCost != workLog.Cost)
+            {
+                var project = await _projectRepository.GetByIdAsync(workLog.ProjectId);
+                if (project != null)
+                {
+                    project.ActualCost = (project.ActualCost ?? 0) - oldCost + workLog.Cost;
+                    await _projectRepository.UpdateAsync(project);
+                }
+            }
+
             return _mapper.Map<WorkLogDto>(workLog);
         }
 

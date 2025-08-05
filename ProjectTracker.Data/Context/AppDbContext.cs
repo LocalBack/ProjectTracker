@@ -87,6 +87,9 @@ namespace ProjectTracker.Data.Context
                 entity.Property(e => e.HireDate)
                     .IsRequired();
 
+                entity.Property(e => e.IsActive)
+                    .HasDefaultValue(true);
+
                 // Configure the relationship with ApplicationUser
                 entity.HasOne(e => e.User)
                     .WithOne()
@@ -116,6 +119,10 @@ namespace ProjectTracker.Data.Context
 
                 entity.Property(e => e.HoursSpent)
                     .HasColumnType("decimal(5,2)");
+
+                entity.Property(e => e.Cost)
+                    .HasColumnType("decimal(18,2)")
+                    .HasDefaultValue(0);
 
                 entity.HasOne(e => e.Project)
                     .WithMany(p => p.WorkLogs)

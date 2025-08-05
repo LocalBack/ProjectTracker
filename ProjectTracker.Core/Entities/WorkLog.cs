@@ -15,6 +15,7 @@ namespace ProjectTracker.Core.Entities
         public string Description { get; set; } = string.Empty;
         public DateTime WorkDate { get; set; }
         public decimal HoursSpent { get; set; }
+        public decimal Cost { get; set; }
 
         public int ProjectId { get; set; }
         public Project Project { get; set; } = null!;
