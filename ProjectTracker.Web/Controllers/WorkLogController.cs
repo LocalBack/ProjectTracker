@@ -5,6 +5,7 @@ using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.ViewModels;
 using System.Security.Claims;
+using ProjectTracker.Web.Authorization;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -14,17 +15,20 @@ namespace ProjectTracker.Web.Controllers
         private readonly IWorkLogService _workLogService;
         private readonly IProjectService _projectService;
         private readonly IEmployeeService _employeeService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WorkLogController> _logger;
 
         public WorkLogController(
             IWorkLogService workLogService,
             IProjectService projectService,
             IEmployeeService employeeService,
+            IAuthorizationService authorizationService,
             ILogger<WorkLogController> logger)
         {
             _workLogService = workLogService;
             _projectService = projectService;
             _employeeService = employeeService;
+            _authorizationService = authorizationService;
             _logger = logger;
         }
 
@@ -183,12 +187,19 @@ namespace ProjectTracker.Web.Controllers
         // GET: WorkLog/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             return View(workLog);
         }
 
@@ -221,12 +232,19 @@ namespace ProjectTracker.Web.Controllers
         // GET: WorkLog/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLog.ProjectId);
             ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLog.EmployeeId);
 
@@ -241,6 +259,18 @@ namespace ProjectTracker.Web.Controllers
             if (id != workLogDto.Id)
             {
                 return NotFound();
+            }
+
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
             }
 
             if (ModelState.IsValid)
@@ -258,12 +288,19 @@ namespace ProjectTracker.Web.Controllers
         // GET: WorkLog/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             return View(workLog);
         }
 
@@ -272,12 +309,23 @@ namespace ProjectTracker.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             await _workLogService.DeleteWorkLogAsync(id);
             return RedirectToAction(nameof(Index));
-
-
         }
-            public async Task<IActionResult> MyWorkLogs()
+
+        public async Task<IActionResult> MyWorkLogs()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
@@ -295,6 +343,6 @@ namespace ProjectTracker.Web.Controllers
 
             var workLogs = await _workLogService.GetWorkLogsByEmployeeIdAsync(employee.Id);
             return View(workLogs);
-            }
         }
     }
+}
