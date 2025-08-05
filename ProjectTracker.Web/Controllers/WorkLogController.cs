@@ -33,6 +33,7 @@ namespace ProjectTracker.Web.Controllers
         }
 
         // GET: WorkLog
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
             // Sorting parameters
@@ -55,8 +56,25 @@ namespace ProjectTracker.Web.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            // Get all work logs
-            var workLogs = await _workLogService.GetAllWorkLogsAsync();
+            // Get work logs based on user role
+            IEnumerable<WorkLogDto> workLogs;
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                workLogs = await _workLogService.GetAllWorkLogsAsync();
+            }
+            else if (User.IsInRole("Employee"))
+            {
+                if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out int userId))
+                {
+                    return Unauthorized();
+                }
+                workLogs = await _workLogService.GetWorkLogsByUserIdAsync(userId);
+            }
+            else
+            {
+                return Forbid();
+            }
 
             // Apply search filter
             if (!string.IsNullOrEmpty(searchString))
@@ -109,6 +127,7 @@ namespace ProjectTracker.Web.Controllers
         }
 
         // GET: WorkLog/MyWorkLog
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> MyWorkLog(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
             // Get current user's work logs
@@ -185,6 +204,7 @@ namespace ProjectTracker.Web.Controllers
 
 
         // GET: WorkLog/Details/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Details(int id)
         {
             var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
@@ -193,6 +213,7 @@ namespace ProjectTracker.Web.Controllers
                 return NotFound();
             }
 
+
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
             if (!authorizationResult.Succeeded)
             {
@@ -200,23 +221,57 @@ namespace ProjectTracker.Web.Controllers
             }
 
             var workLog = await _workLogService.GetWorkLogByIdAsync(id);
+
             return View(workLog);
         }
 
         // GET: WorkLog/Create
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Create()
         {
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name");
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName");
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null)
+                {
+                    return Forbid();
+                }
+                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName");
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName");
+            }
 
             return View();
         }
 
         // POST: WorkLog/Create
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WorkLogDto workLogDto)
         {
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null || workLogDto.EmployeeId != employee.Id)
+                {
+                    return Forbid();
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 await _workLogService.CreateWorkLogAsync(workLogDto);
@@ -224,12 +279,25 @@ namespace ProjectTracker.Web.Controllers
             }
 
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLogDto.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+                {
+                    var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLogDto.EmployeeId);
+                }
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            }
 
             return View(workLogDto);
         }
 
         // GET: WorkLog/Edit/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Edit(int id)
         {
             var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
@@ -246,12 +314,30 @@ namespace ProjectTracker.Web.Controllers
 
             var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLog.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLog.EmployeeId);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null || workLog.EmployeeId != employee.Id)
+                {
+                    return Forbid();
+                }
+                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLog.EmployeeId);
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLog.EmployeeId);
+            }
 
             return View(workLog);
         }
 
         // POST: WorkLog/Edit/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, WorkLogDto workLogDto)
@@ -261,6 +347,7 @@ namespace ProjectTracker.Web.Controllers
                 return NotFound();
             }
 
+
             var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
             if (workLogEntity == null)
             {
@@ -271,6 +358,7 @@ namespace ProjectTracker.Web.Controllers
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
+
             }
 
             if (ModelState.IsValid)
@@ -280,12 +368,25 @@ namespace ProjectTracker.Web.Controllers
             }
 
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLogDto.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+                {
+                    var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLogDto.EmployeeId);
+                }
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            }
 
             return View(workLogDto);
         }
 
         // GET: WorkLog/Delete/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Delete(int id)
         {
             var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
@@ -294,6 +395,7 @@ namespace ProjectTracker.Web.Controllers
                 return NotFound();
             }
 
+
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
             if (!authorizationResult.Succeeded)
             {
@@ -301,19 +403,24 @@ namespace ProjectTracker.Web.Controllers
             }
 
             var workLog = await _workLogService.GetWorkLogByIdAsync(id);
+
             return View(workLog);
         }
 
         // POST: WorkLog/Delete/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
             var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
             if (workLogEntity == null)
+
             {
                 return NotFound();
             }
+
 
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
             if (!authorizationResult.Succeeded)
@@ -324,6 +431,7 @@ namespace ProjectTracker.Web.Controllers
             await _workLogService.DeleteWorkLogAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
 
         public async Task<IActionResult> MyWorkLogs()
         {
