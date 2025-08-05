@@ -5,6 +5,7 @@ using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.ViewModels;
 using System.Security.Claims;
+using ProjectTracker.Web.Authorization;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -14,17 +15,20 @@ namespace ProjectTracker.Web.Controllers
         private readonly IWorkLogService _workLogService;
         private readonly IProjectService _projectService;
         private readonly IEmployeeService _employeeService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WorkLogController> _logger;
 
         public WorkLogController(
             IWorkLogService workLogService,
             IProjectService projectService,
             IEmployeeService employeeService,
+            IAuthorizationService authorizationService,
             ILogger<WorkLogController> logger)
         {
             _workLogService = workLogService;
             _projectService = projectService;
             _employeeService = employeeService;
+            _authorizationService = authorizationService;
             _logger = logger;
         }
 
@@ -203,25 +207,20 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Details(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    return Unauthorized();
-                }
-                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                if (employee == null || workLog.EmployeeId != employee.Id)
-                {
-                    return Forbid();
-                }
+                return Forbid();
             }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
 
             return View(workLog);
         }
@@ -301,12 +300,19 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Edit(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLog.ProjectId);
             if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
             {
@@ -341,18 +347,18 @@ namespace ProjectTracker.Web.Controllers
                 return NotFound();
             }
 
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    return Unauthorized();
-                }
-                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                if (employee == null || workLogDto.EmployeeId != employee.Id)
-                {
-                    return Forbid();
-                }
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+
             }
 
             if (ModelState.IsValid)
@@ -383,25 +389,20 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Delete(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    return Unauthorized();
-                }
-                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                if (employee == null || workLog.EmployeeId != employee.Id)
-                {
-                    return Forbid();
-                }
+                return Forbid();
             }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
 
             return View(workLog);
         }
@@ -412,31 +413,26 @@ namespace ProjectTracker.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
+
             {
                 return NotFound();
             }
 
-            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    return Unauthorized();
-                }
-                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
-                if (employee == null || workLog.EmployeeId != employee.Id)
-                {
-                    return Forbid();
-                }
+                return Forbid();
             }
 
             await _workLogService.DeleteWorkLogAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin,Manager,Employee")]
+
         public async Task<IActionResult> MyWorkLogs()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

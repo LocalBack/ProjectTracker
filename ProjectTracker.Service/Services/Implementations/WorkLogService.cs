@@ -48,6 +48,19 @@ namespace ProjectTracker.Service.Services.Implementations
             return _mapper.Map<WorkLogDto>(workLog);
         }
 
+        public async Task<WorkLog> GetWorkLogEntityByIdAsync(int id)
+        {
+            var workLogs = await _workLogRepository.GetAsync(
+                w => w.Id == id,
+                includes: new Expression<Func<WorkLog, object>>[]
+                {
+                    w => w.Project,
+                    w => w.Project.ProjectEmployees
+                });
+
+            return workLogs.FirstOrDefault();
+        }
+
         // Add this method
         public async Task<IEnumerable<WorkLogDto>> GetWorkLogsByUserIdAsync(int userId)
         {
