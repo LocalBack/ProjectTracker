@@ -9,6 +9,7 @@
 <table class="table">
     <thead>
         <tr>
+            <th>Project</th>
             <th>Equipment</th>
             <th>Type</th>
             <th>Next Date</th>
@@ -19,6 +20,7 @@
     @foreach (var task in Model.Tasks)
     {
         <tr>
+            <td>@task.ProjectName</td>
             <td>@task.EquipmentName</td>
             <td>@task.MaintenanceType</td>
             <td>@task.NextMaintenanceDate.ToShortDateString()</td>
