@@ -92,8 +92,10 @@ namespace ProjectTracker.Service.Mapping
             // MaintenanceSchedule Mappings (Eğer MaintenanceScheduleDto varsa)
             CreateMap<MaintenanceSchedule, MaintenanceScheduleDto>()
                 .ForMember(dest => dest.EquipmentName, opt => opt.MapFrom(src => src.Equipment != null ? src.Equipment.Name : string.Empty))
+                .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project != null ? src.Project.Name : string.Empty))
                 .ReverseMap()
-                .ForMember(dest => dest.Equipment, opt => opt.Ignore());
+                .ForMember(dest => dest.Equipment, opt => opt.Ignore())
+                .ForMember(dest => dest.Project, opt => opt.Ignore());
 
             // ProjectEmployee Mappings (Eğer gerekirse)
             CreateMap<ProjectEmployee, ProjectEmployeeDto>()

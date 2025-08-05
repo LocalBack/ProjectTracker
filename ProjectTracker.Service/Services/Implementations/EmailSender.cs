@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using ProjectTracker.Service.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace ProjectTracker.Service.Services.Implementations

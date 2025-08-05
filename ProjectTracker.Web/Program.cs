@@ -14,7 +14,6 @@ using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.Authorization;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

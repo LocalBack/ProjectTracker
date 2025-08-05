@@ -2,6 +2,8 @@
 {
     public class MaintenanceSchedule : BaseEntity
     {
+        public int ProjectId { get; set; }
+        public virtual Project Project { get; set; } = null!;
         public int EquipmentId { get; set; }
         public virtual Equipment Equipment { get; set; } = null!;
 
