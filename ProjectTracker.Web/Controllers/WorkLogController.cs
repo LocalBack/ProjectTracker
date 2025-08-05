@@ -10,6 +10,10 @@ using ProjectTracker.Web.Authorization;
 using System.IO;
 using System;
 
+using System.Collections.Generic;
+using System.Linq;
+
+
 namespace ProjectTracker.Web.Controllers
 {
     [Authorize]
@@ -377,7 +381,7 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, WorkLogDto workLogDto)
+        public async Task<IActionResult> Edit(int id, WorkLogDto workLogDto, IFormFile? attachment)
         {
             if (id != workLogDto.Id)
             {
@@ -400,6 +404,37 @@ namespace ProjectTracker.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                var existing = await _workLogService.GetWorkLogByIdAsync(id);
+                if (existing == null)
+                {
+                    return NotFound();
+                }
+
+                workLogDto.Attachments = existing.Attachments?.ToList() ?? new List<WorkLogAttachmentDto>();
+
+                if (attachment != null && attachment.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Path.GetFileName(attachment.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    workLogDto.Attachments.Add(new WorkLogAttachmentDto
+                    {
+                        FileName = fileName,
+                        FilePath = $"/uploads/{uniqueFileName}",
+                        FileType = attachment.ContentType,
+                        FileSize = attachment.Length
+                    });
+                }
+
                 await _workLogService.UpdateWorkLogAsync(id, workLogDto);
                 return RedirectToAction(nameof(Index));
             }

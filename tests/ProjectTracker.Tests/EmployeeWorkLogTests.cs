@@ -153,7 +153,7 @@ public class EmployeeWorkLogTests
         // Edit worklog
         var existing = worklogs.First();
         existing.Title = "Updated";
-        var editResult = await controller.Edit(existing.Id, existing);
+        var editResult = await controller.Edit(existing.Id, existing, null);
         Assert.IsType<RedirectToActionResult>(editResult);
 
         var updated = await workLogService.GetWorkLogByIdAsync(existing.Id);
