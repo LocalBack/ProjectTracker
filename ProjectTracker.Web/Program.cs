@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectTracker.Core.Events; // Event'in bulunduðu assembly  
+using ProjectTracker.Core.Events; // Event'in bulunduÄŸu assembly  
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +22,15 @@ builder.Services.AddControllersWithViews();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging()
+               .LogTo(Console.WriteLine, LogLevel.Information);
+    }
+});
 
 // Note: No need to add AppDbContext separately as AddDbContext already registers it
 
@@ -96,27 +104,10 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-// Authorization Configuration
-builder.Services.AddAuthorization(options =>
-{
-    // This policy makes the ENTIRE APPLICATION require login
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
-
 builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
 
 // Add before builder.Build()
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
-
-// In your Program.cs, modify your DbContext configuration:
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer("DefaultConnection")
-           .LogTo(Console.WriteLine, LogLevel.Information)
-           .EnableSensitiveDataLogging();
-});
 
 builder.Services.AddMediatR(typeof(EmployeeUpdatedEventHandler).Assembly);
 builder.Services.AddScoped<IUserProjectService, UserProjectService>();
