@@ -123,6 +123,7 @@ namespace ProjectTracker.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                employeeDto.IsActive = true;
                 await _employeeService.CreateEmployeeAsync(employeeDto);
                 TempData["SuccessMessage"] = "Çalışan başarıyla oluşturuldu.";
                 return RedirectToAction(nameof(Index));
@@ -151,7 +152,7 @@ namespace ProjectTracker.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Title,HireDate")] EmployeeDto employeeDto)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Email,Title,HireDate,IsActive")] EmployeeDto employeeDto)
         {
             if (id != employeeDto.Id)
             {
