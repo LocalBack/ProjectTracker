@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Http;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.ViewModels;
 using System.Security.Claims;
 using ProjectTracker.Web.Authorization;
+using System.IO;
+using System;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -262,7 +265,7 @@ namespace ProjectTracker.Web.Controllers
         [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(WorkLogDto workLogDto)
+        public async Task<IActionResult> Create(WorkLogDto workLogDto, IFormFile? attachment)
         {
             if (User.IsInRole("Employee"))
             {
@@ -284,6 +287,29 @@ namespace ProjectTracker.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                if (attachment != null && attachment.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Path.GetFileName(attachment.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    workLogDto.Attachments.Add(new WorkLogAttachmentDto
+                    {
+                        FileName = fileName,
+                        FilePath = $"/uploads/{uniqueFileName}",
+                        FileType = attachment.ContentType,
+                        FileSize = attachment.Length
+                    });
+                }
+
                 await _workLogService.CreateWorkLogAsync(workLogDto);
                 return RedirectToAction(nameof(Index));
             }

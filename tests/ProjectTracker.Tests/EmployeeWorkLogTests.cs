@@ -107,7 +107,7 @@ public class EmployeeWorkLogTests
         var projectRepo = new Repository<Project>(context);
 
         var employeeService = new EmployeeService(employeeRepo, userRepo, mapper, mediator);
-        var workLogService = new WorkLogService(workLogRepo, employeeRepo, userRepo, mapper);
+        var workLogService = new WorkLogService(workLogRepo, employeeRepo, userRepo, projectRepo, mapper);
         var projectService = new ProjectService(projectRepo, mapper);
 
         // Authorization service with custom handler
@@ -144,7 +144,7 @@ public class EmployeeWorkLogTests
             HoursSpent = 2,
             ProjectId = project.Id
         };
-        var createResult = await controller.Create(dto);
+        var createResult = await controller.Create(dto, null);
         Assert.IsType<RedirectToActionResult>(createResult);
 
         var worklogs = await workLogService.GetWorkLogsByEmployeeIdAsync(employee.Id);
