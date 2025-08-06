@@ -52,7 +52,8 @@ namespace ProjectTracker.Service.Services.Implementations
                     TotalWorkLogs = 0
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
-                ActiveProjects = new List<ProjectDto>()
+                ActiveProjects = new List<ProjectDto>(),
+                ProjectReports = new List<ProjectReportDto>()
             };
 
             // Get employee data
@@ -71,6 +72,9 @@ namespace ProjectTracker.Service.Services.Implementations
 
                 // Get active projects
                 dashboard.ActiveProjects = (await GetUserProjectsAsync(userId)).ToList();
+
+                // Get project reports
+                dashboard.ProjectReports = (await GetProjectReportsAsync(userId)).ToList();
             }
 
             return dashboard;
@@ -156,6 +160,34 @@ namespace ProjectTracker.Service.Services.Implementations
 
             var projects = projectEmployees.Select(pe => pe.Project).Distinct();
             return _mapper.Map<IEnumerable<ProjectDto>>(projects);
+        }
+
+        public async Task<IEnumerable<ProjectReportDto>> GetProjectReportsAsync(int userId)
+        {
+            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+            var employee = employees.FirstOrDefault();
+            if (employee == null)
+                return new List<ProjectReportDto>();
+
+            var projects = await _projectRepository.GetAsync(
+                p => p.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
+                includes: new Expression<Func<Project, object>>[]
+                {
+                    p => p.WorkLogs,
+                    p => p.ProjectEmployees
+                });
+
+            var reports = projects.Select(p => new ProjectReportDto
+            {
+                ProjectId = p.Id,
+                ProjectName = p.Name,
+                TotalHours = p.WorkLogs.Sum(w => w.HoursSpent),
+                TotalCost = p.WorkLogs.Sum(w => w.Cost),
+                Budget = p.Budget,
+                ActualCost = p.ActualCost ?? p.WorkLogs.Sum(w => w.Cost)
+            });
+
+            return reports;
         }
     }
 }

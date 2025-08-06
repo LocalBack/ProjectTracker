@@ -10,6 +10,7 @@ namespace ProjectTracker.Service.DTOs
         public DashboardStatsDto Stats { get; set; }
         public List<WorkLogDto> RecentWorkLogs { get; set; }
         public List<ProjectDto> ActiveProjects { get; set; }
+        public List<ProjectReportDto> ProjectReports { get; set; }
     }
 
     public class DashboardStatsDto

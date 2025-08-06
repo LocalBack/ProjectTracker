@@ -1,4 +1,5 @@
 ﻿@model ProjectTracker.Service.DTOs.DashboardDto
+@using System.Linq
 @{
     ViewData["Title"] = "Kontrol Paneli";
 }
@@ -148,6 +149,66 @@
         </div>
     </div>
 </div>
+
+@if (Model.ProjectReports != null && Model.ProjectReports.Any())
+{
+    var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName));
+    var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget));
+    var actualJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost));
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Proje Süre ve Maliyet</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Proje</th>
+                        <th>Toplam Saat</th>
+                        <th>Toplam Maliyet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var report in Model.ProjectReports)
+                    {
+                        <tr>
+                            <td>@report.ProjectName</td>
+                            <td>@report.TotalHours</td>
+                            <td>@report.TotalCost.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <h3>Bütçe vs Gerçekleşen</h3>
+            <canvas id="budgetChart"></canvas>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @Html.Raw(labelsJson);
+        const budgets = @Html.Raw(budgetJson);
+        const actuals = @Html.Raw(actualJson);
+        new Chart(document.getElementById('budgetChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Bütçe',
+                        data: budgets,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    },
+                    {
+                        label: 'Gerçekleşen',
+                        data: actuals,
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                    }
+                ]
+            }
+        });
+    </script>
+}
 
 @if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
 {
