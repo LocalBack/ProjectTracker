@@ -49,6 +49,14 @@
                         <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                     </div>
 
+                    <div class="form-check mb-4">
+                        <input asp-for="KvkkAccepted" class="form-check-input" />
+                        <label asp-for="KvkkAccepted" class="form-check-label">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#kvkkModal">KVKK onam formunu</a> okudum ve kabul ediyorum
+                        </label>
+                        <span asp-validation-for="KvkkAccepted" class="text-danger small"></span>
+                    </div>
+
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-user-plus"></i> Kayıt Ol
@@ -63,10 +71,49 @@
                     <a asp-action="Login" class="btn btn-link">Giriş Yap</a>
                 </div>
             </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="kvkkModal" tabindex="-1" aria-labelledby="kvkkModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="kvkkModalLabel">KVKK Aydınlatma Metni</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5>1. Aydınlatma Metni</h5>
+                    <h6>[A] Veri Sorumlusu</h6>
+                    <p>Unvan: Project Tracker Yazılım A.Ş.<br />Adres: …<br />İletişim: … / kvkk@projecttracker.com</p>
+                    <h6>[B] İşlenen Kişisel Veriler</h6>
+                    <p>Kimlik (ad-soyad), iletişim (e-posta, telefon), kullanıcı adı &amp; parola hash’i, rol ve yetki bilgisi, işlem güvenliği verileri (IP, oturum kayıtları), proje/çalışma günlükleri, isteğe bağlı profil fotoğrafı.</p>
+                    <h6>[C] İşleme Amaçları ve Hukuki Sebep</h6>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr><th>Amaç</th><th>Hukuki Dayanak (KVKK m.)</th><th>Örnek</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Hesap oluşturma &amp; projelerin yürütülmesi</td><td>5/2-c (Sözleşme)</td><td>Görev ekleme</td></tr>
+                            <tr><td>Zorunlu loglama &amp; güvenlik</td><td>5/2-f (Meşru menfaat)</td><td>Hata takibi</td></tr>
+                            <tr><td>Pazarlama iletişimi (opsiyonel)</td><td>5/1 Açık Rıza</td><td>Bülten</td></tr>
+                            <tr><td>Mali &amp; hukuki yükümlülükler</td><td>5/2-ç</td><td>Fatura</td></tr>
+                        </tbody>
+                    </table>
+                    <h6>[D] Aktarım</h6>
+                    <p>Yurt içi: Bulut barındırma, hukuk ve muhasebe danışmanları.<br />Yurt dışı (varsa): AWS-EU (Frankfurt) sunucuları ► Standart Sözleşme ve Açık Rıza koşulu.<br />KVKK</p>
+                    <h6>[E] Saklama Süresi</h6>
+                    <p>Hesabın kapatılmasından itibaren 10 yıl veya kanuni zamanaşımı.</p>
+                    <h6>[F] İlgili Kişi Hakları (m. 11)</h6>
+                    <p>Veri sahibi; erişim, düzeltme, silme, işlemeyi kısıtlama, aktarım, itiraz ve rıza geri çekme haklarını kvkk@projecttracker.com adresine ileterek kullanabilir.</p>
+                    <h5>2. Açık Rıza Beyanı</h5>
+                    <p>“Aydınlatma Metni’ni okudum. 6698 sayılı Kanun kapsamında; kimlik, iletişim, proje ve işlem güvenliği verilerimin belirtilen amaçlarla işlenmesine ve yurt dışındaki bulut sunucularına aktarılmasına özgür irademle izin veriyorum.”</p>
+                    <p>□ Kabul ediyorum □ Reddet / Vazgeç</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
