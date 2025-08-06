@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectTracker.Data.Context;
 
@@ -11,9 +12,11 @@ using ProjectTracker.Data.Context;
 namespace ProjectTracker.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250806111504_AddUserFlagsAndMaintenance")]
+    partial class AddUserFlagsAndMaintenance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,14 +264,12 @@ namespace ProjectTracker.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
                     b.Property<bool>("KVKK")
-
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false)
@@ -464,9 +465,6 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<DateTime>("NextMaintenanceDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -475,10 +473,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("EquipmentId");
 
                     b.HasIndex("NextMaintenanceDate");
-
-
-                    b.HasIndex("ProjectId");
-
 
                     b.ToTable("MaintenanceSchedules");
                 });
@@ -530,57 +524,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Projects");
-
-                });
-
-            modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("ProjectDocuments");
-
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -943,26 +886,7 @@ namespace ProjectTracker.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany("MaintenanceSchedules")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Equipment");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectDocument", b =>
-                {
-                    b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany("Documents")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -1080,11 +1004,7 @@ namespace ProjectTracker.Data.Migrations
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.Project", b =>
                 {
-                    b.Navigation("Documents");
-
                     b.Navigation("Equipments");
-
-                    b.Navigation("MaintenanceSchedules");
 
                     b.Navigation("ProjectEmployees");
 

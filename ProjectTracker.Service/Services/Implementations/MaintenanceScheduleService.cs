@@ -22,7 +22,6 @@ namespace ProjectTracker.Service.Services.Implementations
         {
             var items = await _context.MaintenanceSchedules
                 .Include(m => m.Equipment)
-                .Include(m => m.Project)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<MaintenanceScheduleDto>>(items);
         }
@@ -33,7 +32,6 @@ namespace ProjectTracker.Service.Services.Implementations
             var items = await _context.MaintenanceSchedules
                 .Where(m => m.NextMaintenanceDate <= now && !m.IsNotificationSent)
                 .Include(m => m.Equipment)
-                .Include(m => m.Project)
                 .ToListAsync();
             return _mapper.Map<IEnumerable<MaintenanceScheduleDto>>(items);
         }
