@@ -52,16 +52,9 @@ namespace ProjectTracker.Admin.Pages.Users
                 return NotFound();
             }
 
-<<<<<<< HEAD
-            var user = await _userManager.Users
 
-                .IgnoreQueryFilters()
-
-                .Include(u => u.Employee)
-                .FirstOrDefaultAsync(u => u.Id == id);
-=======
             var user = await _userManager.FindByIdAsync(id.ToString());
->>>>>>> parent of 301a2be (Add employee activation toggle in Manage Roles)
+
             if (user == null)
             {
                 return NotFound();
@@ -100,16 +93,9 @@ namespace ProjectTracker.Admin.Pages.Users
                 return Page();
             }
 
-<<<<<<< HEAD
-            var user = await _userManager.Users
 
-                .IgnoreQueryFilters()
-
-                .Include(u => u.Employee)
-                .FirstOrDefaultAsync(u => u.Id == UserRoles.UserId);
-=======
             var user = await _userManager.FindByIdAsync(UserRoles.UserId.ToString());
->>>>>>> parent of 301a2be (Add employee activation toggle in Manage Roles)
+
             if (user == null)
             {
                 return NotFound();
