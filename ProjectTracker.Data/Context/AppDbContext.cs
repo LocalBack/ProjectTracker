@@ -190,6 +190,7 @@ namespace ProjectTracker.Data.Context
             // WorkLogHistory Configuration
             modelBuilder.Entity<WorkLogHistory>(entity =>
             {
+                entity.ToTable("WorkLogHistory");
                 entity.Property(e => e.Action)
                     .IsRequired()
                     .HasMaxLength(50);
