@@ -28,7 +28,7 @@ namespace ProjectTracker.Service.Implementations
 
         public async Task<ProjectDto> GetProjectByIdAsync(int id)
         {
-            var project = await _projectRepository.GetByIdAsync(id);
+            var project = (await _projectRepository.GetAsync(p => p.Id == id, includes: p => p.Documents)).FirstOrDefault();
             return _mapper.Map<ProjectDto>(project);
         }
 

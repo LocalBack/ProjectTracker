@@ -25,7 +25,7 @@ namespace ProjectTracker.Admin.Pages.Projects
                 return NotFound();
             }
 
-            var project = await _context.Projects.FirstOrDefaultAsync(m => m.Id == id);
+            var project = await _context.Projects.Include(p => p.Documents).FirstOrDefaultAsync(m => m.Id == id);
             if (project == null)
             {
                 return NotFound();

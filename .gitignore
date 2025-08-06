@@ -62,7 +62,7 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
-wwwroot/
+wwwroot/uploads/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
