@@ -18,6 +18,7 @@ namespace ProjectTracker.Data.Context
         public DbSet<WorkLog> WorkLogs { get; set; } = null!;
         public DbSet<WorkLogDetail> WorkLogDetails { get; set; } = null!;
         public DbSet<WorkLogAttachment> WorkLogAttachments { get; set; } = null!;
+        public DbSet<WorkLogHistory> WorkLogHistories { get; set; } = null!;
         public DbSet<ProjectEmployee> ProjectEmployees { get; set; } = null!;
         public DbSet<Equipment> Equipments { get; set; } = null!;
         public DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
@@ -186,6 +187,26 @@ namespace ProjectTracker.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            // WorkLogHistory Configuration
+            modelBuilder.Entity<WorkLogHistory>(entity =>
+            {
+                entity.ToTable("WorkLogHistory");
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ChangedByUserName)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Changes)
+                    .HasColumnType("nvarchar(max)");
+
+                entity.HasOne(e => e.WorkLog)
+                    .WithMany(w => w.History)
+                    .HasForeignKey(e => e.WorkLogId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             // ProjectEmployee Configuration (Many-to-Many)
             modelBuilder.Entity<ProjectEmployee>(entity =>
             {
@@ -306,6 +327,13 @@ namespace ProjectTracker.Data.Context
                 entity.HasIndex(e => e.EmployeeId)
                     .IsUnique()
                     .HasFilter("[EmployeeId] IS NOT NULL");
+
+                entity.Property(e => e.Kvkk)
+                    .HasColumnName("KVKK")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.KvkkTimestamp)
+                    .HasColumnName("KVKK_Timestamp");
             });
 
             // UserProject Configuration (User-Project Many-to-Many)

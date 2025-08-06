@@ -105,9 +105,10 @@ public class EmployeeWorkLogTests
         var employeeRepo = new Repository<Employee>(context);
         var userRepo = new Repository<ApplicationUser>(context);
         var projectRepo = new Repository<Project>(context);
+        var historyRepo = new Repository<WorkLogHistory>(context);
 
         var employeeService = new EmployeeService(employeeRepo, userRepo, mapper, mediator);
-        var workLogService = new WorkLogService(workLogRepo, employeeRepo, userRepo, projectRepo, mapper);
+        var workLogService = new WorkLogService(workLogRepo, employeeRepo, userRepo, projectRepo, historyRepo, mapper);
         var projectService = new ProjectService(projectRepo, mapper);
 
         // Authorization service with custom handler
@@ -158,5 +159,90 @@ public class EmployeeWorkLogTests
 
         var updated = await workLogService.GetWorkLogByIdAsync(existing.Id);
         Assert.Equal("Updated", updated.Title);
+
+        Assert.Equal(2, context.WorkLogHistories.Count());
+    }
+
+    [Fact]
+    public async Task Manager_can_view_any_worklog_details()
+    {
+        using var context = CreateContext();
+        var mapper = CreateMapper();
+        var mediator = new NoopMediator();
+
+        var employeeUser = new ApplicationUser { Id = 1, UserName = "employee@tracker.com", EmployeeId = 1 };
+        var managerUser = new ApplicationUser { Id = 2, UserName = "manager@tracker.com" };
+        var employee = new Employee
+        {
+            Id = 1,
+            FirstName = "Test",
+            LastName = "User",
+            Title = "Dev",
+            EmployeeCode = "E001",
+            Department = "IT",
+            Email = "employee@tracker.com",
+            Phone = "123456789",
+            HireDate = DateTime.Today
+        };
+        var project = new Project
+        {
+            Id = 1,
+            Name = "Proj",
+            Description = "Desc",
+            StartDate = DateTime.Today,
+            Budget = 1000
+        };
+        var workLog = new WorkLog
+        {
+            Id = 1,
+            Title = "First",
+            Description = "desc",
+            WorkDate = DateTime.Today,
+            HoursSpent = 2,
+            ProjectId = project.Id,
+            EmployeeId = employee.Id
+        };
+
+        context.Users.AddRange(employeeUser, managerUser);
+        context.Employees.Add(employee);
+        context.Projects.Add(project);
+        context.WorkLogs.Add(workLog);
+        await context.SaveChangesAsync();
+
+        var workLogRepo = new Repository<WorkLog>(context);
+        var employeeRepo = new Repository<Employee>(context);
+        var userRepo = new Repository<ApplicationUser>(context);
+        var projectRepo = new Repository<Project>(context);
+        var historyRepo = new Repository<WorkLogHistory>(context);
+
+        var employeeService = new EmployeeService(employeeRepo, userRepo, mapper, mediator);
+        var workLogService = new WorkLogService(workLogRepo, employeeRepo, userRepo, projectRepo, historyRepo, mapper);
+        var projectService = new ProjectService(projectRepo, mapper);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IEmployeeService>(employeeService);
+        services.AddSingleton<IAuthorizationHandler, WorkLogAuthorizationHandler>();
+        services.AddAuthorization();
+        var provider = services.BuildServiceProvider();
+        var authorizationService = provider.GetRequiredService<IAuthorizationService>();
+        var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+        var logger = loggerFactory.CreateLogger<WorkLogController>();
+
+        var controller = new WorkLogController(workLogService, projectService, employeeService, authorizationService, logger);
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, managerUser.Id.ToString()),
+                    new Claim(ClaimTypes.Role, "Manager")
+                }, "Test"))
+            }
+        };
+
+        var result = await controller.Details(workLog.Id);
+        Assert.IsType<ViewResult>(result);
     }
 }
