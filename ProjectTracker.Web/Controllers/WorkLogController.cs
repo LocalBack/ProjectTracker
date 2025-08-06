@@ -25,6 +25,9 @@ namespace ProjectTracker.Web.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WorkLogController> _logger;
 
+        private static readonly string[] _allowedExtensions = new[] { ".pdf", ".png" };
+        private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
+
         public WorkLogController(
             IWorkLogService workLogService,
             IProjectService projectService,
@@ -291,11 +294,24 @@ namespace ProjectTracker.Web.Controllers
                 workLogDto.EmployeeId = employee.Id;
             }
 
+            if (attachment != null && attachment.Length > 0)
+            {
+                var ext = Path.GetExtension(attachment.FileName).ToLowerInvariant();
+                if (!_allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("Attachment", "Unsupported file type. Only PDF and PNG are allowed.");
+                }
+                else if (attachment.Length > _maxFileSize)
+                {
+                    ModelState.AddModelError("Attachment", "File size exceeds the 5 MB limit.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 if (attachment != null && attachment.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
                     if (!Directory.Exists(uploadsFolder))
                         Directory.CreateDirectory(uploadsFolder);
 
@@ -310,7 +326,7 @@ namespace ProjectTracker.Web.Controllers
                     workLogDto.Attachments.Add(new WorkLogAttachmentDto
                     {
                         FileName = fileName,
-                        FilePath = $"/uploads/{uniqueFileName}",
+                        FilePath = Path.Combine("uploads", uniqueFileName),
                         FileType = attachment.ContentType,
                         FileSize = attachment.Length
                     });
@@ -409,6 +425,19 @@ namespace ProjectTracker.Web.Controllers
 
             }
 
+            if (attachment != null && attachment.Length > 0)
+            {
+                var ext = Path.GetExtension(attachment.FileName).ToLowerInvariant();
+                if (!_allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("Attachment", "Unsupported file type. Only PDF and PNG are allowed.");
+                }
+                else if (attachment.Length > _maxFileSize)
+                {
+                    ModelState.AddModelError("Attachment", "File size exceeds the 5 MB limit.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 var existing = await _workLogService.GetWorkLogByIdAsync(id);
@@ -421,7 +450,7 @@ namespace ProjectTracker.Web.Controllers
 
                 if (attachment != null && attachment.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
                     if (!Directory.Exists(uploadsFolder))
                         Directory.CreateDirectory(uploadsFolder);
 
@@ -436,7 +465,7 @@ namespace ProjectTracker.Web.Controllers
                     workLogDto.Attachments.Add(new WorkLogAttachmentDto
                     {
                         FileName = fileName,
-                        FilePath = $"/uploads/{uniqueFileName}",
+                        FilePath = Path.Combine("uploads", uniqueFileName),
                         FileType = attachment.ContentType,
                         FileSize = attachment.Length
                     });
