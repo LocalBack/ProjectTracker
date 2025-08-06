@@ -25,7 +25,7 @@ namespace ProjectTracker.Web.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WorkLogController> _logger;
 
-        private static readonly string[] _allowedExtensions = new[] { ".pdf", ".png" };
+        private static readonly string[] _allowedExtensions = new[] { ".pdf", ".png", ".json" };
         private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
 
         public WorkLogController(
