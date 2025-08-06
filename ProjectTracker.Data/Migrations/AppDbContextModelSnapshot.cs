@@ -261,14 +261,7 @@ namespace ProjectTracker.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("KVKK")
-
+                    b.Property<bool>("Kvkk")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false)
@@ -444,6 +437,10 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<int>("EquipmentId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<int>("IntervalDays")
                         .HasColumnType("int");
 
@@ -476,9 +473,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("NextMaintenanceDate");
 
-
                     b.HasIndex("ProjectId");
-
 
                     b.ToTable("MaintenanceSchedules");
                 });
@@ -530,7 +525,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Projects");
-
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectDocument", b =>
@@ -580,7 +574,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectDocuments");
-
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -927,7 +920,7 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceLog", b =>
                 {
                     b.HasOne("ProjectTracker.Core.Entities.MaintenanceSchedule", "MaintenanceSchedule")
-                        .WithMany()
+                        .WithMany("MaintenanceLogs")
                         .HasForeignKey("MaintenanceScheduleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1076,6 +1069,11 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.Equipment", b =>
                 {
                     b.Navigation("MaintenanceSchedules");
+                });
+
+            modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceSchedule", b =>
+                {
+                    b.Navigation("MaintenanceLogs");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.Project", b =>

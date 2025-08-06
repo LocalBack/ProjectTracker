@@ -112,7 +112,7 @@ namespace ProjectTracker.Web.Controllers
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 CreatedDate = DateTime.UtcNow,
-                KVKK = model.KvkkAccepted,
+                Kvkk = model.KvkkAccepted,
                 KvkkTimestamp = model.KvkkAccepted ? DateTime.UtcNow : null
             };
 

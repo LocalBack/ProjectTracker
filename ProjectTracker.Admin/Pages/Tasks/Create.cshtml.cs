@@ -24,10 +24,17 @@ namespace ProjectTracker.Admin.Pages.Tasks
         [BindProperty]
         public MaintenanceScheduleDto Task { get; set; } = new();
         public SelectList EquipmentOptions { get; set; } = default!;
+        public SelectList ProjectOptions { get; set; } = default!;
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? projectId)
         {
-            var equipments = await _context.Equipments.ToListAsync();
+            var projects = await _context.Projects.ToListAsync();
+            ProjectOptions = new SelectList(projects, "Id", "Name");
+            Task.ProjectId = projectId ?? (projects.FirstOrDefault()?.Id ?? 0);
+
+            var equipments = await _context.Equipments
+                .Where(e => e.ProjectId == Task.ProjectId)
+                .ToListAsync();
             EquipmentOptions = new SelectList(equipments, "Id", "Name");
             Task.LastMaintenanceDate = DateTime.Today;
         }
@@ -36,16 +43,18 @@ namespace ProjectTracker.Admin.Pages.Tasks
         {
             if (!ModelState.IsValid)
             {
-                await OnGetAsync();
+                await OnGetAsync(Task.ProjectId);
                 return Page();
             }
+
             var equipment = await _context.Equipments.FindAsync(Task.EquipmentId);
             if (equipment == null)
             {
                 ModelState.AddModelError("Task.EquipmentId", "Invalid equipment selected.");
-                await OnGetAsync();
+                await OnGetAsync(Task.ProjectId);
                 return Page();
             }
+            Task.ProjectId = equipment.ProjectId ?? Task.ProjectId;
 
             var entity = _mapper.Map<MaintenanceSchedule>(Task);
             entity.NextMaintenanceDate = Task.LastMaintenanceDate.AddDays(Task.IntervalDays);
