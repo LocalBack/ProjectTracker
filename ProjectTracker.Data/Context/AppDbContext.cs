@@ -18,6 +18,7 @@ namespace ProjectTracker.Data.Context
         public DbSet<WorkLog> WorkLogs { get; set; } = null!;
         public DbSet<WorkLogDetail> WorkLogDetails { get; set; } = null!;
         public DbSet<WorkLogAttachment> WorkLogAttachments { get; set; } = null!;
+        public DbSet<WorkLogHistory> WorkLogHistories { get; set; } = null!;
         public DbSet<ProjectEmployee> ProjectEmployees { get; set; } = null!;
         public DbSet<Equipment> Equipments { get; set; } = null!;
         public DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
@@ -182,6 +183,25 @@ namespace ProjectTracker.Data.Context
 
                 entity.HasOne(e => e.WorkLog)
                     .WithMany(w => w.Attachments)
+                    .HasForeignKey(e => e.WorkLogId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // WorkLogHistory Configuration
+            modelBuilder.Entity<WorkLogHistory>(entity =>
+            {
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ChangedByUserName)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Changes)
+                    .HasColumnType("nvarchar(max)");
+
+                entity.HasOne(e => e.WorkLog)
+                    .WithMany(w => w.History)
                     .HasForeignKey(e => e.WorkLogId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

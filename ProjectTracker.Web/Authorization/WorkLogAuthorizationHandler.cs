@@ -27,7 +27,7 @@ namespace ProjectTracker.Web.Authorization
                 return;
             }
 
-            if (context.User.IsInRole("Admin"))
+            if (context.User.IsInRole("Admin") || context.User.IsInRole("Manager"))
             {
                 context.Succeed(requirement);
                 return;
@@ -36,13 +36,6 @@ namespace ProjectTracker.Web.Authorization
             var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
             if (employee == null)
             {
-                return;
-            }
-
-            if (context.User.IsInRole("Manager") &&
-                resource.Project?.ProjectEmployees?.Any(pe => pe.EmployeeId == employee.Id && pe.Role == "Manager") == true)
-            {
-                context.Succeed(requirement);
                 return;
             }
 

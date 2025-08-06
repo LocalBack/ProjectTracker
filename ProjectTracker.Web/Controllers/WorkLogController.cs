@@ -316,7 +316,12 @@ namespace ProjectTracker.Web.Controllers
                     });
                 }
 
-                await _workLogService.CreateWorkLogAsync(workLogDto);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                await _workLogService.CreateWorkLogAsync(workLogDto, userId);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -437,7 +442,12 @@ namespace ProjectTracker.Web.Controllers
                     });
                 }
 
-                await _workLogService.UpdateWorkLogAsync(id, workLogDto);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                await _workLogService.UpdateWorkLogAsync(id, workLogDto, userId);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -502,7 +512,12 @@ namespace ProjectTracker.Web.Controllers
                 return Forbid();
             }
 
-            await _workLogService.DeleteWorkLogAsync(id);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+            await _workLogService.DeleteWorkLogAsync(id, userId);
             return RedirectToAction(nameof(Index));
         }
 
