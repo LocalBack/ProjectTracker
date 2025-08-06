@@ -1,9 +1,12 @@
 using MediatR;
-using ProjectTracker.Core.Events; // Event'in bulunduğu assembly  
+using ProjectTracker.Core.Events; // Event'in bulunduğu assembly
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Repositories;
@@ -18,7 +21,20 @@ using ProjectTracker.Web.Authorization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supported = new[] { "tr-TR", "en-US" }
+        .Select(c => new CultureInfo(c)).ToList();
+    options.DefaultRequestCulture = new RequestCulture("tr-TR");
+    options.SupportedCultures = supported;
+    options.SupportedUICultures = supported;
+    options.ApplyCurrentCultureToResponseHeaders = true;
+});
+
+builder.Services.AddControllersWithViews()
+       .AddViewLocalization()
+       .AddDataAnnotationsLocalization();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -127,6 +143,8 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 
 var app = builder.Build();
+
+app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
 // Seed Data - UPDATED VERSION
 using (var scope = app.Services.CreateScope())
