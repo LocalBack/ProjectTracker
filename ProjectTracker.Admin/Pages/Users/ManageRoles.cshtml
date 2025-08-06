@@ -32,13 +32,6 @@
 
                     <dt class="col-sm-3">Full Name:</dt>
                     <dd class="col-sm-9">@Model.UserRoles.FullName</dd>
-
-                    <dt class="col-sm-3">Status:</dt>
-                    <dd class="col-sm-9">
-                        <span class="badge @(Model.UserRoles.IsActive ? "bg-success" : "bg-secondary")">
-                            @(Model.UserRoles.IsActive ? "Active" : "Inactive")
-                        </span>
-                    </dd>
                 </dl>
             </div>
         </div>
@@ -55,11 +48,6 @@
                     <input type="hidden" asp-for="UserRoles.FullName" />
 
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" asp-for="UserRoles.IsActive" />
-                        <label class="form-check-label" asp-for="UserRoles.IsActive"></label>
-                    </div>
 
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -79,7 +67,7 @@
                                             <input type="hidden" asp-for="UserRoles.Roles[i].RoleName" />
                                             <input type="hidden" asp-for="UserRoles.Roles[i].Description" />
                                             <input type="checkbox" asp-for="UserRoles.Roles[i].IsAssigned"
-                                                   class="form-check-input role-checkbox" />
+                                                   class="form-check-input" />
                                         </td>
                                         <td>
                                             <strong>@Model.UserRoles.Roles[i].RoleName</strong>
@@ -153,7 +141,7 @@
 @section Scripts {
     <script>
         // Add visual feedback when checkboxes are changed
-        document.querySelectorAll('.role-checkbox').forEach(function(checkbox) {
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
                 var row = this.closest('tr');
                 if (this.checked) {
