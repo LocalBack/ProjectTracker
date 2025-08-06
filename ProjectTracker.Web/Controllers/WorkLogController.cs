@@ -228,6 +228,8 @@ namespace ProjectTracker.Web.Controllers
             }
 
             var workLog = await _workLogService.GetWorkLogByIdAsync(id);
+            ViewBag.Details = workLog?.Details;
+            ViewBag.Attachments = workLog?.Attachments;
 
             return View(workLog);
         }
