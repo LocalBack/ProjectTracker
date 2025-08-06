@@ -15,6 +15,8 @@ public partial class WorkLog
 
     public decimal HoursSpent { get; set; }
 
+    public decimal Cost { get; set; }
+
     public int ProjectId { get; set; }
 
     public int EmployeeId { get; set; }
