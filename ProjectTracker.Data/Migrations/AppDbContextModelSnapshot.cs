@@ -261,6 +261,15 @@ namespace ProjectTracker.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("Kvkk")
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("KVKK");
+
+                    b.Property<DateTime?>("KvkkTimestamp")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("KVKK_Timestamp");
+
                     b.Property<DateTime?>("LastLoginDate")
                         .HasColumnType("datetime2");
 

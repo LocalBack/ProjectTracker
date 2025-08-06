@@ -27,5 +27,8 @@ namespace ProjectTracker.Web.ViewModels
         [Display(Name = "Şifre Tekrar")]
         [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
         public string ConfirmPassword { get; set; }
+
+        [Display(Name = "KVKK Onamı")]
+        public bool KvkkAccepted { get; set; }
     }
 }
