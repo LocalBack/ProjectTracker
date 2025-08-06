@@ -10,5 +10,6 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task<DashboardStatsDto> GetDashboardStatsAsync(int userId);
         Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int userId, int count = 5);
         Task<IEnumerable<ProjectDto>> GetUserProjectsAsync(int userId);
+        Task<IEnumerable<ProjectReportDto>> GetProjectReportsAsync(int userId);
     }
 }

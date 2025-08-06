@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ProjectTracker.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Manager")]
     public class UserDashboardController : Controller
     {
         private readonly IUserDashboardService _userDashboardService;
