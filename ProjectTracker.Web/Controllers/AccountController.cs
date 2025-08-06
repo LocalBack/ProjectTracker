@@ -106,7 +106,9 @@ namespace ProjectTracker.Web.Controllers
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                Kvkk = model.KvkkAccepted,
+                KvkkTimestamp = model.KvkkAccepted ? DateTime.UtcNow : null
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

@@ -327,6 +327,13 @@ namespace ProjectTracker.Data.Context
                 entity.HasIndex(e => e.EmployeeId)
                     .IsUnique()
                     .HasFilter("[EmployeeId] IS NOT NULL");
+
+                entity.Property(e => e.Kvkk)
+                    .HasColumnName("KVKK")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.KvkkTimestamp)
+                    .HasColumnName("KVKK_Timestamp");
             });
 
             // UserProject Configuration (User-Project Many-to-Many)
