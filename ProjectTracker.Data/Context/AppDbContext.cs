@@ -260,18 +260,10 @@ namespace ProjectTracker.Data.Context
                     .IsRequired()
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Instructions)
-                    .HasMaxLength(2000);
-
                 entity.HasOne(e => e.Equipment)
                     .WithMany(eq => eq.MaintenanceSchedules)
                     .HasForeignKey(e => e.EquipmentId)
                     .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(e => e.Project)
-                    .WithMany(p => p.MaintenanceSchedules)
-                    .HasForeignKey(e => e.ProjectId)
-                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(e => e.NextMaintenanceDate);
             });
@@ -298,7 +290,7 @@ namespace ProjectTracker.Data.Context
                     .IsRequired();
 
                 entity.HasOne(e => e.MaintenanceSchedule)
-                    .WithMany(ms => ms.MaintenanceLogs)
+                    .WithMany()
                     .HasForeignKey(e => e.MaintenanceScheduleId)
                     .OnDelete(DeleteBehavior.Cascade);
 
@@ -328,7 +320,10 @@ namespace ProjectTracker.Data.Context
                     .IsUnique()
                     .HasFilter("[EmployeeId] IS NOT NULL");
 
-                entity.Property(e => e.Kvkk)
+                entity.Property(e => e.IsActive)
+                    .HasDefaultValue(true);
+
+                entity.Property(e => e.KVKK)
                     .HasColumnName("KVKK")
                     .HasDefaultValue(false);
 

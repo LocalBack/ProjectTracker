@@ -11,7 +11,9 @@ namespace ProjectTracker.Core.Entities
         public DateTime CreatedDate { get; set; }
         public DateTime? LastLoginDate { get; set; }
 
-        public bool Kvkk { get; set; }
+        // User status flags
+        public bool IsActive { get; set; } = true;
+        public bool KVKK { get; set; } = false;
         public DateTime? KvkkTimestamp { get; set; }
 
         // User-Project ilişkisi için

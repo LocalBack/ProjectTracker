@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ProjectTracker.Core.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using ProjectTracker.Data.Context;
+using System.Linq;
 
 namespace ProjectTracker.Data.Seed
 {
@@ -55,18 +57,87 @@ namespace ProjectTracker.Data.Seed
             }
         }
 
+        public static async Task SeedDefaultManagerAsync(UserManager<ApplicationUser> userManager)
+        {
+            const string managerEmail = "manager@projecttracker.com";
+            const string managerPassword = "Manager@123!";
+
+            if (await userManager.FindByEmailAsync(managerEmail) == null)
+            {
+                var managerUser = new ApplicationUser
+                {
+                    UserName = managerEmail,
+                    Email = managerEmail,
+                    FirstName = "Default",
+                    LastName = "Manager",
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(managerUser, managerPassword);
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(managerUser, "Manager");
+                }
+            }
+        }
+
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
 
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             // Seed roles first
             await SeedRolesAsync(roleManager);
 
-            // Then seed default admin user
+            // Seed users
             await SeedDefaultAdminAsync(userManager);
+            await SeedDefaultManagerAsync(userManager);
+
+            // Seed sample project and equipment
+            if (!context.Projects.Any())
+            {
+                var project = new Project
+                {
+                    Name = "Drone",
+                    Description = "Sample project",
+                    StartDate = DateTime.Today,
+                    Budget = 1000
+                };
+                context.Projects.Add(project);
+                await context.SaveChangesAsync();
+
+                var servo = new Equipment
+                {
+                    Name = "Servo",
+                    SerialNumber = "SERVO-001",
+                    Type = "Motor",
+                    PurchaseDate = DateTime.Today,
+                    ProjectId = project.Id
+                };
+                var esc = new Equipment
+                {
+                    Name = "ESC",
+                    SerialNumber = "ESC-001",
+                    Type = "Controller",
+                    PurchaseDate = DateTime.Today,
+                    ProjectId = project.Id
+                };
+                context.Equipments.AddRange(servo, esc);
+                await context.SaveChangesAsync();
+
+                context.MaintenanceSchedules.Add(new MaintenanceSchedule
+                {
+                    EquipmentId = servo.Id,
+                    MaintenanceType = "General",
+                    IntervalDays = 180,
+                    LastMaintenanceDate = DateTime.Today,
+                    NextMaintenanceDate = DateTime.Today.AddDays(180)
+                });
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
