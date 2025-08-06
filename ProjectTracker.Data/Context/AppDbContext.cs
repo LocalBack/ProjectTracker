@@ -23,6 +23,7 @@ namespace ProjectTracker.Data.Context
         public DbSet<Equipment> Equipments { get; set; } = null!;
         public DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
         public DbSet<MaintenanceLog> MaintenanceLogs { get; set; } = null!;
+        public DbSet<ProjectDocument> ProjectDocuments { get; set; } = null!;
 
         // Identity Extension
         public DbSet<UserProject> UserProjects { get; set; } = null!;
@@ -184,6 +185,30 @@ namespace ProjectTracker.Data.Context
                 entity.HasOne(e => e.WorkLog)
                     .WithMany(w => w.Attachments)
                     .HasForeignKey(e => e.WorkLogId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ProjectDocument Configuration
+            modelBuilder.Entity<ProjectDocument>(entity =>
+            {
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(500);
+
+                entity.HasOne(e => e.Project)
+                    .WithMany(p => p.Documents)
+                    .HasForeignKey(e => e.ProjectId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

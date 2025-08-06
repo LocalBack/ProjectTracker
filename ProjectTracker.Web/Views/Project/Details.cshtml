@@ -1,4 +1,4 @@
-﻿@model ProjectTracker.Service.DTOs.ProjectDto
+@model ProjectTracker.Service.DTOs.ProjectDto
 @{
     ViewData["Title"] = "Proje Detayları";
 }
@@ -32,6 +32,29 @@
                     </dl>
 
                     <div class="mt-4">
+                        @if (Model.Documents != null && Model.Documents.Any())
+                        {
+                            <h5><i class="fas fa-paperclip"></i> Dokümanlar (@Model.Documents.Count)</h5>
+                            <ul class="list-group mb-3">
+                                @foreach (var doc in Model.Documents)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-file-@GetFileIcon(doc.FileType)"></i> @doc.FileName<br />
+                                            <small class="text-muted">@GetFileSize(doc.FileSize)</small>
+                                        </div>
+                                        <a href="@doc.FilePath" class="btn btn-sm btn-primary" download>
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Henüz doküman eklenmemiş.</p>
+                        }
+
                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Düzenle
                         </a>
@@ -44,3 +67,29 @@
         </div>
     </div>
 </div>
+
+@functions {
+    string GetFileIcon(string fileType)
+    {
+        fileType = fileType?.ToLower() ?? string.Empty;
+        if (fileType.Contains("pdf")) return "pdf";
+        if (fileType.Contains("word") || fileType.Contains("doc")) return "word";
+        if (fileType.Contains("excel") || fileType.Contains("xls")) return "excel";
+        if (fileType.Contains("image") || fileType.Contains("png") || fileType.Contains("jpg") || fileType.Contains("jpeg")) return "image";
+        if (fileType.Contains("zip") || fileType.Contains("rar")) return "archive";
+        return "alt";
+    }
+
+    string GetFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        int order = 0;
+        double size = bytes;
+        while (size >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            size = size / 1024;
+        }
+        return $"{size:0.##} {sizes[order]}";
+    }
+}

@@ -11,6 +11,7 @@ namespace ProjectTracker.Core.Entities
             ProjectEmployees = new HashSet<ProjectEmployee>();
             Equipments = new HashSet<Equipment>(); // Yeni eklendi
             MaintenanceSchedules = new HashSet<MaintenanceSchedule>();
+            Documents = new HashSet<ProjectDocument>();
         }
 
         public string Name { get; set; } = string.Empty;
@@ -24,5 +25,6 @@ namespace ProjectTracker.Core.Entities
         public ICollection<ProjectEmployee> ProjectEmployees { get; set; }
         public virtual ICollection<Equipment> Equipments { get; set; } = [];// Yeni eklendi
         public virtual ICollection<MaintenanceSchedule> MaintenanceSchedules { get; set; } = [];
+        public virtual ICollection<ProjectDocument> Documents { get; set; } = [];
     }
 }
