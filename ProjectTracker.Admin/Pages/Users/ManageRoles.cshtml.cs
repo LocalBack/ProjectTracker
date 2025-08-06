@@ -59,6 +59,9 @@ namespace ProjectTracker.Admin.Pages.Users
             }
 
             var user = await _userManager.Users
+
+                .IgnoreQueryFilters()
+
                 .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
@@ -101,6 +104,9 @@ namespace ProjectTracker.Admin.Pages.Users
             }
 
             var user = await _userManager.Users
+
+                .IgnoreQueryFilters()
+
                 .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u => u.Id == UserRoles.UserId);
             if (user == null)
