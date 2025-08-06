@@ -1,34 +1,35 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ProjectTracker.Web.Resources.Models;
 
 namespace ProjectTracker.Web.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Ad alanı zorunludur")]
-        [Display(Name = "Ad")]
+        [Required(ErrorMessageResourceName = "FirstNameRequired", ErrorMessageResourceType = typeof(User))]
+        [Display(Name = "FirstName", ResourceType = typeof(User))]
         public string FirstName { get; set; }
 
-        [Required(ErrorMessage = "Soyad alanı zorunludur")]
-        [Display(Name = "Soyad")]
+        [Required(ErrorMessageResourceName = "LastNameRequired", ErrorMessageResourceType = typeof(User))]
+        [Display(Name = "LastName", ResourceType = typeof(User))]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "Email adresi zorunludur")]
-        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
-        [Display(Name = "Email")]
+        [Required(ErrorMessageResourceName = "EmailRequired", ErrorMessageResourceType = typeof(User))]
+        [EmailAddress(ErrorMessageResourceName = "EmailInvalid", ErrorMessageResourceType = typeof(User))]
+        [Display(Name = "Email", ResourceType = typeof(User))]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Şifre zorunludur")]
-        [StringLength(100, ErrorMessage = "{0} en az {2} ve en fazla {1} karakter olmalıdır.", MinimumLength = 6)]
+        [Required(ErrorMessageResourceName = "PasswordRequired", ErrorMessageResourceType = typeof(User))]
+        [StringLength(100, ErrorMessageResourceName = "PasswordLength", ErrorMessageResourceType = typeof(User), MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "Şifre")]
+        [Display(Name = "Password", ResourceType = typeof(User))]
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
-        [Display(Name = "Şifre Tekrar")]
-        [Compare("Password", ErrorMessage = "Şifreler eşleşmiyor.")]
+        [Display(Name = "ConfirmPassword", ResourceType = typeof(User))]
+        [Compare("Password", ErrorMessageResourceName = "PasswordMismatch", ErrorMessageResourceType = typeof(User))]
         public string ConfirmPassword { get; set; }
 
-        [Display(Name = "KVKK Onamı")]
+        [Display(Name = "KvkkAccepted", ResourceType = typeof(User))]
 
         public bool KvkkAccepted { get; set; }
     }
