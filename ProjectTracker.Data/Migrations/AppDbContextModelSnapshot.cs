@@ -88,7 +88,7 @@ namespace ProjectTracker.Data.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -364,7 +364,7 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("SerialNumber")
                         .IsUnique();
 
-                    b.ToTable("Equipments");
+                    b.ToTable("Equipments", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.MaintenanceLog", b =>
@@ -451,9 +451,6 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<DateTime>("NextMaintenanceDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -463,9 +460,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("NextMaintenanceDate");
 
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("MaintenanceSchedules");
+                    b.ToTable("MaintenanceSchedules", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.Project", b =>
@@ -514,7 +509,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -545,7 +540,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("ProjectId", "IsActive");
 
-                    b.ToTable("ProjectEmployees");
+                    b.ToTable("ProjectEmployees", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.UserProject", b =>
@@ -579,7 +574,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("UserId", "CanView");
 
-                    b.ToTable("UserProjects");
+                    b.ToTable("UserProjects", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.WorkLog", b =>
@@ -634,7 +629,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("ProjectId", "EmployeeId");
 
-                    b.ToTable("WorkLogs");
+                    b.ToTable("WorkLogs", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.WorkLogAttachment", b =>
@@ -683,7 +678,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("WorkLogId");
 
-                    b.ToTable("WorkLogAttachments");
+                    b.ToTable("WorkLogAttachments", (string)null);
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.WorkLogDetail", b =>
@@ -731,7 +726,7 @@ namespace ProjectTracker.Data.Migrations
 
                     b.HasIndex("WorkLogId");
 
-                    b.ToTable("WorkLogDetails");
+                    b.ToTable("WorkLogDetails", (string)null);
                 });
 
             modelBuilder.Entity("Employee", b =>
@@ -834,15 +829,7 @@ namespace ProjectTracker.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany("MaintenanceSchedules")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Equipment");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -955,8 +942,6 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.Project", b =>
                 {
                     b.Navigation("Equipments");
-
-                    b.Navigation("MaintenanceSchedules");
 
                     b.Navigation("ProjectEmployees");
 
