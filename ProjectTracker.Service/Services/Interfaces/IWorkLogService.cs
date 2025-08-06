@@ -13,9 +13,9 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task<IEnumerable<WorkLogDto>> GetWorkLogsByUserIdAsync(int userId);
         Task<IEnumerable<WorkLogDto>> GetWorkLogsByProjectIdAsync(int projectId);
         Task<IEnumerable<WorkLogDto>> GetWorkLogsByEmployeeIdAsync(int employeeId);  // Add this method
-        Task<WorkLogDto> CreateWorkLogAsync(WorkLogDto workLogDto);
-        Task<WorkLogDto> UpdateWorkLogAsync(int id, WorkLogDto workLogDto);
-        Task<bool> DeleteWorkLogAsync(int id);
+        Task<WorkLogDto> CreateWorkLogAsync(WorkLogDto workLogDto, int userId);
+        Task<WorkLogDto> UpdateWorkLogAsync(int id, WorkLogDto workLogDto, int userId);
+        Task<bool> DeleteWorkLogAsync(int id, int userId);
         Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count = 10);
     }
 }
