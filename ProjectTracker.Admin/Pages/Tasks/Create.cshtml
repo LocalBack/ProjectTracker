@@ -8,6 +8,10 @@
 
 <form method="post">
     <div class="mb-3">
+        <label asp-for="Task.ProjectId" class="form-label"></label>
+        <select asp-for="Task.ProjectId" asp-items="Model.ProjectOptions" class="form-select" onchange="location.href='?projectId=' + this.value"></select>
+    </div>
+    <div class="mb-3">
         <label asp-for="Task.EquipmentId" class="form-label"></label>
         <select asp-for="Task.EquipmentId" asp-items="Model.EquipmentOptions" class="form-select"></select>
     </div>

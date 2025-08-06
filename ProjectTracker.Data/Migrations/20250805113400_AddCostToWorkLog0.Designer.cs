@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjectTracker.Data.Context;
 
@@ -11,9 +12,11 @@ using ProjectTracker.Data.Context;
 namespace ProjectTracker.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250805113400_AddCostToWorkLog0")]
+    partial class AddCostToWorkLog0
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -451,9 +454,6 @@ namespace ProjectTracker.Data.Migrations
                     b.Property<DateTime>("NextMaintenanceDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -462,8 +462,6 @@ namespace ProjectTracker.Data.Migrations
                     b.HasIndex("EquipmentId");
 
                     b.HasIndex("NextMaintenanceDate");
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("MaintenanceSchedules");
                 });
@@ -834,15 +832,7 @@ namespace ProjectTracker.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ProjectTracker.Core.Entities.Project", "Project")
-                        .WithMany("MaintenanceSchedules")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Equipment");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("ProjectTracker.Core.Entities.ProjectEmployee", b =>
@@ -955,8 +945,6 @@ namespace ProjectTracker.Data.Migrations
             modelBuilder.Entity("ProjectTracker.Core.Entities.Project", b =>
                 {
                     b.Navigation("Equipments");
-
-                    b.Navigation("MaintenanceSchedules");
 
                     b.Navigation("ProjectEmployees");
 
