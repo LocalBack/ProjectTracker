@@ -97,6 +97,11 @@ namespace ProjectTracker.Web.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
 
+            if (!model.KvkkAccepted)
+            {
+                ModelState.AddModelError(nameof(model.KvkkAccepted), "KVKK onam formunu onaylamalısınız.");
+            }
+
             if (!ModelState.IsValid)
                 return View(model);
 

@@ -29,7 +29,7 @@ namespace ProjectTracker.Web.ViewModels
         public string ConfirmPassword { get; set; }
 
         [Display(Name = "KVKK Onamı")]
-        [Range(typeof(bool), "true", "true", ErrorMessage = "KVKK onam formunu onaylamalısınız.")]
+
         public bool KvkkAccepted { get; set; }
     }
 }
