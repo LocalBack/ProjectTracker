@@ -133,6 +133,7 @@ builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>()
 
 // Add before builder.Build()
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
+builder.Services.AddScoped<IReportingService, ReportingService>();
 
 builder.Services.AddMediatR(typeof(EmployeeUpdatedEventHandler).Assembly);
 builder.Services.AddScoped<IUserProjectService, UserProjectService>();

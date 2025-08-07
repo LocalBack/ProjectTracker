@@ -7,6 +7,39 @@
 
 <h1>@L["ControlPanel"]</h1>
 
+<div class="mb-3">
+    <form asp-action="ExportWorkLogs" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Work Logs to Excel</button>
+    </form>
+    <form asp-action="ExportWorkLogs" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Work Logs to PDF</button>
+    </form>
+</div>
+
+<div class="mb-3">
+    <form asp-action="ExportActivity" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Activity to Excel</button>
+    </form>
+    <form asp-action="ExportActivity" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Activity to PDF</button>
+    </form>
+</div>
+
+<div class="mb-3">
+    <form asp-action="ExportPerformance" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Performance to Excel</button>
+    </form>
+    <form asp-action="ExportPerformance" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Performance to PDF</button>
+    </form>
+</div>
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card shadow-sm">
