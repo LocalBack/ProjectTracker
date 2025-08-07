@@ -121,5 +121,10 @@ namespace ProjectTracker.Service.Services.Implementations
 
             return dto;
         }
+
+        public Task<int> GetEmployeeCountAsync()
+        {
+            return _employeeRepository.CountAsync();
+        }
     }
 }

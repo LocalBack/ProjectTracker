@@ -127,6 +127,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IProjectDashboardService, ProjectDashboardService>();
+builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 
 builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
 

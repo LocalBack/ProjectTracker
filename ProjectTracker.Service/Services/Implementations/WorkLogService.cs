@@ -244,5 +244,10 @@ namespace ProjectTracker.Service.Services.Implementations
 
             return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs.Take(count));
         }
+
+        public Task<int> GetActiveWorkLogCountAsync()
+        {
+            return _workLogRepository.CountAsync();
+        }
     }
 }

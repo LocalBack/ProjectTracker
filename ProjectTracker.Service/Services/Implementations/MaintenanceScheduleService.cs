@@ -55,5 +55,11 @@ namespace ProjectTracker.Service.Services.Implementations
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<int> GetUpcomingMaintenanceCountAsync()
+        {
+            var today = DateTime.Today;
+            return await _context.MaintenanceSchedules.CountAsync(m => m.NextMaintenanceDate > today);
+        }
     }
 }
