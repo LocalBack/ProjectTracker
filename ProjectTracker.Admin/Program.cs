@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;              // BackgroundService
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
+using ProjectTracker.Data.Repositories;
 using ProjectTracker.Data.Seed;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Linq;
 
@@ -74,6 +75,7 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 builder.Services.AddHostedService<MaintenanceNotificationService>();
 builder.Services.AddScoped<IProjectDashboardService, ProjectDashboardService>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 /*──────────────────────────── 6) HttpClient  (NEW) ───────────────────
    Yavaş/arıza yapan dış API çağrıları “task cancelled” üretmesin */
