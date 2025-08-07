@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Seed;
+using ProjectTracker.Data.Repositories;
+using ProjectTracker.Service.Implementations;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
@@ -71,6 +73,8 @@ builder.Services.AddRazorPages(opt =>
 
 /*──────────────────────────── 5) Mapping / Services ──────────────────*/
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 builder.Services.AddHostedService<MaintenanceNotificationService>();
 builder.Services.AddScoped<IProjectDashboardService, ProjectDashboardService>();
