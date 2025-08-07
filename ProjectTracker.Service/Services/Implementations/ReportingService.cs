@@ -196,7 +196,7 @@ namespace ProjectTracker.Service.Services.Implementations
             foreach (var item in data)
             {
                 ws.Cell(row, 1).Value = item.Key;
-                ws.Cell(row, 2).Value = item.Value;
+                ws.Cell(row, 2).Value = item.Value?.ToString() ?? string.Empty;
                 row++;
             }
             using var ms = new MemoryStream();
