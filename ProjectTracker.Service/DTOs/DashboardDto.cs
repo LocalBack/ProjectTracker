@@ -18,8 +18,13 @@ namespace ProjectTracker.Service.DTOs
         public int TotalProjects { get; set; }
         public int ActiveProjects { get; set; }
         public int CompletedProjects { get; set; }
+        public int PendingWorkLogApprovals { get; set; }
+        public int ActiveTasks { get; set; }
+        public int CompletedTasks { get; set; }
+        public int TotalEquipment { get; set; }
         public decimal TotalHoursThisMonth { get; set; }
         public decimal TotalHoursThisWeek { get; set; }
         public int TotalWorkLogs { get; set; }
+        public List<decimal> WeeklyHours { get; set; }
     }
 }

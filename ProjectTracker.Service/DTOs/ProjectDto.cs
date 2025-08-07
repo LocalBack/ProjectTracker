@@ -31,6 +31,8 @@ namespace ProjectTracker.Service.DTOs
         [Display(Name = "Gerçekleşen Maliyet")]
         public decimal? ActualCost { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Active;
+        public decimal CompletionPercent { get; set; }
+        public string StatusText { get; set; } = string.Empty;
         public ICollection<ProjectDocumentDto> Documents { get; set; } = new List<ProjectDocumentDto>();
     }
 }
