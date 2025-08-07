@@ -37,6 +37,7 @@
                 datasets: [{ label: 'Hours', data: data.map(x => x.hours) }]
             }
         });
+        const culture = document.documentElement.lang.startsWith('tr') ? 'tr' : 'en';
         new DataTable('#maintenanceTable', {
             data: @Json.Serialize(Model.UpcomingMaintenance),
             columns: [
@@ -45,7 +46,8 @@
                 { title: 'Type', data: 'type' }
             ],
             dom: 'Bfrtip',
-            buttons: ['copy', 'excel', 'pdf']
+            buttons: ['copy', 'excel', 'pdf'],
+            language: { url: `/js/localization/datatables_${culture}.json` }
         });
     </script>
 }

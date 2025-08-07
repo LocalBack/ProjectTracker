@@ -5,20 +5,20 @@ namespace ProjectTracker.Web.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required(ErrorMessageResourceName = "FirstNameRequired", ErrorMessageResourceType = typeof(User))]
+        [Required(ErrorMessage = "Required")]
         [Display(Name = "FirstName", ResourceType = typeof(User))]
         public string FirstName { get; set; }
 
-        [Required(ErrorMessageResourceName = "LastNameRequired", ErrorMessageResourceType = typeof(User))]
+        [Required(ErrorMessage = "Required")]
         [Display(Name = "LastName", ResourceType = typeof(User))]
         public string LastName { get; set; }
 
-        [Required(ErrorMessageResourceName = "EmailRequired", ErrorMessageResourceType = typeof(User))]
+        [Required(ErrorMessage = "Required")]
         [EmailAddress(ErrorMessageResourceName = "EmailInvalid", ErrorMessageResourceType = typeof(User))]
         [Display(Name = "Email", ResourceType = typeof(User))]
         public string Email { get; set; }
 
-        [Required(ErrorMessageResourceName = "PasswordRequired", ErrorMessageResourceType = typeof(User))]
+        [Required(ErrorMessage = "Required")]
         [StringLength(100, ErrorMessageResourceName = "PasswordLength", ErrorMessageResourceType = typeof(User), MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password", ResourceType = typeof(User))]

@@ -4,7 +4,7 @@
 @{
     var culture = Thread.CurrentThread.CurrentUICulture.Name;
 }
-<form asp-controller="Culture" asp-action="Set" method="post" class="d-inline">
+<form asp-controller="Culture" asp-action="Set" method="get" class="d-inline">
     <select name="culture" onchange="this.form.submit()" class="form-select form-select-sm w-auto">
         @foreach (var c in loc.Value.SupportedUICultures)
         {
@@ -18,5 +18,5 @@
             }
         }
     </select>
-    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
 </form>
