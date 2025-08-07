@@ -57,7 +57,7 @@
 </div>
 
 <!-- Active Projects Widget -->
-@if (Model.ActiveProjects != null && Model.ActiveProjects.Any())
+@if (Model.ActiveProjects.Any())
 {
     <div class="row mb-4">
         <div class="col-12">
@@ -90,6 +90,10 @@
             </div>
         </div>
     </div>
+}
+else
+{
+    <div class="text-muted">No data available</div>
 }
 
 <!-- Work Log Summary Widget -->
@@ -151,7 +155,7 @@
     </div>
 </div>
 
-@if (Model.ProjectReports != null && Model.ProjectReports.Any())
+@if (Model.ProjectReports.Any())
 {
     var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName));
     var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget));
@@ -210,8 +214,12 @@
         });
     </script>
 }
+else
+{
+    <div class="text-muted">No data available</div>
+}
 
-@if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
+@if (Model.RecentWorkLogs.Any())
 {
     <div class="row mt-4">
         <div class="col-md-12">
@@ -239,4 +247,8 @@
             </table>
         </div>
     </div>
+}
+else
+{
+    <div class="text-muted">No data available</div>
 }
