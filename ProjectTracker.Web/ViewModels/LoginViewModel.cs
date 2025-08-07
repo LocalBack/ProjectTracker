@@ -1,20 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using ProjectTracker.Web.Resources;
 
 namespace ProjectTracker.Web.ViewModels
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Required")]
-        [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
-        [Display(Name = "Email")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [EmailAddress(ErrorMessageResourceName = "EmailInvalid", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "Email", ResourceType = typeof(SharedResource))]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Required")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
         [DataType(DataType.Password)]
-        [Display(Name = "Şifre")]
+        [Display(Name = "Password", ResourceType = typeof(SharedResource))]
         public string Password { get; set; }
 
-        [Display(Name = "Beni Hatırla")]
+        [Display(Name = "RememberMe", ResourceType = typeof(SharedResource))]
         public bool RememberMe { get; set; }
     }
 }

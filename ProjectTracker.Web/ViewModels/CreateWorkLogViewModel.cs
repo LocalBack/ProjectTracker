@@ -1,33 +1,34 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ProjectTracker.Web.Resources;
 
 namespace ProjectTracker.Web.ViewModels
 {
     public class CreateWorkLogViewModel
     {
-        [Required(ErrorMessage = "Required")]
-        [Display(Name = "Başlık")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "Title", ResourceType = typeof(SharedResource))]
         public string Title { get; set; } = string.Empty;
 
-        [Display(Name = "Açıklama")]
+        [Display(Name = "Description", ResourceType = typeof(SharedResource))]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Required")]
-        [Display(Name = "Çalışma Tarihi")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "WorkDate", ResourceType = typeof(SharedResource))]
         [DataType(DataType.Date)]
         public DateTime WorkDate { get; set; } = DateTime.Today;
 
-        [Required(ErrorMessage = "Required")]
-        [Display(Name = "Harcanan Süre (Saat)")]
-        [Range(0.1, 24, ErrorMessage = "Süre 0.1 ile 24 saat arasında olmalıdır")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "HoursSpent", ResourceType = typeof(SharedResource))]
+        [Range(0.1, 24, ErrorMessageResourceName = "HoursRange", ErrorMessageResourceType = typeof(DataAnnotations))]
         public decimal HoursSpent { get; set; }
 
-        [Required(ErrorMessage = "Required")]
-        [Display(Name = "Proje")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "Project", ResourceType = typeof(SharedResource))]
         public int ProjectId { get; set; }
 
-        [Required(ErrorMessage = "Required")]
-        [Display(Name = "Çalışan")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [Display(Name = "Employee", ResourceType = typeof(SharedResource))]
         public int EmployeeId { get; set; }
 
         // Dropdown listeler için

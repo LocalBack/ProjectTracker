@@ -1,16 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using ProjectTracker.Web.Resources;
 
 namespace ProjectTracker.Web.ViewModels
 {
     public class LoginWith2faViewModel
     {
-        [Required(ErrorMessage = "Required")]
-        [StringLength(7, ErrorMessage = "{0} {2} ile {1} karakter arasında olmalıdır.", MinimumLength = 6)]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(DataAnnotations))]
+        [StringLength(7, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(DataAnnotations), MinimumLength = 6)]
         [DataType(DataType.Text)]
-        [Display(Name = "Doğrulama Kodu")]
+        [Display(Name = "VerificationCode", ResourceType = typeof(SharedResource))]
         public string TwoFactorCode { get; set; }
 
-        [Display(Name = "Bu cihazı hatırla")]
+        [Display(Name = "RememberThisDevice", ResourceType = typeof(SharedResource))]
         public bool RememberMachine { get; set; }
 
         public bool RememberMe { get; set; }
