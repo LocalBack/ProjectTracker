@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AccessDenied" xml:space="preserve"><value>Erişim Reddedildi</value></data>
+  <data name="AccessDeniedMessage" xml:space="preserve"><value>Bu sayfaya erişim yetkiniz yok.</value></data>
+  <data name="ReturnHome" xml:space="preserve"><value>Anasayfaya Dön</value></data>
+</root>

@@ -1,6 +1,7 @@
 @model ProjectTracker.Web.ViewModels.ProfileViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Profilim";
+    ViewData["Title"] = L["MyProfile"];
     Layout = "_Layout";
 }
 
@@ -12,27 +13,27 @@
             </div>
             <div class="card-body p-4">
                 <dl class="row">
-                    <dt class="col-sm-4">Ad</dt>
+                    <dt class="col-sm-4">@L["FirstName"]</dt>
                     <dd class="col-sm-8">@Model.FirstName</dd>
 
-                    <dt class="col-sm-4">Soyad</dt>
+                    <dt class="col-sm-4">@L["LastName"]</dt>
                     <dd class="col-sm-8">@Model.LastName</dd>
 
-                    <dt class="col-sm-4">E-posta</dt>
+                    <dt class="col-sm-4">@L["Email"]</dt>
                     <dd class="col-sm-8">
                         <a href="mailto:@Model.Email">@Model.Email</a>
                     </dd>
 
-                    <dt class="col-sm-4">Kayıt Tarihi</dt>
+                    <dt class="col-sm-4">@L["RegistrationDate"]</dt>
                     <dd class="col-sm-8">@Model.CreatedDate.ToString("dd.MM.yyyy HH:mm")</dd>
 
-                    <dt class="col-sm-4">Son Giriş</dt>
+                    <dt class="col-sm-4">@L["LastLogin"]</dt>
                     <dd class="col-sm-8">@(Model.LastLoginDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</dd>
                 </dl>
             </div>
             <div class="card-footer text-center">
                 <a asp-action="ChangePassword" class="btn btn-outline-primary">
-                    <i class="fas fa-key"></i> Şifre Değiştir
+                    <i class="fas fa-key"></i> @L["ChangePassword"]
                 </a>
             </div>
         </div>

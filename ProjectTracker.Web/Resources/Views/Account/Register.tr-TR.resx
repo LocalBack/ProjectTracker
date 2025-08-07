@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Register" xml:space="preserve"><value>Kayıt Ol</value></data>
+  <data name="AlreadyAccount" xml:space="preserve"><value>Zaten hesabınız var mı?</value></data>
+  <data name="Login" xml:space="preserve"><value>Giriş Yap</value></data>
+</root>

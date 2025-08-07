@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="MyProfile" xml:space="preserve"><value>Profilim</value></data>
+  <data name="FirstName" xml:space="preserve"><value>Ad</value></data>
+  <data name="LastName" xml:space="preserve"><value>Soyad</value></data>
+  <data name="Email" xml:space="preserve"><value>E-posta</value></data>
+  <data name="RegistrationDate" xml:space="preserve"><value>Kayıt Tarihi</value></data>
+  <data name="LastLogin" xml:space="preserve"><value>Son Giriş</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Şifre Değiştir</value></data>
+</root>
