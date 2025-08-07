@@ -6,4 +6,13 @@
   <data name="Budget" xml:space="preserve">
     <value>Bütçe</value>
   </data>
+  <data name="Equipment" xml:space="preserve">
+    <value>Ekipman</value>
+  </data>
+  <data name="NextDate" xml:space="preserve">
+    <value>Sonraki Tarih</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Tip</value>
+  </data>
 </root>

@@ -1,5 +1,10 @@
 @model ProjectTracker.Web.ViewModels.ProjectDashboardViewModel
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
+@{
+    ViewBag.JsTexts["Equipment"] = L["Equipment"].Value;
+    ViewBag.JsTexts["NextDate"] = L["NextDate"].Value;
+    ViewBag.JsTexts["Type"] = L["Type"].Value;
+}
 
 <h2>@L["ProjectDashboard"]</h2>
 
@@ -41,9 +46,9 @@
         new DataTable('#maintenanceTable', {
             data: @Json.Serialize(Model.UpcomingMaintenance),
             columns: [
-                { title: 'Equipment', data: 'equipment' },
-                { title: 'NextDate', data: 'nextDate' },
-                { title: 'Type', data: 'type' }
+                { title: t('Equipment'), data: 'equipment' },
+                { title: t('NextDate'), data: 'nextDate' },
+                { title: t('Type'), data: 'type' }
             ],
             dom: 'Bfrtip',
             buttons: ['copy', 'excel', 'pdf'],
