@@ -7,6 +7,39 @@
 
 <h1>@L["ControlPanel"]</h1>
 
+<div class="mb-3">
+    <form asp-action="ExportWorkLogs" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Work Logs to Excel</button>
+    </form>
+    <form asp-action="ExportWorkLogs" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Work Logs to PDF</button>
+    </form>
+</div>
+
+<div class="mb-3">
+    <form asp-action="ExportActivity" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Activity to Excel</button>
+    </form>
+    <form asp-action="ExportActivity" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Activity to PDF</button>
+    </form>
+</div>
+
+<div class="mb-3">
+    <form asp-action="ExportPerformance" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Excel" />
+        <button type="submit" class="btn btn-success btn-sm">Export Performance to Excel</button>
+    </form>
+    <form asp-action="ExportPerformance" method="post" class="d-inline">
+        <input type="hidden" name="format" value="Pdf" />
+        <button type="submit" class="btn btn-danger btn-sm">Export Performance to PDF</button>
+    </form>
+</div>
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card shadow-sm">
@@ -56,30 +89,45 @@
     </div>
 </div>
 
+
 <!-- Active Projects Widget -->
-@if (Model.ActiveProjects.Any())
+
+@if ((Model.UserRoles.Contains("Employee") || Model.UserRoles.Contains("Manager")) && Model.ActiveProjects != null && Model.ActiveProjects.Any())
+
+
 {
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
-                    <i class="fas fa-project-diagram"></i> @L["MyActiveProjects"]
+                    <i class="fas fa-project-diagram"></i> @L["MyProjects"]
                 </div>
                 <div class="card-body">
                     <div class="row">
                         @foreach (var project in Model.ActiveProjects)
                         {
+                            var statusClass = project.Status switch
+                            {
+                                ProjectTracker.Core.Entities.ProjectStatus.Planning => "bg-secondary",
+                                ProjectTracker.Core.Entities.ProjectStatus.Active => "bg-primary",
+                                ProjectTracker.Core.Entities.ProjectStatus.OnHold => "bg-warning text-dark",
+                                ProjectTracker.Core.Entities.ProjectStatus.Completed => "bg-success",
+                                ProjectTracker.Core.Entities.ProjectStatus.Cancelled => "bg-danger",
+                                _ => "bg-secondary"
+                            };
                             <div class="col-md-6 col-lg-4 mb-3">
                                 <div class="card h-100 border-primary">
                                     <div class="card-body">
                                         <h5 class="card-title">@project.Name</h5>
-                                        <p class="card-text text-muted">@L["Status"]: <span class="badge bg-info">@project.Status</span></p>
-                                        <!-- Placeholder progress bar -->
+                                        <p class="card-text text-muted">@L["Status"]: <span class="badge @statusClass">@project.StatusText</span></p>
                                         <div class="progress mb-2">
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: @project.CompletionPercent%" aria-valuenow="@project.CompletionPercent" aria-valuemin="0" aria-valuemax="100">@project.CompletionPercent%</div>
                                         </div>
-                                        <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-info-circle"></i> @L["Details"]
+                                        <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm me-1">
+                                            <i class="fas fa-info-circle"></i> Go to Project
+                                        </a>
+                                        <a asp-controller="Task" asp-action="Index" asp-route-projectId="@project.Id" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-tasks"></i> View Tasks
                                         </a>
                                     </div>
                                 </div>
@@ -104,12 +152,9 @@ else
                 <i class="fas fa-clock"></i> @L["WorkSummary"]
             </div>
             <div class="card-body">
-                <p>@L["ThisWeek"]: <strong>40</strong> @L["Hours"]</p>
-                <p>@L["ThisMonth"]: <strong>120</strong> @L["Hours"]</p>
-                <!-- Placeholder for chart -->
-                <div class="bg-light border rounded p-3 text-center">
-                    <em>@L["WorkHoursChartPlaceholder"]</em>
-                </div>
+                <p>@L["ThisWeek"]: <strong>@Model.Stats.TotalHoursThisWeek</strong> @L["Hours"]</p>
+                <p>@L["ThisMonth"]: <strong>@Model.Stats.TotalHoursThisMonth</strong> @L["Hours"]</p>
+                <canvas id="workChart"></canvas>
             </div>
         </div>
     </div>
@@ -119,12 +164,21 @@ else
             <div class="card-header bg-warning text-dark">
                 <i class="fas fa-bell"></i> @L["Notifications"]
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-envelope-open-text text-primary"></i> @L["NewMessages", 2]</li>
-                    <li><i class="fas fa-tasks text-success"></i> @L["PendingWorkLogs", 1]</li>
-                    <li><i class="fas fa-exclamation-circle text-danger"></i> @L["SystemWarnings", 1]</li>
-                </ul>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="/WorkLog/Approvals" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-tasks text-success me-2"></i>@L["PendingApprovals"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.PendingApprovals</span>
+                    </a>
+                    <a href="/Messages/Inbox" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-envelope-open-text text-primary me-2"></i>@L["UnreadMessages"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.UnreadMessages</span>
+                    </a>
+                    <a href="/SystemAlerts" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-exclamation-circle text-danger me-2"></i>@L["SystemAlerts"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.SystemAlerts</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -144,23 +198,50 @@ else
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">@L["TotalProjects"]</h5>
-                <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+
+@if (Model.UserRoles.Contains("Admin"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">System Projects</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
+
             </div>
         </div>
     </div>
-</div>
+}
+else if (Model.UserRoles.Contains("Manager"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Team Projects</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.UserRoles.Contains("Employee"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@L["TotalProjects"]</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (Model.ProjectReports.Any())
 {
-    var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName));
-    var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget));
-    var actualJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost));
-
     <div class="row mt-4">
         <div class="col-md-6">
             <h3>@L["ProjectTimeCost"]</h3>
@@ -189,30 +270,6 @@ else
             <canvas id="budgetChart"></canvas>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const labels = @Html.Raw(labelsJson);
-        const budgets = @Html.Raw(budgetJson);
-        const actuals = @Html.Raw(actualJson);
-        new Chart(document.getElementById('budgetChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '@L["Budget"]',
-                        data: budgets,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                    },
-                    {
-                        label: '@L["Actual"]',
-                        data: actuals,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                    }
-                ]
-            }
-        });
-    </script>
 }
 else
 {
@@ -227,20 +284,22 @@ else
             <table class="table">
                 <thead>
                     <tr>
-                        <th>@L["Project"]</th>
-                        <th>@L["Description"]</th>
                         <th>@L["Date"]</th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Project"]</th>
                         <th>@L["Duration"]</th>
+                        <th>@L["Status"]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var workLog in Model.RecentWorkLogs)
                     {
                         <tr>
-                            <td>@workLog.ProjectName</td>
-                            <td>@workLog.Description</td>
                             <td>@workLog.WorkDate.ToString("dd.MM.yyyy")</td>
-                            <td>@workLog.HoursSpent @L["Hours"]</td>
+                            <td>@workLog.Title</td>
+                            <td>@workLog.ProjectName</td>
+                            <td>@workLog.HoursSpent</td>
+                            <td>@L["Logged"]</td>
                         </tr>
                     }
                 </tbody>
@@ -251,4 +310,80 @@ else
 else
 {
     <div class="text-muted">No data available</div>
+
+
+@if (Model.RecentEquipmentActions != null && Model.RecentEquipmentActions.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>@L["RecentEquipmentActions"]</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["Date"]</th>
+                        <th>@L["Equipment"]</th>
+                        <th>@L["Description"]</th>
+                        <th>@L["Status"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var action in Model.RecentEquipmentActions)
+                    {
+                        <tr>
+                            <td>@action.Date.ToString("dd.MM.yyyy")</td>
+                            <td>@action.Equipment</td>
+                            <td>@action.Description</td>
+                            <td>@action.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const weeklyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Stats.WeeklyHours));
+        const weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+        new Chart(document.getElementById('workChart'), {
+            type: 'bar',
+            data: {
+                labels: weeklyLabels,
+                datasets: [{
+                    label: '@L["Hours"]',
+                    data: weeklyData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                }]
+            }
+        });
+        @if (Model.ProjectReports != null && Model.ProjectReports.Any())
+        {
+            <text>
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName)));
+            const budgets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget)));
+            const actuals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost)));
+            new Chart(document.getElementById('budgetChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '@L["Budget"]',
+                            data: budgets,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        },
+                        {
+                            label: '@L["Actual"]',
+                            data: actuals,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                        }
+                    ]
+                }
+            });
+            </text>
+        }
+    </script>
+
 }
