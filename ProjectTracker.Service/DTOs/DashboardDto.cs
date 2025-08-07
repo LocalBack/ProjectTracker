@@ -27,6 +27,12 @@ namespace ProjectTracker.Service.DTOs
         public decimal TotalHoursThisMonth { get; set; }
         public decimal TotalHoursThisWeek { get; set; }
         public int TotalWorkLogs { get; set; }
+
+        public int PendingApprovals { get; set; }
+        public int UnreadMessages { get; set; }
+        public int SystemAlerts { get; set; }
+
         public List<decimal> WeeklyHours { get; set; }
+
     }
 }

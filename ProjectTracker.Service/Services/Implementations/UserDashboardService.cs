@@ -66,7 +66,13 @@ namespace ProjectTracker.Service.Services.Implementations
                     TotalHoursThisMonth = 0,
                     TotalHoursThisWeek = 0,
                     TotalWorkLogs = 0,
+
+                    PendingApprovals = 0,
+                    UnreadMessages = 0,
+                    SystemAlerts = 0
+
                     WeeklyHours = new List<decimal>()
+
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
                 RecentMaintenanceLogs = new List<MaintenanceLogDto>(),
@@ -214,12 +220,19 @@ namespace ProjectTracker.Service.Services.Implementations
                     .Sum(w => w.HoursSpent);
 
 
+                // Notification counts
+                stats.PendingApprovals = await GetPendingApprovalsCountAsync(userId);
+                stats.UnreadMessages = await GetUnreadMessagesCountAsync(userId);
+                stats.SystemAlerts = await GetSystemAlertsCountAsync(userId);
+
+
                 // Maintenance tasks for user's projects
                 var maintenanceLogs = await _maintenanceLogRepository.GetAsync(
                     l => l.MaintenanceSchedule.Project.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
                     includes: new Expression<Func<MaintenanceLog, object>>[] { l => l.MaintenanceSchedule });
                 stats.ActiveTasks = maintenanceLogs.Count(l => !l.IsCompleted);
                 stats.CompletedTasks = maintenanceLogs.Count(l => l.IsCompleted);
+
 
             }
 
@@ -368,6 +381,25 @@ namespace ProjectTracker.Service.Services.Implementations
             });
 
             return reports;
+        }
+
+        // Placeholder implementations for notification counts
+        private Task<int> GetPendingApprovalsCountAsync(int userId)
+        {
+            // Pending approval logic would normally query work logs requiring manager action
+            return Task.FromResult(0);
+        }
+
+        private Task<int> GetUnreadMessagesCountAsync(int userId)
+        {
+            // Unread message logic would normally query a message repository for unread items
+            return Task.FromResult(0);
+        }
+
+        private Task<int> GetSystemAlertsCountAsync(int userId)
+        {
+            // System alert logic would typically query alert sources for the current user
+            return Task.FromResult(0);
         }
     }
 }
