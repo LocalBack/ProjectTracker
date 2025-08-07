@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="EmployeeDetails" xml:space="preserve"><value>Çalışan Detayları</value></data>
+  <data name="FullName" xml:space="preserve"><value>Ad Soyad</value></data>
+  <data name="Email" xml:space="preserve"><value>E-posta</value></data>
+  <data name="Title" xml:space="preserve"><value>Ünvan</value></data>
+  <data name="HireDate" xml:space="preserve"><value>İşe Başlama Tarihi</value></data>
+  <data name="WorkDuration" xml:space="preserve"><value>Çalışma Süresi</value></data>
+  <data name="Years" xml:space="preserve"><value>yıl</value></data>
+  <data name="Months" xml:space="preserve"><value>ay</value></data>
+  <data name="Edit" xml:space="preserve"><value>Düzenle</value></data>
+  <data name="Back" xml:space="preserve"><value>Geri</value></data>
+</root>
+

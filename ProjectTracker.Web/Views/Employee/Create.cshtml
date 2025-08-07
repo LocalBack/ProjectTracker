@@ -1,6 +1,7 @@
-﻿@model ProjectTracker.Service.DTOs.EmployeeDto
+@model ProjectTracker.Service.DTOs.EmployeeDto
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Yeni Çalışan";
+    ViewData["Title"] = L["NewEmployee"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -12,40 +13,38 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group mb-3">
-                <label asp-for="FirstName" class="control-label">Ad</label>
+                <label asp-for="FirstName" class="control-label">@L["FirstName"]</label>
                 <input asp-for="FirstName" class="form-control" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="LastName" class="control-label">Soyad</label>
+                <label asp-for="LastName" class="control-label">@L["LastName"]</label>
                 <input asp-for="LastName" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label">E-posta</label>
+                <label asp-for="Email" class="control-label">@L["Email"]</label>
                 <input asp-for="Email" class="form-control" type="email" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
-                <label asp-for="Title" class="control-label">Ünvan</label>
+                <label asp-for="Title" class="control-label">@L["Title"]</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
-            
-
             <div class="form-group mb-3">
-                <label asp-for="HireDate" class="control-label">İşe Başlama Tarihi</label>
+                <label asp-for="HireDate" class="control-label">@L["HireDate"]</label>
                 <input asp-for="HireDate" class="form-control" type="date" />
                 <span asp-validation-for="HireDate" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Kaydet" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                <input type="submit" value="@L["Save"]" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">@L["Cancel"]</a>
             </div>
         </form>
     </div>
@@ -56,3 +55,4 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
