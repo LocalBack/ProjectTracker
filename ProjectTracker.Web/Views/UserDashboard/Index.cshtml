@@ -91,7 +91,9 @@
 
 
 <!-- Active Projects Widget -->
+
 @if ((Model.UserRoles.Contains("Employee") || Model.UserRoles.Contains("Manager")) && Model.ActiveProjects != null && Model.ActiveProjects.Any())
+
 
 {
     <div class="row mb-4">
@@ -136,6 +138,10 @@
             </div>
         </div>
     </div>
+}
+else
+{
+    <div class="text-muted">No data available</div>
 }
 
 <!-- Work Log Summary Widget -->
@@ -234,7 +240,7 @@ else if (Model.UserRoles.Contains("Employee"))
     </div>
 }
 
-@if (Model.ProjectReports != null && Model.ProjectReports.Any())
+@if (Model.ProjectReports.Any())
 {
     <div class="row mt-4">
         <div class="col-md-6">
@@ -265,8 +271,12 @@ else if (Model.UserRoles.Contains("Employee"))
         </div>
     </div>
 }
+else
+{
+    <div class="text-muted">No data available</div>
+}
 
-@if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
+@if (Model.RecentWorkLogs.Any())
 {
     <div class="row mt-4">
         <div class="col-md-12">
@@ -297,6 +307,10 @@ else if (Model.UserRoles.Contains("Employee"))
         </div>
     </div>
 }
+else
+{
+    <div class="text-muted">No data available</div>
+
 
 @if (Model.RecentEquipmentActions != null && Model.RecentEquipmentActions.Any())
 {
@@ -371,4 +385,5 @@ else if (Model.UserRoles.Contains("Employee"))
             </text>
         }
     </script>
+
 }

@@ -6,6 +6,7 @@ using ProjectTracker.Service.Enums;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -38,6 +39,11 @@ namespace ProjectTracker.Web.Controllers
 
             // Get dashboard data
             var dashboardData = await _userDashboardService.GetDashboardDataAsync(userId, roles);
+
+            // Ensure collections are not null
+            dashboardData.ActiveProjects ??= new List<ProjectDto>();
+            dashboardData.RecentWorkLogs ??= new List<WorkLogDto>();
+            dashboardData.ProjectReports ??= new List<ProjectReportDto>();
 
             // Set user info
             dashboardData.UserName = userName;
