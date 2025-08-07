@@ -29,7 +29,10 @@ namespace ProjectTracker.Admin.Pages.Dashboard
                 Summary = await _dashboardService.GetSummaryAsync(projectId),
                 TaskStatuses = await _dashboardService.GetTaskStatusAsync(projectId),
                 WorkLogTrend = await _dashboardService.GetWorkLogTrendAsync(projectId, 12),
-                UpcomingMaintenance = await _dashboardService.GetUpcomingMaintenanceAsync(projectId, 30)
+                UpcomingMaintenance = await _dashboardService.GetUpcomingMaintenanceAsync(projectId, 30),
+                Equipment = await _dashboardService.GetEquipmentAsync(projectId),
+                RecentWorkLogs = await _dashboardService.GetRecentWorkLogsAsync(projectId, 5),
+                RecentMaintenance = await _dashboardService.GetRecentMaintenanceAsync(projectId, 5)
             };
         }
 

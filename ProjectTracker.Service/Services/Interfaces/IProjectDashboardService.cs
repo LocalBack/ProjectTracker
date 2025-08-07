@@ -11,6 +11,9 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task<IEnumerable<TaskStatusDto>> GetTaskStatusAsync(int projectId);
         Task<IEnumerable<WorkLogTrendDto>> GetWorkLogTrendAsync(int projectId, int months);
         Task<IEnumerable<MaintenanceDto>> GetUpcomingMaintenanceAsync(int projectId, int days);
+        Task<IEnumerable<EquipmentStatusDto>> GetEquipmentAsync(int projectId);
+        Task<IEnumerable<RecentWorkLogDto>> GetRecentWorkLogsAsync(int projectId, int count);
+        Task<IEnumerable<RecentMaintenanceDto>> GetRecentMaintenanceAsync(int projectId, int count);
         Task<byte[]> ExportAsync(ExportTarget target, ExportFormat fmt, int? projectId);
     }
 }

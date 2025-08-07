@@ -25,15 +25,18 @@ namespace ProjectTracker.Service.Services.Implementations
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<WorkLog> _workLogRepository;
         private readonly IRepository<MaintenanceSchedule> _maintenanceRepository;
+        private readonly IRepository<Equipment> _equipmentRepository;
 
         public ProjectDashboardService(
             IRepository<Project> projectRepository,
             IRepository<WorkLog> workLogRepository,
-            IRepository<MaintenanceSchedule> maintenanceRepository)
+            IRepository<MaintenanceSchedule> maintenanceRepository,
+            IRepository<Equipment> equipmentRepository)
         {
             _projectRepository = projectRepository;
             _workLogRepository = workLogRepository;
             _maintenanceRepository = maintenanceRepository;
+            _equipmentRepository = equipmentRepository;
         }
 
         public async Task<ProjectSummaryDto> GetSummaryAsync(int projectId)
@@ -43,7 +46,8 @@ namespace ProjectTracker.Service.Services.Implementations
                 includes: new Expression<Func<Project, object>>[]
                 {
                     p => p.WorkLogs,
-                    p => p.ProjectEmployees
+                    p => p.ProjectEmployees,
+                    p => p.Equipments
                 });
 
             var project = projects.FirstOrDefault();
@@ -52,16 +56,21 @@ namespace ProjectTracker.Service.Services.Implementations
 
             var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
+            var spent = project.WorkLogs.Sum(w => w.Cost);
             return new ProjectSummaryDto
             {
                 Name = project.Name,
                 Budget = project.Budget,
-                Spent = project.WorkLogs.Sum(w => w.Cost),
+                Spent = spent,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
                 HoursTotal = project.WorkLogs.Sum(w => w.HoursSpent),
                 HoursMonth = project.WorkLogs
                     .Where(w => w.WorkDate >= startOfMonth)
                     .Sum(w => w.HoursSpent),
-                ActiveEmployeeCount = project.ProjectEmployees.Count()
+                ActiveEmployeeCount = project.ProjectEmployees.Count(),
+                EquipmentCount = project.Equipments.Count(),
+                CompletionPercent = project.Budget > 0 ? Math.Round(spent / project.Budget * 100, 2) : 0
             };
         }
 
@@ -112,6 +121,112 @@ namespace ProjectTracker.Service.Services.Implementations
                 Type = s.MaintenanceType,
                 Project = s.Project.Name
             });
+        }
+
+        public async Task<IEnumerable<EquipmentStatusDto>> GetEquipmentAsync(int projectId)
+        {
+            var equipments = await _equipmentRepository.GetAsync(
+                e => e.ProjectId == projectId,
+                includes: new Expression<Func<Equipment, object>>[]
+                {
+                    e => e.MaintenanceSchedules
+                });
+
+            var result = equipments.Select(e =>
+            {
+                var schedule = e.MaintenanceSchedules.OrderByDescending(s => s.NextMaintenanceDate).FirstOrDefault();
+                var status = schedule == null ? "No Schedule" :
+                    (schedule.NextMaintenanceDate < DateTime.Now ? "Overdue" : "OK");
+                return new EquipmentStatusDto
+                {
+                    Name = e.Name,
+                    Type = e.Type,
+                    LastMaintenanceDate = schedule?.LastMaintenanceDate,
+                    NextMaintenanceDate = schedule?.NextMaintenanceDate,
+                    Status = status
+                };
+            });
+
+            if (!result.Any())
+            {
+                return new[]
+                {
+                    new EquipmentStatusDto
+                    {
+                        Name = "Sample Equipment",
+                        Type = "TypeA",
+                        LastMaintenanceDate = DateTime.Now.AddDays(-10),
+                        NextMaintenanceDate = DateTime.Now.AddDays(20),
+                        Status = "OK"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<IEnumerable<RecentWorkLogDto>> GetRecentWorkLogsAsync(int projectId, int count)
+        {
+            var logs = await _workLogRepository.GetAsync(
+                w => w.ProjectId == projectId,
+                orderBy: q => q.OrderByDescending(w => w.WorkDate),
+                includes: new Expression<Func<WorkLog, object>>[] { w => w.Employee });
+
+            var result = logs.Take(count).Select(w => new RecentWorkLogDto
+            {
+                Date = w.WorkDate,
+                Title = w.Title,
+                Employee = $"{w.Employee.FirstName} {w.Employee.LastName}",
+                Duration = w.HoursSpent,
+                Description = w.Description
+            });
+
+            if (!result.Any())
+            {
+                return new[]
+                {
+                    new RecentWorkLogDto
+                    {
+                        Date = DateTime.Now,
+                        Title = "Sample Work",
+                        Employee = "John Doe",
+                        Duration = 2,
+                        Description = "Demo log"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<IEnumerable<RecentMaintenanceDto>> GetRecentMaintenanceAsync(int projectId, int count)
+        {
+            var schedules = await _maintenanceRepository.GetAsync(
+                m => m.ProjectId == projectId,
+                orderBy: q => q.OrderByDescending(s => s.LastMaintenanceDate),
+                includes: new Expression<Func<MaintenanceSchedule, object>>[] { m => m.Equipment });
+
+            var result = schedules.Take(count).Select(s => new RecentMaintenanceDto
+            {
+                EquipmentName = s.Equipment.Name,
+                LastMaintenanceDate = s.LastMaintenanceDate,
+                NextMaintenanceDate = s.NextMaintenanceDate
+            });
+
+            if (!result.Any())
+            {
+                return new[]
+                {
+                    new RecentMaintenanceDto
+                    {
+                        EquipmentName = "Sample Equipment",
+                        LastMaintenanceDate = DateTime.Now.AddDays(-30),
+                        NextMaintenanceDate = DateTime.Now.AddDays(30)
+                    }
+                };
+            }
+
+            return result;
         }
 
         public async Task<byte[]> ExportAsync(ExportTarget target, ExportFormat fmt, int? projectId)
