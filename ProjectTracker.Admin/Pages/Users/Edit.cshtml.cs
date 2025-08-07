@@ -58,6 +58,9 @@ namespace ProjectTracker.Admin.Pages.Users
             [Display(Name = "Two-Factor Authentication")]
             public bool TwoFactorEnabled { get; set; }
 
+            [Display(Name = "Kullanıcı Aktif mi?")]
+            public bool IsActive { get; set; }
+
             [Display(Name = "Account Locked")]
             public bool IsLocked { get; set; }
 
@@ -90,6 +93,7 @@ namespace ProjectTracker.Admin.Pages.Users
                 PhoneNumber = user.PhoneNumber,
                 EmailConfirmed = user.EmailConfirmed,
                 TwoFactorEnabled = user.TwoFactorEnabled,
+                IsActive = user.IsActive,
                 IsLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.Now,
                 LockoutEnd = user.LockoutEnd
             };
@@ -130,6 +134,7 @@ namespace ProjectTracker.Admin.Pages.Users
             user.PhoneNumber = Input.PhoneNumber;
             user.EmailConfirmed = Input.EmailConfirmed;
             user.TwoFactorEnabled = Input.TwoFactorEnabled;
+            user.IsActive = Input.IsActive;
 
             // Handle lockout
             if (Input.IsLocked && (!user.LockoutEnd.HasValue || user.LockoutEnd <= DateTimeOffset.Now))

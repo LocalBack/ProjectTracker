@@ -342,6 +342,9 @@ namespace ProjectTracker.Data.Context
                     .IsRequired()
                     .HasMaxLength(100);
 
+                entity.Property(e => e.IsActive)
+                    .HasDefaultValue(true);
+
                 // User-Employee ilişkisi (One-to-One)
                 entity.HasOne(u => u.Employee)
                     .WithOne()

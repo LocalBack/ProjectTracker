@@ -11,6 +11,8 @@ namespace ProjectTracker.Core.Entities
         public DateTime CreatedDate { get; set; }
         public DateTime? LastLoginDate { get; set; }
 
+        public bool IsActive { get; set; } = true;
+
         public bool Kvkk { get; set; }
         public DateTime? KvkkTimestamp { get; set; }
 
