@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Service.Services.Interfaces;
-using ProjectTracker.Service.DTOs;
+using ProjectTracker.Web.ViewModels;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
@@ -33,13 +33,46 @@ namespace ProjectTracker.Web.Controllers
             var dashboardData = await _userDashboardService.GetDashboardDataAsync(userId);
 
             // Set user info
-            dashboardData.UserName = userName;
-            dashboardData.UserRoles = User.Claims
+            dashboardData.ProfileInfo.UserName = userName;
+            dashboardData.ProfileInfo.UserRoles = User.Claims
                 .Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value)
                 .ToList();
 
-            return View(dashboardData);
+            var viewModel = new UserDashboardViewModel
+            {
+                ProfileInfo = new ProfileInfoViewModel
+                {
+                    UserName = dashboardData.ProfileInfo.UserName,
+                    FullName = dashboardData.ProfileInfo.FullName,
+                    UserRoles = dashboardData.ProfileInfo.UserRoles
+                },
+                WorkSummary = new WorkSummaryViewModel
+                {
+                    ThisWeekHours = dashboardData.WorkSummary.ThisWeekHours,
+                    ThisMonthHours = dashboardData.WorkSummary.ThisMonthHours
+                },
+                Projects = new ProjectsViewModel
+                {
+                    ActiveProjects = dashboardData.Projects.ActiveProjects
+                },
+                Activities = new ActivitiesViewModel
+                {
+                    RecentWorkLogs = dashboardData.Activities.RecentWorkLogs
+                },
+                Notifications = new NotificationsViewModel
+                {
+                    Items = dashboardData.Notifications.Items
+                },
+                Stats = dashboardData.Stats,
+                Exports = new ExportsViewModel
+                {
+                    ProjectReports = dashboardData.Exports.ProjectReports
+                }
+            };
+
+            return View(viewModel);
         }
     }
 }
+

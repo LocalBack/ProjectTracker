@@ -1,4 +1,4 @@
-﻿@model ProjectTracker.Service.DTOs.DashboardDto
+﻿@model ProjectTracker.Web.ViewModels.UserDashboardViewModel
 @using System.Linq
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
@@ -11,11 +11,11 @@
     <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body text-center">
-                <img src="https://ui-avatars.com/api/?name=@Model.UserName&background=0D8ABC&color=fff&size=96" class="rounded-circle mb-3" alt="Avatar" width="96" height="96" />
-                <h4 class="card-title mb-1">@Model.FullName</h4>
+                <img src="https://ui-avatars.com/api/?name=@Model.ProfileInfo.UserName&background=0D8ABC&color=fff&size=96" class="rounded-circle mb-3" alt="Avatar" width="96" height="96" />
+                <h4 class="card-title mb-1">@Model.ProfileInfo.FullName</h4>
                 <p class="text-muted mb-2">@User.Identity.Name</p>
                 <div class="mb-2">
-                    @foreach (var role in Model.UserRoles)
+                    @foreach (var role in Model.ProfileInfo.UserRoles)
                     {
                         if (role == "Admin")
                         {
@@ -45,10 +45,10 @@
         </div>
     </div>
     <div class="col-md-8">
-        <h2>@L["WelcomeUser", Model.UserName]</h2>
+        <h2>@L["WelcomeUser", Model.ProfileInfo.UserName]</h2>
         <p>
             @L["SystemRoles"]:
-            @foreach (var role in Model.UserRoles)
+            @foreach (var role in Model.ProfileInfo.UserRoles)
             {
                 <span class="badge bg-info">@role</span>
             }
@@ -57,7 +57,7 @@
 </div>
 
 <!-- Active Projects Widget -->
-@if (Model.ActiveProjects != null && Model.ActiveProjects.Any())
+@if (Model.Projects.ActiveProjects != null && Model.Projects.ActiveProjects.Any())
 {
     <div class="row mb-4">
         <div class="col-12">
@@ -67,7 +67,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        @foreach (var project in Model.ActiveProjects)
+                        @foreach (var project in Model.Projects.ActiveProjects)
                         {
                             <div class="col-md-6 col-lg-4 mb-3">
                                 <div class="card h-100 border-primary">
@@ -100,8 +100,8 @@
                 <i class="fas fa-clock"></i> @L["WorkSummary"]
             </div>
             <div class="card-body">
-                <p>@L["ThisWeek"]: <strong>40</strong> @L["Hours"]</p>
-                <p>@L["ThisMonth"]: <strong>120</strong> @L["Hours"]</p>
+                <p>@L["ThisWeek"]: <strong>@Model.WorkSummary.ThisWeekHours</strong> @L["Hours"]</p>
+                <p>@L["ThisMonth"]: <strong>@Model.WorkSummary.ThisMonthHours</strong> @L["Hours"]</p>
                 <!-- Placeholder for chart -->
                 <div class="bg-light border rounded p-3 text-center">
                     <em>@L["WorkHoursChartPlaceholder"]</em>
@@ -151,11 +151,11 @@
     </div>
 </div>
 
-@if (Model.ProjectReports != null && Model.ProjectReports.Any())
+@if (Model.Exports.ProjectReports != null && Model.Exports.ProjectReports.Any())
 {
-    var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName));
-    var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget));
-    var actualJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost));
+    var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.Exports.ProjectReports.Select(p => p.ProjectName));
+    var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.Exports.ProjectReports.Select(p => p.Budget));
+    var actualJson = System.Text.Json.JsonSerializer.Serialize(Model.Exports.ProjectReports.Select(p => p.ActualCost));
 
     <div class="row mt-4">
         <div class="col-md-6">
@@ -169,7 +169,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var report in Model.ProjectReports)
+                    @foreach (var report in Model.Exports.ProjectReports)
                     {
                         <tr>
                             <td>@report.ProjectName</td>
@@ -211,7 +211,7 @@
     </script>
 }
 
-@if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
+@if (Model.Activities.RecentWorkLogs != null && Model.Activities.RecentWorkLogs.Any())
 {
     <div class="row mt-4">
         <div class="col-md-12">
@@ -226,7 +226,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var workLog in Model.RecentWorkLogs)
+                    @foreach (var workLog in Model.Activities.RecentWorkLogs)
                     {
                         <tr>
                             <td>@workLog.ProjectName</td>

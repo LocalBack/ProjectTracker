@@ -1,16 +1,49 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace ProjectTracker.Service.DTOs
 {
     public class DashboardDto
     {
-        public string UserName { get; set; }
-        public string FullName { get; set; }
-        public List<string> UserRoles { get; set; }
-        public DashboardStatsDto Stats { get; set; }
-        public List<WorkLogDto> RecentWorkLogs { get; set; }
-        public List<ProjectDto> ActiveProjects { get; set; }
-        public List<ProjectReportDto> ProjectReports { get; set; }
+        public ProfileInfoDto ProfileInfo { get; set; } = new();
+        public WorkSummaryDto WorkSummary { get; set; } = new();
+        public ProjectsDto Projects { get; set; } = new();
+        public ActivitiesDto Activities { get; set; } = new();
+        public NotificationsDto Notifications { get; set; } = new();
+        public DashboardStatsDto Stats { get; set; } = new();
+        public ExportsDto Exports { get; set; } = new();
+    }
+
+    public class ProfileInfoDto
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public List<string> UserRoles { get; set; } = new();
+    }
+
+    public class WorkSummaryDto
+    {
+        public decimal ThisWeekHours { get; set; }
+        public decimal ThisMonthHours { get; set; }
+    }
+
+    public class ProjectsDto
+    {
+        public List<ProjectDto> ActiveProjects { get; set; } = new();
+    }
+
+    public class ActivitiesDto
+    {
+        public List<WorkLogDto> RecentWorkLogs { get; set; } = new();
+    }
+
+    public class NotificationsDto
+    {
+        public List<string> Items { get; set; } = new();
+    }
+
+    public class ExportsDto
+    {
+        public List<ProjectReportDto> ProjectReports { get; set; } = new();
     }
 
     public class DashboardStatsDto
@@ -23,3 +56,4 @@ namespace ProjectTracker.Service.DTOs
         public int TotalWorkLogs { get; set; }
     }
 }
+

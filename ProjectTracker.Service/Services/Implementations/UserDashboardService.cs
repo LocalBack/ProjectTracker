@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Repositories;
@@ -36,13 +36,15 @@ namespace ProjectTracker.Service.Services.Implementations
 
         public async Task<DashboardDto> GetDashboardDataAsync(int userId)
         {
-            // Initialize with default values to prevent null reference exceptions
             var dashboard = new DashboardDto
             {
-                UserName = string.Empty, // You need to set this from somewhere
-                FullName = "Guest User",
-                UserRoles = new List<string>(),
-                Stats = new DashboardStatsDto // Initialize Stats to prevent null
+                ProfileInfo = new ProfileInfoDto
+                {
+                    UserName = string.Empty,
+                    FullName = "Guest User",
+                    UserRoles = new List<string>()
+                },
+                Stats = new DashboardStatsDto
                 {
                     TotalProjects = 0,
                     ActiveProjects = 0,
@@ -51,30 +53,33 @@ namespace ProjectTracker.Service.Services.Implementations
                     TotalHoursThisWeek = 0,
                     TotalWorkLogs = 0
                 },
-                RecentWorkLogs = new List<WorkLogDto>(),
-                ActiveProjects = new List<ProjectDto>(),
-                ProjectReports = new List<ProjectReportDto>()
+                WorkSummary = new WorkSummaryDto(),
+                Projects = new ProjectsDto(),
+                Activities = new ActivitiesDto(),
+                Notifications = new NotificationsDto(),
+                Exports = new ExportsDto()
             };
 
-            // Get employee data
             var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
             var employee = employees.FirstOrDefault();
 
             if (employee != null)
             {
-                dashboard.FullName = $"{employee.FirstName} {employee.LastName}";
+                dashboard.ProfileInfo.FullName = $"{employee.FirstName} {employee.LastName}";
 
-                // Get stats - this will overwrite the default values
                 dashboard.Stats = await GetDashboardStatsAsync(userId);
 
-                // Get recent work logs
-                dashboard.RecentWorkLogs = (await GetRecentWorkLogsAsync(userId, 5)).ToList();
+                dashboard.WorkSummary = new WorkSummaryDto
+                {
+                    ThisWeekHours = dashboard.Stats.TotalHoursThisWeek,
+                    ThisMonthHours = dashboard.Stats.TotalHoursThisMonth
+                };
 
-                // Get active projects
-                dashboard.ActiveProjects = (await GetUserProjectsAsync(userId)).ToList();
+                dashboard.Activities.RecentWorkLogs = (await GetRecentWorkLogsAsync(userId, 5)).ToList();
 
-                // Get project reports
-                dashboard.ProjectReports = (await GetProjectReportsAsync(userId)).ToList();
+                dashboard.Projects.ActiveProjects = (await GetUserProjectsAsync(userId)).ToList();
+
+                dashboard.Exports.ProjectReports = (await GetProjectReportsAsync(userId)).ToList();
             }
 
             return dashboard;
@@ -191,3 +196,4 @@ namespace ProjectTracker.Service.Services.Implementations
         }
     }
 }
+
