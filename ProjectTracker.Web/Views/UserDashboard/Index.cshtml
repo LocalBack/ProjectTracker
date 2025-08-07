@@ -115,12 +115,21 @@
             <div class="card-header bg-warning text-dark">
                 <i class="fas fa-bell"></i> @L["Notifications"]
             </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-envelope-open-text text-primary"></i> @L["NewMessages", 2]</li>
-                    <li><i class="fas fa-tasks text-success"></i> @L["PendingWorkLogs", 1]</li>
-                    <li><i class="fas fa-exclamation-circle text-danger"></i> @L["SystemWarnings", 1]</li>
-                </ul>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="/WorkLog/Approvals" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-tasks text-success me-2"></i>@L["PendingApprovals"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.PendingApprovals</span>
+                    </a>
+                    <a href="/Messages/Inbox" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-envelope-open-text text-primary me-2"></i>@L["UnreadMessages"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.UnreadMessages</span>
+                    </a>
+                    <a href="/SystemAlerts" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-exclamation-circle text-danger me-2"></i>@L["SystemAlerts"]</span>
+                        <span class="badge bg-secondary">@Model.Stats.SystemAlerts</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>

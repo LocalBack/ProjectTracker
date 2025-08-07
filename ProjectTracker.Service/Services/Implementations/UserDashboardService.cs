@@ -49,7 +49,10 @@ namespace ProjectTracker.Service.Services.Implementations
                     CompletedProjects = 0,
                     TotalHoursThisMonth = 0,
                     TotalHoursThisWeek = 0,
-                    TotalWorkLogs = 0
+                    TotalWorkLogs = 0,
+                    PendingApprovals = 0,
+                    UnreadMessages = 0,
+                    SystemAlerts = 0
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
                 ActiveProjects = new List<ProjectDto>(),
@@ -117,6 +120,11 @@ namespace ProjectTracker.Service.Services.Implementations
                 stats.TotalHoursThisWeek = workLogs
                     .Where(w => w.WorkDate >= startOfWeek)
                     .Sum(w => w.HoursSpent);
+
+                // Notification counts
+                stats.PendingApprovals = await GetPendingApprovalsCountAsync(userId);
+                stats.UnreadMessages = await GetUnreadMessagesCountAsync(userId);
+                stats.SystemAlerts = await GetSystemAlertsCountAsync(userId);
             }
 
             return stats;
@@ -188,6 +196,25 @@ namespace ProjectTracker.Service.Services.Implementations
             });
 
             return reports;
+        }
+
+        // Placeholder implementations for notification counts
+        private Task<int> GetPendingApprovalsCountAsync(int userId)
+        {
+            // Pending approval logic would normally query work logs requiring manager action
+            return Task.FromResult(0);
+        }
+
+        private Task<int> GetUnreadMessagesCountAsync(int userId)
+        {
+            // Unread message logic would normally query a message repository for unread items
+            return Task.FromResult(0);
+        }
+
+        private Task<int> GetSystemAlertsCountAsync(int userId)
+        {
+            // System alert logic would typically query alert sources for the current user
+            return Task.FromResult(0);
         }
     }
 }
