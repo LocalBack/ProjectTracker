@@ -1,16 +1,16 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
-using ProjectTracker.Web;
 using Xunit;
+using WebMarker = ProjectTracker.Web.WebAssemblyMarker;
 
 namespace ProjectTracker.Tests
 {
-    public class CultureMiddlewareTests : IClassFixture<WebApplicationFactory<Program>>
+    public class CultureMiddlewareTests : IClassFixture<CustomWebApplicationFactory<WebMarker>>
     {
-        private readonly WebApplicationFactory<Program> _factory;
+        private readonly CustomWebApplicationFactory<WebMarker> _factory;
 
-        public CultureMiddlewareTests(WebApplicationFactory<Program> factory)
+        public CultureMiddlewareTests(CustomWebApplicationFactory<WebMarker> factory)
         {
             _factory = factory;
         }
