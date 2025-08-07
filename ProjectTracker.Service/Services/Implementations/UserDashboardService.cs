@@ -59,7 +59,8 @@ namespace ProjectTracker.Service.Services.Implementations
                     TotalEquipment = 0,
                     TotalHoursThisMonth = 0,
                     TotalHoursThisWeek = 0,
-                    TotalWorkLogs = 0
+                    TotalWorkLogs = 0,
+                    WeeklyHours = new List<decimal>()
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
                 ActiveProjects = new List<ProjectDto>(),
@@ -92,7 +93,10 @@ namespace ProjectTracker.Service.Services.Implementations
 
         public async Task<DashboardStatsDto> GetDashboardStatsAsync(int userId)
         {
-            var stats = new DashboardStatsDto();
+            var stats = new DashboardStatsDto
+            {
+                WeeklyHours = new List<decimal>()
+            };
 
             // Get employee
             var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
@@ -136,12 +140,14 @@ namespace ProjectTracker.Service.Services.Implementations
                     .Where(w => w.WorkDate >= startOfWeek)
                     .Sum(w => w.HoursSpent);
 
+
                 // Maintenance tasks for user's projects
                 var maintenanceLogs = await _maintenanceLogRepository.GetAsync(
                     l => l.MaintenanceSchedule.Project.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
                     includes: new Expression<Func<MaintenanceLog, object>>[] { l => l.MaintenanceSchedule });
                 stats.ActiveTasks = maintenanceLogs.Count(l => !l.IsCompleted);
                 stats.CompletedTasks = maintenanceLogs.Count(l => l.IsCompleted);
+
             }
 
             return stats;
@@ -177,14 +183,36 @@ namespace ProjectTracker.Service.Services.Implementations
                 return new List<ProjectDto>();
 
             var projectEmployees = await _projectEmployeeRepository.GetAsync(
-                pe => pe.EmployeeId == employee.Id && pe.Project.Status == ProjectStatus.Active,
+                pe => pe.EmployeeId == employee.Id,
                 includes: new Expression<Func<ProjectEmployee, object>>[]
                 {
-                    pe => pe.Project
+                    pe => pe.Project,
+                    pe => pe.Project.WorkLogs
                 });
 
             var projects = projectEmployees.Select(pe => pe.Project).Distinct();
-            return _mapper.Map<IEnumerable<ProjectDto>>(projects);
+            var projectDtos = new List<ProjectDto>();
+
+            foreach (var project in projects)
+            {
+                var dto = _mapper.Map<ProjectDto>(project);
+
+                var spent = project.WorkLogs.Sum(w => w.Cost);
+                dto.CompletionPercent = project.Budget > 0 ? Math.Round(spent / project.Budget * 100, 2) : 0;
+                dto.StatusText = project.Status switch
+                {
+                    ProjectStatus.Planning => "Planning",
+                    ProjectStatus.Active => "Active",
+                    ProjectStatus.OnHold => "On Hold",
+                    ProjectStatus.Completed => "Completed",
+                    ProjectStatus.Cancelled => "Cancelled",
+                    _ => project.Status.ToString()
+                };
+
+                projectDtos.Add(dto);
+            }
+
+            return projectDtos;
         }
 
         public async Task<IEnumerable<ProjectReportDto>> GetProjectReportsAsync(int userId)
