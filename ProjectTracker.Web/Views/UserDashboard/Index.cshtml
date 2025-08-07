@@ -57,7 +57,7 @@
 </div>
 
 <!-- Active Projects Widget -->
-@if (Model.ActiveProjects != null && Model.ActiveProjects.Any())
+@if ((Model.UserRoles.Contains("Employee") || Model.UserRoles.Contains("Manager")) && Model.ActiveProjects != null && Model.ActiveProjects.Any())
 {
     <div class="row mb-4">
         <div class="col-12">
@@ -140,16 +140,45 @@
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">@L["TotalProjects"]</h5>
-                <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+@if (Model.UserRoles.Contains("Admin"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">System Projects</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
+else if (Model.UserRoles.Contains("Manager"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Team Projects</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (Model.UserRoles.Contains("Employee"))
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@L["TotalProjects"]</h5>
+                    <p class="card-text display-4">@Model.Stats.TotalProjects</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (Model.ProjectReports != null && Model.ProjectReports.Any())
 {
