@@ -100,12 +100,9 @@
                 <i class="fas fa-clock"></i> @L["WorkSummary"]
             </div>
             <div class="card-body">
-                <p>@L["ThisWeek"]: <strong>40</strong> @L["Hours"]</p>
-                <p>@L["ThisMonth"]: <strong>120</strong> @L["Hours"]</p>
-                <!-- Placeholder for chart -->
-                <div class="bg-light border rounded p-3 text-center">
-                    <em>@L["WorkHoursChartPlaceholder"]</em>
-                </div>
+                <p>@L["ThisWeek"]: <strong>@Model.Stats.TotalHoursThisWeek</strong> @L["Hours"]</p>
+                <p>@L["ThisMonth"]: <strong>@Model.Stats.TotalHoursThisMonth</strong> @L["Hours"]</p>
+                <canvas id="workChart"></canvas>
             </div>
         </div>
     </div>
@@ -153,10 +150,6 @@
 
 @if (Model.ProjectReports != null && Model.ProjectReports.Any())
 {
-    var labelsJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName));
-    var budgetJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget));
-    var actualJson = System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost));
-
     <div class="row mt-4">
         <div class="col-md-6">
             <h3>@L["ProjectTimeCost"]</h3>
@@ -185,30 +178,6 @@
             <canvas id="budgetChart"></canvas>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const labels = @Html.Raw(labelsJson);
-        const budgets = @Html.Raw(budgetJson);
-        const actuals = @Html.Raw(actualJson);
-        new Chart(document.getElementById('budgetChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: '@L["Budget"]',
-                        data: budgets,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                    },
-                    {
-                        label: '@L["Actual"]',
-                        data: actuals,
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                    }
-                ]
-            }
-        });
-    </script>
 }
 
 @if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
@@ -239,4 +208,49 @@
             </table>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const weeklyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Stats.WeeklyHours));
+        const weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+        new Chart(document.getElementById('workChart'), {
+            type: 'bar',
+            data: {
+                labels: weeklyLabels,
+                datasets: [{
+                    label: '@L["Hours"]',
+                    data: weeklyData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                }]
+            }
+        });
+        @if (Model.ProjectReports != null && Model.ProjectReports.Any())
+        {
+            <text>
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName)));
+            const budgets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget)));
+            const actuals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost)));
+            new Chart(document.getElementById('budgetChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '@L["Budget"]',
+                            data: budgets,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        },
+                        {
+                            label: '@L["Actual"]',
+                            data: actuals,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                        }
+                    ]
+                }
+            });
+            </text>
+        }
+    </script>
 }

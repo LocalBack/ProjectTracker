@@ -49,7 +49,8 @@ namespace ProjectTracker.Service.Services.Implementations
                     CompletedProjects = 0,
                     TotalHoursThisMonth = 0,
                     TotalHoursThisWeek = 0,
-                    TotalWorkLogs = 0
+                    TotalWorkLogs = 0,
+                    WeeklyHours = new List<decimal>()
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
                 ActiveProjects = new List<ProjectDto>(),
@@ -82,7 +83,10 @@ namespace ProjectTracker.Service.Services.Implementations
 
         public async Task<DashboardStatsDto> GetDashboardStatsAsync(int userId)
         {
-            var stats = new DashboardStatsDto();
+            var stats = new DashboardStatsDto
+            {
+                WeeklyHours = new List<decimal>()
+            };
 
             // Get employee
             var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
@@ -117,6 +121,17 @@ namespace ProjectTracker.Service.Services.Implementations
                 stats.TotalHoursThisWeek = workLogs
                     .Where(w => w.WorkDate >= startOfWeek)
                     .Sum(w => w.HoursSpent);
+
+                // Last four weeks hours
+                for (int i = 3; i >= 0; i--)
+                {
+                    var weekStart = startOfWeek.AddDays(-7 * i);
+                    var weekEnd = weekStart.AddDays(7);
+                    var weeklyTotal = workLogs
+                        .Where(w => w.WorkDate >= weekStart && w.WorkDate < weekEnd)
+                        .Sum(w => w.HoursSpent);
+                    stats.WeeklyHours.Add(weeklyTotal);
+                }
             }
 
             return stats;
