@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Title" xml:space="preserve"><value>Projects</value></data>
+  <data name="Projects" xml:space="preserve"><value>Projects</value></data>
+  <data name="NewProject" xml:space="preserve"><value>New Project</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search project name or description...</value></data>
+  <data name="Search" xml:space="preserve"><value>Search</value></data>
+  <data name="Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="ShowRecords" xml:space="preserve"><value>Show {0} records</value></data>
+  <data name="TotalRecords" xml:space="preserve"><value>Total {0} records</value></data>
+  <data name="ProjectName" xml:space="preserve"><value>Project Name</value></data>
+  <data name="Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Start" xml:space="preserve"><value>Start</value></data>
+  <data name="End" xml:space="preserve"><value>End</value></data>
+  <data name="Budget" xml:space="preserve"><value>Budget</value></data>
+  <data name="Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="NoRecords" xml:space="preserve"><value>No records found</value></data>
+  <data name="Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+</root>

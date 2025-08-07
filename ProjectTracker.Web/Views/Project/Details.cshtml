@@ -1,6 +1,7 @@
 @model ProjectTracker.Service.DTOs.ProjectDto
+@inject IViewLocalizer L
 @{
-    ViewData["Title"] = "Proje Detayları";
+    ViewData["Title"] = L["Title"];
 }
 
 <div class="container">
@@ -8,33 +9,33 @@
         <div class="col-md-12">
             <div class="card shadow">
                 <div class="card-header bg-info text-white">
-                    <h3><i class="fas fa-info-circle"></i> @Model.Name - Detaylar</h3>
+                    <h3><i class="fas fa-info-circle"></i> @Model.Name - @L["Details"]</h3>
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-3">Proje Adı</dt>
+                        <dt class="col-sm-3">@L["ProjectName"]</dt>
                         <dd class="col-sm-9">@Model.Name</dd>
 
-                        <dt class="col-sm-3">Açıklama</dt>
+                        <dt class="col-sm-3">@L["Description"]</dt>
                         <dd class="col-sm-9">@Model.Description</dd>
 
-                        <dt class="col-sm-3">Başlangıç Tarihi</dt>
+                        <dt class="col-sm-3">@L["StartDate"]</dt>
                         <dd class="col-sm-9">@Model.StartDate.ToString("dd.MM.yyyy")</dd>
 
-                        <dt class="col-sm-3">Bitiş Tarihi</dt>
-                        <dd class="col-sm-9">@(Model.EndDate?.ToString("dd.MM.yyyy") ?? "Belirlenmedi")</dd>
+                        <dt class="col-sm-3">@L["EndDate"]</dt>
+                        <dd class="col-sm-9">@(Model.EndDate?.ToString("dd.MM.yyyy") ?? L["NotSpecified"].Value)</dd>
 
-                        <dt class="col-sm-3">Bütçe</dt>
+                        <dt class="col-sm-3">@L["Budget"]</dt>
                         <dd class="col-sm-9">@Model.Budget.ToString("C")</dd>
 
-                        <dt class="col-sm-3">Gerçekleşen Maliyet</dt>
-                        <dd class="col-sm-9">@(Model.ActualCost?.ToString("C") ?? "Henüz yok")</dd>
+                        <dt class="col-sm-3">@L["ActualCost"]</dt>
+                        <dd class="col-sm-9">@(Model.ActualCost?.ToString("C") ?? L["NoneYet"].Value)</dd>
                     </dl>
 
                     <div class="mt-4">
                         @if (Model.Documents != null && Model.Documents.Any())
                         {
-                            <h5><i class="fas fa-paperclip"></i> Dokümanlar (@Model.Documents.Count)</h5>
+                            <h5><i class="fas fa-paperclip"></i> @L["Documents", Model.Documents.Count]</h5>
                             <ul class="list-group mb-3">
                                 @foreach (var doc in Model.Documents)
                                 {
@@ -52,14 +53,14 @@
                         }
                         else
                         {
-                            <p class="text-muted">Henüz doküman eklenmemiş.</p>
+                            <p class="text-muted">@L["NoDocuments"]</p>
                         }
 
                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-                            <i class="fas fa-edit"></i> Düzenle
+                            <i class="fas fa-edit"></i> @L["Edit"]
                         </a>
                         <a asp-action="Index" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Listeye Dön
+                            <i class="fas fa-arrow-left"></i> @L["BackToList"]
                         </a>
                     </div>
                 </div>

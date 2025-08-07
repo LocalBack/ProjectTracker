@@ -1,6 +1,7 @@
 ﻿@model ProjectTracker.Service.DTOs.ProjectDto
+@inject IViewLocalizer L
 @{
-    ViewData["Title"] = "Yeni Proje";
+    ViewData["Title"] = L["Title"];
 }
 
 <div class="container">
@@ -8,7 +9,7 @@
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-header bg-success text-white">
-                    <h3><i class="fas fa-plus"></i> Yeni Proje Oluştur</h3>
+                    <h3><i class="fas fa-plus"></i> @L["CreateProject"]</h3>
                 </div>
                 <div class="card-body">
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
@@ -47,16 +48,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Ana Doküman</label>
+                            <label class="form-label">@L["MainDocument"]</label>
                             <input type="file" name="document" class="form-control" />
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a asp-action="Index" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> İptal
+                                <i class="fas fa-arrow-left"></i> @L["Cancel"]
                             </a>
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save"></i> Kaydet
+                                <i class="fas fa-save"></i> @L["Save"]
                             </button>
                         </div>
                     </form>
