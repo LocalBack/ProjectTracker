@@ -1,6 +1,7 @@
 ﻿@model LoginViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Giriş Yap";
+    ViewData["Title"] = L["Login"];
     Layout = "_Layout";
 }
 
@@ -9,7 +10,7 @@
         <div class="card shadow">
             <div class="card-header bg-primary text-white">
                 <h3 class="card-title text-center mb-0">
-                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    <i class="fas fa-sign-in-alt"></i> @L["Login"]
                 </h3>
             </div>
             <div class="card-body">
@@ -40,22 +41,22 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                        <i class="fas fa-sign-in-alt"></i> @L["Login"]
                     </button>
                 </form>
             </div>
             <div class="card-footer text-center">
                 <small class="text-muted">
-                    Hesabınız yok mu? <a asp-action="Register">Kayıt Ol</a>
+                    @L["NoAccount"] <a asp-action="Register">@L["Register"]</a>
                 </small>
             </div>
         </div>
 
         <div class="alert alert-info mt-3">
-            <h6 class="alert-heading">Test Kullanıcısı:</h6>
+            <h6 class="alert-heading">@L["TestUser"]</h6>
             <small>
-                <strong>Email:</strong> admin@projecttracker.com<br>
-                <strong>Şifre:</strong> Admin123!
+                <strong>@L["EmailLabel"]:</strong> admin@projecttracker.com<br>
+                <strong>@L["PasswordLabel"]:</strong> Admin123!
             </small>
         </div>
     </div>

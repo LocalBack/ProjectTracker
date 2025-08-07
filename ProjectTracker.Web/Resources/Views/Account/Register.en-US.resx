@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Register" xml:space="preserve"><value>Register</value></data>
+  <data name="AlreadyAccount" xml:space="preserve"><value>Already have an account?</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+</root>

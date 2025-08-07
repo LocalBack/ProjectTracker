@@ -1,6 +1,7 @@
 ﻿@model ProjectTracker.Web.ViewModels.RegisterViewModel
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Kayıt Ol";
+    ViewData["Title"] = L["Register"];
     Layout = "_Layout";
 }
 
@@ -61,7 +62,7 @@
 
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-user-plus"></i> Kayıt Ol
+                            <i class="fas fa-user-plus"></i> @L["Register"]
                         </button>
                     </div>
                 </form>
@@ -69,8 +70,8 @@
                 <hr class="my-4" />
 
                 <div class="text-center">
-                    <p class="mb-0">Zaten hesabınız var mı?</p>
-                    <a asp-action="Login" class="btn btn-link">Giriş Yap</a>
+                    <p class="mb-0">@L["AlreadyAccount"]</p>
+                    <a asp-action="Login" class="btn btn-link">@L["Login"]</a>
                 </div>
             </div>
     </div>

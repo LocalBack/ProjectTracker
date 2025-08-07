@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ControlPanel" xml:space="preserve"><value>Kontrol Paneli</value></data>
+  <data name="MyProfile" xml:space="preserve"><value>Profilim</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Şifre Değiştir</value></data>
+  <data name="WelcomeUser" xml:space="preserve"><value>Hoş Geldiniz, {0}!</value></data>
+  <data name="SystemRoles" xml:space="preserve"><value>Sistem rolleri</value></data>
+  <data name="MyActiveProjects" xml:space="preserve"><value>Aktif Projelerim</value></data>
+  <data name="Status" xml:space="preserve"><value>Durum</value></data>
+  <data name="Details" xml:space="preserve"><value>Detaylar</value></data>
+  <data name="WorkSummary" xml:space="preserve"><value>Çalışma Özeti</value></data>
+  <data name="ThisWeek" xml:space="preserve"><value>Bu hafta</value></data>
+  <data name="ThisMonth" xml:space="preserve"><value>Bu ay</value></data>
+  <data name="Hours" xml:space="preserve"><value>saat</value></data>
+  <data name="WorkHoursChartPlaceholder" xml:space="preserve"><value>Çalışma saatleri grafiği (placeholder)</value></data>
+  <data name="Notifications" xml:space="preserve"><value>Bildirimler</value></data>
+  <data name="NewMessages" xml:space="preserve"><value>{0} yeni mesajınız var</value></data>
+  <data name="PendingWorkLogs" xml:space="preserve"><value>{0} onay bekleyen iş kaydı</value></data>
+  <data name="SystemWarnings" xml:space="preserve"><value>{0} sistem uyarısı</value></data>
+  <data name="AddWorkLog" xml:space="preserve"><value>İş Kaydı Ekle</value></data>
+  <data name="RequestLeave" xml:space="preserve"><value>İzin Talep Et</value></data>
+  <data name="CreateProject" xml:space="preserve"><value>Proje Oluştur</value></data>
+  <data name="TotalProjects" xml:space="preserve"><value>Toplam Proje</value></data>
+  <data name="ProjectTimeCost" xml:space="preserve"><value>Proje Süre ve Maliyet</value></data>
+  <data name="Project" xml:space="preserve"><value>Proje</value></data>
+  <data name="TotalHours" xml:space="preserve"><value>Toplam Saat</value></data>
+  <data name="TotalCost" xml:space="preserve"><value>Toplam Maliyet</value></data>
+  <data name="BudgetVsActual" xml:space="preserve"><value>Bütçe vs Gerçekleşen</value></data>
+  <data name="Budget" xml:space="preserve"><value>Bütçe</value></data>
+  <data name="Actual" xml:space="preserve"><value>Gerçekleşen</value></data>
+  <data name="RecentWorkLogs" xml:space="preserve"><value>Son İş Kayıtları</value></data>
+  <data name="Description" xml:space="preserve"><value>Açıklama</value></data>
+  <data name="Date" xml:space="preserve"><value>Tarih</value></data>
+  <data name="Duration" xml:space="preserve"><value>Süre</value></data>
+</root>

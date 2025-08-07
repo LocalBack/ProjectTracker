@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Login" xml:space="preserve"><value>Giriş Yap</value></data>
+  <data name="NoAccount" xml:space="preserve"><value>Hesabınız yok mu?</value></data>
+  <data name="Register" xml:space="preserve"><value>Kayıt Ol</value></data>
+  <data name="TestUser" xml:space="preserve"><value>Test Kullanıcısı:</value></data>
+  <data name="EmailLabel" xml:space="preserve"><value>E-posta</value></data>
+  <data name="PasswordLabel" xml:space="preserve"><value>Şifre</value></data>
+</root>

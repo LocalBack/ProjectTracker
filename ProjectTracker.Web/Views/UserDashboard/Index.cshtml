@@ -1,10 +1,11 @@
 ﻿@model ProjectTracker.Service.DTOs.DashboardDto
 @using System.Linq
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Kontrol Paneli";
+    ViewData["Title"] = L["ControlPanel"];
 }
 
-<h1>Kontrol Paneli</h1>
+<h1>@L["ControlPanel"]</h1>
 
 <div class="row mb-4">
     <div class="col-md-4">
@@ -35,18 +36,18 @@
                     }
                 </div>
                 <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-primary btn-sm mb-1">
-                    <i class="fas fa-user"></i> Profilim
+                    <i class="fas fa-user"></i> @L["MyProfile"]
                 </a>
                 <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-secondary btn-sm mb-1">
-                    <i class="fas fa-key"></i> Şifre Değiştir
+                    <i class="fas fa-key"></i> @L["ChangePassword"]
                 </a>
             </div>
         </div>
     </div>
     <div class="col-md-8">
-        <h2>Hoş Geldiniz, @Model.UserName!</h2>
+        <h2>@L["WelcomeUser", Model.UserName]</h2>
         <p>
-            Sistem rolleri:
+            @L["SystemRoles"]:
             @foreach (var role in Model.UserRoles)
             {
                 <span class="badge bg-info">@role</span>
@@ -62,7 +63,7 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
-                    <i class="fas fa-project-diagram"></i> Aktif Projelerim
+                    <i class="fas fa-project-diagram"></i> @L["MyActiveProjects"]
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -72,13 +73,13 @@
                                 <div class="card h-100 border-primary">
                                     <div class="card-body">
                                         <h5 class="card-title">@project.Name</h5>
-                                        <p class="card-text text-muted">Durum: <span class="badge bg-info">@project.Status</span></p>
+                                        <p class="card-text text-muted">@L["Status"]: <span class="badge bg-info">@project.Status</span></p>
                                         <!-- Placeholder progress bar -->
                                         <div class="progress mb-2">
                                             <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
                                         </div>
                                         <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-info-circle"></i> Detaylar
+                                            <i class="fas fa-info-circle"></i> @L["Details"]
                                         </a>
                                     </div>
                                 </div>
@@ -96,14 +97,14 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-info text-white">
-                <i class="fas fa-clock"></i> Çalışma Özeti
+                <i class="fas fa-clock"></i> @L["WorkSummary"]
             </div>
             <div class="card-body">
-                <p>Bu hafta: <strong>40</strong> saat</p>
-                <p>Bu ay: <strong>120</strong> saat</p>
+                <p>@L["ThisWeek"]: <strong>40</strong> @L["Hours"]</p>
+                <p>@L["ThisMonth"]: <strong>120</strong> @L["Hours"]</p>
                 <!-- Placeholder for chart -->
                 <div class="bg-light border rounded p-3 text-center">
-                    <em>Çalışma saatleri grafiği (placeholder)</em>
+                    <em>@L["WorkHoursChartPlaceholder"]</em>
                 </div>
             </div>
         </div>
@@ -112,13 +113,13 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-warning text-dark">
-                <i class="fas fa-bell"></i> Bildirimler
+                <i class="fas fa-bell"></i> @L["Notifications"]
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-envelope-open-text text-primary"></i> 2 yeni mesajınız var</li>
-                    <li><i class="fas fa-tasks text-success"></i> 1 onay bekleyen iş kaydı</li>
-                    <li><i class="fas fa-exclamation-circle text-danger"></i> 1 sistem uyarısı</li>
+                    <li><i class="fas fa-envelope-open-text text-primary"></i> @L["NewMessages", 2]</li>
+                    <li><i class="fas fa-tasks text-success"></i> @L["PendingWorkLogs", 1]</li>
+                    <li><i class="fas fa-exclamation-circle text-danger"></i> @L["SystemWarnings", 1]</li>
                 </ul>
             </div>
         </div>
@@ -128,13 +129,13 @@
 <div class="row mb-4">
     <div class="col-12 text-center">
         <a asp-controller="WorkLog" asp-action="Create" class="btn btn-success mx-2 mb-2">
-            <i class="fas fa-plus"></i> İş Kaydı Ekle
+            <i class="fas fa-plus"></i> @L["AddWorkLog"]
         </a>
         <a href="#" class="btn btn-outline-primary mx-2 mb-2">
-            <i class="fas fa-calendar-alt"></i> İzin Talep Et
+            <i class="fas fa-calendar-alt"></i> @L["RequestLeave"]
         </a>
         <a asp-controller="Project" asp-action="Create" class="btn btn-outline-info mx-2 mb-2">
-            <i class="fas fa-folder-plus"></i> Proje Oluştur
+            <i class="fas fa-folder-plus"></i> @L["CreateProject"]
         </a>
     </div>
 </div>
@@ -143,7 +144,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Toplam Proje</h5>
+                <h5 class="card-title">@L["TotalProjects"]</h5>
                 <p class="card-text display-4">@Model.Stats.TotalProjects</p>
             </div>
         </div>
@@ -158,13 +159,13 @@
 
     <div class="row mt-4">
         <div class="col-md-6">
-            <h3>Proje Süre ve Maliyet</h3>
+            <h3>@L["ProjectTimeCost"]</h3>
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Proje</th>
-                        <th>Toplam Saat</th>
-                        <th>Toplam Maliyet</th>
+                        <th>@L["Project"]</th>
+                        <th>@L["TotalHours"]</th>
+                        <th>@L["TotalCost"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -180,7 +181,7 @@
             </table>
         </div>
         <div class="col-md-6">
-            <h3>Bütçe vs Gerçekleşen</h3>
+            <h3>@L["BudgetVsActual"]</h3>
             <canvas id="budgetChart"></canvas>
         </div>
     </div>
@@ -195,12 +196,12 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Bütçe',
+                        label: '@L["Budget"]',
                         data: budgets,
                         backgroundColor: 'rgba(54, 162, 235, 0.5)'
                     },
                     {
-                        label: 'Gerçekleşen',
+                        label: '@L["Actual"]',
                         data: actuals,
                         backgroundColor: 'rgba(255, 99, 132, 0.5)'
                     }
@@ -214,14 +215,14 @@
 {
     <div class="row mt-4">
         <div class="col-md-12">
-            <h3>Son İş Kayıtları</h3>
+            <h3>@L["RecentWorkLogs"]</h3>
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Proje</th>
-                        <th>Açıklama</th>
-                        <th>Tarih</th>
-                        <th>Süre</th>
+                        <th>@L["Project"]</th>
+                        <th>@L["Description"]</th>
+                        <th>@L["Date"]</th>
+                        <th>@L["Duration"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -231,7 +232,7 @@
                             <td>@workLog.ProjectName</td>
                             <td>@workLog.Description</td>
                             <td>@workLog.WorkDate.ToString("dd.MM.yyyy")</td>
-                            <td>@workLog.HoursSpent saat</td>
+                            <td>@workLog.HoursSpent @L["Hours"]</td>
                         </tr>
                     }
                 </tbody>

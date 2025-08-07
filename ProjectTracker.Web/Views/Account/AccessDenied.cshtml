@@ -1,5 +1,6 @@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Erişim Reddedildi";
+    ViewData["Title"] = L["AccessDenied"];
     Layout = "_Layout";
 }
 
@@ -7,12 +8,12 @@
     <div class="col-md-6">
         <div class="card shadow">
             <div class="card-header bg-danger text-white text-center">
-                <h3 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Erişim Reddedildi</h3>
+                <h3 class="mb-0"><i class="fas fa-exclamation-triangle"></i> @L["AccessDenied"]</h3>
             </div>
             <div class="card-body text-center">
-                <p>Bu sayfaya erişim yetkiniz yok.</p>
+                <p>@L["AccessDeniedMessage"]</p>
                 <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-                    <i class="fas fa-home"></i> Anasayfaya Dön
+                    <i class="fas fa-home"></i> @L["ReturnHome"]
                 </a>
             </div>
         </div>

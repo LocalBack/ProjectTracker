@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ControlPanel" xml:space="preserve"><value>Control Panel</value></data>
+  <data name="MyProfile" xml:space="preserve"><value>My Profile</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Change Password</value></data>
+  <data name="WelcomeUser" xml:space="preserve"><value>Welcome, {0}!</value></data>
+  <data name="SystemRoles" xml:space="preserve"><value>System roles</value></data>
+  <data name="MyActiveProjects" xml:space="preserve"><value>My Active Projects</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Details" xml:space="preserve"><value>Details</value></data>
+  <data name="WorkSummary" xml:space="preserve"><value>Work Summary</value></data>
+  <data name="ThisWeek" xml:space="preserve"><value>This week</value></data>
+  <data name="ThisMonth" xml:space="preserve"><value>This month</value></data>
+  <data name="Hours" xml:space="preserve"><value>hours</value></data>
+  <data name="WorkHoursChartPlaceholder" xml:space="preserve"><value>Work hours chart (placeholder)</value></data>
+  <data name="Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="NewMessages" xml:space="preserve"><value>{0} new messages</value></data>
+  <data name="PendingWorkLogs" xml:space="preserve"><value>{0} work log awaiting approval</value></data>
+  <data name="SystemWarnings" xml:space="preserve"><value>{0} system warning</value></data>
+  <data name="AddWorkLog" xml:space="preserve"><value>Add Work Log</value></data>
+  <data name="RequestLeave" xml:space="preserve"><value>Request Leave</value></data>
+  <data name="CreateProject" xml:space="preserve"><value>Create Project</value></data>
+  <data name="TotalProjects" xml:space="preserve"><value>Total Projects</value></data>
+  <data name="ProjectTimeCost" xml:space="preserve"><value>Project Time and Cost</value></data>
+  <data name="Project" xml:space="preserve"><value>Project</value></data>
+  <data name="TotalHours" xml:space="preserve"><value>Total Hours</value></data>
+  <data name="TotalCost" xml:space="preserve"><value>Total Cost</value></data>
+  <data name="BudgetVsActual" xml:space="preserve"><value>Budget vs Actual</value></data>
+  <data name="Budget" xml:space="preserve"><value>Budget</value></data>
+  <data name="Actual" xml:space="preserve"><value>Actual</value></data>
+  <data name="RecentWorkLogs" xml:space="preserve"><value>Recent Work Logs</value></data>
+  <data name="Description" xml:space="preserve"><value>Description</value></data>
+  <data name="Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Duration" xml:space="preserve"><value>Duration</value></data>
+</root>
