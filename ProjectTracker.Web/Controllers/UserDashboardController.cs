@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ProjectTracker.Web.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     public class UserDashboardController : Controller
     {
         private readonly IUserDashboardService _userDashboardService;
@@ -28,16 +28,17 @@ namespace ProjectTracker.Web.Controllers
             }
 
             var userName = User.Identity?.Name ?? "Guest";
-
-            // Get dashboard data
-            var dashboardData = await _userDashboardService.GetDashboardDataAsync(userId);
-
-            // Set user info
-            dashboardData.UserName = userName;
-            dashboardData.UserRoles = User.Claims
+            var roles = User.Claims
                 .Where(c => c.Type == ClaimTypes.Role)
                 .Select(c => c.Value)
                 .ToList();
+
+            // Get dashboard data
+            var dashboardData = await _userDashboardService.GetDashboardDataAsync(userId, roles);
+
+            // Set user info
+            dashboardData.UserName = userName;
+            dashboardData.UserRoles = roles;
 
             return View(dashboardData);
         }

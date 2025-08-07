@@ -40,15 +40,15 @@ namespace ProjectTracker.Service.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<DashboardDto> GetDashboardDataAsync(int userId)
+        public async Task<DashboardDto> GetDashboardDataAsync(int userId, IList<string> roles)
         {
             // Initialize with default values to prevent null reference exceptions
             var dashboard = new DashboardDto
             {
-                UserName = string.Empty, // You need to set this from somewhere
+                UserName = string.Empty,
                 FullName = "Guest User",
                 UserRoles = new List<string>(),
-                Stats = new DashboardStatsDto // Initialize Stats to prevent null
+                Stats = new DashboardStatsDto
                 {
                     TotalProjects = 0,
                     ActiveProjects = 0,
@@ -67,28 +67,83 @@ namespace ProjectTracker.Service.Services.Implementations
                 ProjectReports = new List<ProjectReportDto>()
             };
 
-            // Get employee data
             var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
             var employee = employees.FirstOrDefault();
-
             if (employee != null)
             {
                 dashboard.FullName = $"{employee.FirstName} {employee.LastName}";
+            }
 
-                // Get stats - this will overwrite the default values
+            if (roles != null && roles.Contains("Admin"))
+            {
+                dashboard.Stats = await GetSystemStatsAsync();
+            }
+            else if (roles != null && roles.Contains("Manager"))
+            {
+                dashboard.Stats = await GetManagerStatsAsync(userId);
+            }
+            else
+            {
                 dashboard.Stats = await GetDashboardStatsAsync(userId);
-
-                // Get recent work logs
                 dashboard.RecentWorkLogs = (await GetRecentWorkLogsAsync(userId, 5)).ToList();
-
-                // Get active projects
                 dashboard.ActiveProjects = (await GetUserProjectsAsync(userId)).ToList();
-
-                // Get project reports
                 dashboard.ProjectReports = (await GetProjectReportsAsync(userId)).ToList();
             }
 
+            dashboard.UserRoles = roles?.ToList() ?? new List<string>();
             return dashboard;
+        }
+
+        private async Task<DashboardStatsDto> GetSystemStatsAsync()
+        {
+            var stats = new DashboardStatsDto();
+
+            stats.TotalProjects = await _projectRepository.CountAsync();
+            stats.ActiveProjects = await _projectRepository.CountAsync(p => p.Status == ProjectStatus.Active);
+            stats.CompletedProjects = await _projectRepository.CountAsync(p => p.Status == ProjectStatus.Completed);
+
+            var workLogsQuery = _workLogRepository.GetQueryable();
+            stats.TotalWorkLogs = await workLogsQuery.CountAsync();
+
+            var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            stats.TotalHoursThisMonth = await workLogsQuery
+                .Where(w => w.WorkDate >= startOfMonth)
+                .SumAsync(w => w.HoursSpent);
+
+            var startOfWeek = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
+            stats.TotalHoursThisWeek = await workLogsQuery
+                .Where(w => w.WorkDate >= startOfWeek)
+                .SumAsync(w => w.HoursSpent);
+
+            return stats;
+        }
+
+        private async Task<DashboardStatsDto> GetManagerStatsAsync(int userId)
+        {
+            var stats = new DashboardStatsDto();
+
+            var projects = await _projectRepository.GetAsync(
+                p => p.ProjectEmployees.Any(pe => pe.Employee.UserId == userId && pe.Role == "Manager"),
+                includes: new Expression<Func<Project, object>>[] { p => p.WorkLogs });
+
+            stats.TotalProjects = projects.Count();
+            stats.ActiveProjects = projects.Count(p => p.Status == ProjectStatus.Active);
+            stats.CompletedProjects = projects.Count(p => p.Status == ProjectStatus.Completed);
+
+            var workLogs = projects.SelectMany(p => p.WorkLogs);
+            stats.TotalWorkLogs = workLogs.Count();
+
+            var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            stats.TotalHoursThisMonth = workLogs
+                .Where(w => w.WorkDate >= startOfMonth)
+                .Sum(w => w.HoursSpent);
+
+            var startOfWeek = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek);
+            stats.TotalHoursThisWeek = workLogs
+                .Where(w => w.WorkDate >= startOfWeek)
+                .Sum(w => w.HoursSpent);
+
+            return stats;
         }
 
         public async Task<DashboardStatsDto> GetDashboardStatsAsync(int userId)
