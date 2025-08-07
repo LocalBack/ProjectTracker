@@ -6,4 +6,21 @@
   <data name="Logout" xml:space="preserve">
     <value>Çıkış Yap</value>
   </data>
+  <data name="Home" xml:space="preserve"><value>Ana Sayfa</value></data>
+  <data name="Dashboard" xml:space="preserve"><value>Kontrol Paneli</value></data>
+  <data name="Profile" xml:space="preserve"><value>Profilim</value></data>
+  <data name="MyWorkLogs" xml:space="preserve"><value>İş Kayıtlarım</value></data>
+  <data name="Management" xml:space="preserve"><value>Yönetim</value></data>
+  <data name="Projects" xml:space="preserve"><value>Projeler</value></data>
+  <data name="Employees" xml:space="preserve"><value>Çalışanlar</value></data>
+  <data name="AllWorkLogs" xml:space="preserve"><value>Tüm İş Kayıtları</value></data>
+  <data name="System" xml:space="preserve"><value>Sistem</value></data>
+  <data name="AdminPanel" xml:space="preserve"><value>Admin Paneli</value></data>
+  <data name="SystemSettings" xml:space="preserve"><value>Sistem Ayarları</value></data>
+  <data name="Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Manager" xml:space="preserve"><value>Yönetici</value></data>
+  <data name="Employee" xml:space="preserve"><value>Çalışan</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Şifre Değiştir</value></data>
+  <data name="Login" xml:space="preserve"><value>Giriş Yap</value></data>
+  <data name="Privacy" xml:space="preserve"><value>Gizlilik</value></data>
 </root>
