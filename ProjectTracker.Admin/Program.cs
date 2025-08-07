@@ -11,6 +11,10 @@ using ProjectTracker.Data.Seed;
 using ProjectTracker.Service.Mapping;
 using ProjectTracker.Service.Services.Implementations;
 using ProjectTracker.Service.Services.Interfaces;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
+using System.Globalization;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +29,17 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
         sql.CommandTimeout(120);                // CHANGED: 30 s → 120 s
         sql.EnableRetryOnFailure(5);            // NEW: transient retry
     });
+});
+
+/* Localization */
+builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supported = new[] { "tr-TR", "en-US" }
+        .Select(c => new CultureInfo(c)).ToList();
+    options.DefaultRequestCulture = new RequestCulture("tr-TR");
+    options.SupportedCultures = supported;
+    options.SupportedUICultures = supported;
 });
 
 /*──────────────────────────── 2) Identity  ───────────────────────────*/
@@ -50,12 +65,15 @@ builder.Services.AddRazorPages(opt =>
 {
     opt.Conventions.AuthorizeFolder("/", "AdminOnly");
     opt.Conventions.AllowAnonymousToAreaFolder("Identity", "/Account");
-});
+})
+.AddViewLocalization()
+.AddDataAnnotationsLocalization();
 
 /*──────────────────────────── 5) Mapping / Services ──────────────────*/
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 builder.Services.AddHostedService<MaintenanceNotificationService>();
+builder.Services.AddScoped<IProjectDashboardService, ProjectDashboardService>();
 
 /*──────────────────────────── 6) HttpClient  (NEW) ───────────────────
    Yavaş/arıza yapan dış API çağrıları “task cancelled” üretmesin */
@@ -91,6 +109,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 var app = builder.Build();
+
+app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
 /*────────────────────── 9) Global exception / cancellation log (NEW) ─*/
 app.UseExceptionHandler(errorApp =>
