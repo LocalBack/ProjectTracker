@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Title" xml:space="preserve"><value>Projeler</value></data>
+  <data name="Projects" xml:space="preserve"><value>Projeler</value></data>
+  <data name="NewProject" xml:space="preserve"><value>Yeni Proje</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Proje adı veya açıklama ara...</value></data>
+  <data name="Search" xml:space="preserve"><value>Ara</value></data>
+  <data name="Clear" xml:space="preserve"><value>Temizle</value></data>
+  <data name="ShowRecords" xml:space="preserve"><value>{0} kayıt göster</value></data>
+  <data name="TotalRecords" xml:space="preserve"><value>Toplam {0} kayıt</value></data>
+  <data name="ProjectName" xml:space="preserve"><value>Proje Adı</value></data>
+  <data name="Description" xml:space="preserve"><value>Açıklama</value></data>
+  <data name="Start" xml:space="preserve"><value>Başlangıç</value></data>
+  <data name="End" xml:space="preserve"><value>Bitiş</value></data>
+  <data name="Budget" xml:space="preserve"><value>Bütçe</value></data>
+  <data name="Actions" xml:space="preserve"><value>İşlemler</value></data>
+  <data name="NoRecords" xml:space="preserve"><value>Kayıt bulunamadı</value></data>
+  <data name="Details" xml:space="preserve"><value>Detaylar</value></data>
+  <data name="Edit" xml:space="preserve"><value>Düzenle</value></data>
+  <data name="Delete" xml:space="preserve"><value>Sil</value></data>
+</root>
