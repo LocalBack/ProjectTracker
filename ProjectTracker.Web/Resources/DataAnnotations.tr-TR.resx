@@ -3,4 +3,16 @@
   <data name="Required" xml:space="preserve">
     <value>Bu alan zorunlu</value>
   </data>
+  <data name="EmailInvalid" xml:space="preserve">
+    <value>Geçerli bir email adresi giriniz.</value>
+  </data>
+  <data name="StringLength" xml:space="preserve">
+    <value>{0} {2} ile {1} karakter arasında olmalıdır.</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Şifreler eşleşmiyor.</value>
+  </data>
+  <data name="HoursRange" xml:space="preserve">
+    <value>Süre 0.1 ile 24 saat arasında olmalıdır.</value>
+  </data>
 </root>

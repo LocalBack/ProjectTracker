@@ -3,4 +3,58 @@
   <data name="AppName" xml:space="preserve">
     <value>ProjectTracker</value>
   </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Şifre</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Beni Hatırla</value>
+  </data>
+  <data name="VerificationCode" xml:space="preserve">
+    <value>Doğrulama Kodu</value>
+  </data>
+  <data name="RememberThisDevice" xml:space="preserve">
+    <value>Bu cihazı hatırla</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Soyad</value>
+  </data>
+  <data name="RegistrationDate" xml:space="preserve">
+    <value>Kayıt Tarihi</value>
+  </data>
+  <data name="LastLogin" xml:space="preserve">
+    <value>Son Giriş</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Başlık</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Açıklama</value>
+  </data>
+  <data name="WorkDate" xml:space="preserve">
+    <value>Çalışma Tarihi</value>
+  </data>
+  <data name="HoursSpent" xml:space="preserve">
+    <value>Harcanan Süre (Saat)</value>
+  </data>
+  <data name="Project" xml:space="preserve">
+    <value>Proje</value>
+  </data>
+  <data name="Employee" xml:space="preserve">
+    <value>Çalışan</value>
+  </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Mevcut Şifre</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Yeni Şifre</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Yeni Şifre Tekrar</value>
+  </data>
 </root>
