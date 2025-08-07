@@ -265,20 +265,52 @@ else if (Model.UserRoles.Contains("Employee"))
             <table class="table">
                 <thead>
                     <tr>
-                        <th>@L["Project"]</th>
-                        <th>@L["Description"]</th>
                         <th>@L["Date"]</th>
+                        <th>@L["Title"]</th>
+                        <th>@L["Project"]</th>
                         <th>@L["Duration"]</th>
+                        <th>@L["Status"]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var workLog in Model.RecentWorkLogs)
                     {
                         <tr>
-                            <td>@workLog.ProjectName</td>
-                            <td>@workLog.Description</td>
                             <td>@workLog.WorkDate.ToString("dd.MM.yyyy")</td>
-                            <td>@workLog.HoursSpent @L["Hours"]</td>
+                            <td>@workLog.Title</td>
+                            <td>@workLog.ProjectName</td>
+                            <td>@workLog.HoursSpent</td>
+                            <td>@L["Logged"]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Model.RecentEquipmentActions != null && Model.RecentEquipmentActions.Any())
+{
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>@L["RecentEquipmentActions"]</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>@L["Date"]</th>
+                        <th>@L["Equipment"]</th>
+                        <th>@L["Description"]</th>
+                        <th>@L["Status"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var action in Model.RecentEquipmentActions)
+                    {
+                        <tr>
+                            <td>@action.Date.ToString("dd.MM.yyyy")</td>
+                            <td>@action.Equipment</td>
+                            <td>@action.Description</td>
+                            <td>@action.Status</td>
                         </tr>
                     }
                 </tbody>

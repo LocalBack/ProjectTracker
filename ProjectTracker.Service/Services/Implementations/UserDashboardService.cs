@@ -19,7 +19,9 @@ namespace ProjectTracker.Service.Services.Implementations
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<ProjectEmployee> _projectEmployeeRepository;
         private readonly IRepository<MaintenanceLog> _maintenanceLogRepository;
+
         private readonly IRepository<Equipment> _equipmentRepository;
+
         private readonly IMapper _mapper;
 
         public UserDashboardService(
@@ -28,7 +30,9 @@ namespace ProjectTracker.Service.Services.Implementations
             IRepository<Project> projectRepository,
             IRepository<ProjectEmployee> projectEmployeeRepository,
             IRepository<MaintenanceLog> maintenanceLogRepository,
+
             IRepository<Equipment> equipmentRepository,
+
             IMapper mapper)
         {
             _employeeRepository = employeeRepository;
@@ -36,7 +40,9 @@ namespace ProjectTracker.Service.Services.Implementations
             _projectRepository = projectRepository;
             _projectEmployeeRepository = projectEmployeeRepository;
             _maintenanceLogRepository = maintenanceLogRepository;
+
             _equipmentRepository = equipmentRepository;
+
             _mapper = mapper;
         }
 
@@ -63,6 +69,8 @@ namespace ProjectTracker.Service.Services.Implementations
                     WeeklyHours = new List<decimal>()
                 },
                 RecentWorkLogs = new List<WorkLogDto>(),
+                RecentMaintenanceLogs = new List<MaintenanceLogDto>(),
+                RecentEquipmentActions = new List<EquipmentActionDto>(),
                 ActiveProjects = new List<ProjectDto>(),
                 ProjectReports = new List<ProjectReportDto>()
             };
@@ -86,6 +94,16 @@ namespace ProjectTracker.Service.Services.Implementations
             {
                 dashboard.Stats = await GetDashboardStatsAsync(userId);
                 dashboard.RecentWorkLogs = (await GetRecentWorkLogsAsync(userId, 5)).ToList();
+
+
+                // Get recent maintenance logs
+                dashboard.RecentMaintenanceLogs = (await GetRecentMaintenanceLogsAsync(userId, 5)).ToList();
+
+                // Get recent equipment actions
+                dashboard.RecentEquipmentActions = (await GetRecentEquipmentActionsAsync(userId, 5)).ToList();
+
+                // Get active projects
+
                 dashboard.ActiveProjects = (await GetUserProjectsAsync(userId)).ToList();
                 dashboard.ProjectReports = (await GetProjectReportsAsync(userId)).ToList();
             }
@@ -226,6 +244,60 @@ namespace ProjectTracker.Service.Services.Implementations
                 });
 
             return _mapper.Map<IEnumerable<WorkLogDto>>(workLogs.Take(count));
+        }
+
+        public async Task<IEnumerable<MaintenanceLogDto>> GetRecentMaintenanceLogsAsync(int userId, int count = 5)
+        {
+            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+            var employee = employees.FirstOrDefault();
+
+            if (employee == null)
+                return new List<MaintenanceLogDto>();
+
+            var logs = await _maintenanceLogRepository.GetAsync(
+                l => l.MaintenanceSchedule.Project.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
+                orderBy: q => q.OrderByDescending(l => l.MaintenanceDate),
+                includes: new Expression<Func<MaintenanceLog, object>>[]
+                {
+                    l => l.MaintenanceSchedule,
+                    l => l.MaintenanceSchedule.Equipment,
+                    l => l.MaintenanceSchedule.Project
+                });
+
+            return logs.Take(count).Select(l => new MaintenanceLogDto
+            {
+                Date = l.MaintenanceDate,
+                Equipment = l.MaintenanceSchedule.Equipment.Name,
+                Description = l.Notes,
+                Status = l.IsCompleted ? "Completed" : "Pending"
+            });
+        }
+
+        public async Task<IEnumerable<EquipmentActionDto>> GetRecentEquipmentActionsAsync(int userId, int count = 5)
+        {
+            var employees = await _employeeRepository.GetAsync(e => e.UserId == userId);
+            var employee = employees.FirstOrDefault();
+
+            if (employee == null)
+                return new List<EquipmentActionDto>();
+
+            var actions = await _maintenanceLogRepository.GetAsync(
+                l => l.MaintenanceSchedule.Project.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
+                orderBy: q => q.OrderByDescending(l => l.MaintenanceDate),
+                includes: new Expression<Func<MaintenanceLog, object>>[]
+                {
+                    l => l.MaintenanceSchedule,
+                    l => l.MaintenanceSchedule.Equipment,
+                    l => l.MaintenanceSchedule.Project
+                });
+
+            return actions.Take(count).Select(l => new EquipmentActionDto
+            {
+                Date = l.MaintenanceDate,
+                Equipment = l.MaintenanceSchedule.Equipment.Name,
+                Description = l.Notes,
+                Status = l.IsCompleted ? "Completed" : "Pending"
+            });
         }
 
         public async Task<IEnumerable<ProjectDto>> GetUserProjectsAsync(int userId)
