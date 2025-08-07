@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectTracker.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
+using ProjectTracker.Data.Context;
 
 namespace ProjectTracker.Admin.Pages.Users
 {
@@ -14,15 +15,18 @@ namespace ProjectTracker.Admin.Pages.Users
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ILogger<ManageRolesModel> _logger;
+        private readonly AppDbContext _context;
 
         public ManageRolesModel(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            ILogger<ManageRolesModel> logger)
+            ILogger<ManageRolesModel> logger,
+            AppDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _context = context;
         }
 
         [BindProperty]
@@ -34,6 +38,8 @@ namespace ProjectTracker.Admin.Pages.Users
             public string UserName { get; set; }
             public string Email { get; set; }
             public string FullName { get; set; }
+            [Display(Name = "Active")]
+            public bool IsActive { get; set; }
             public List<RoleViewModel> Roles { get; set; } = new List<RoleViewModel>();
         }
 
@@ -52,7 +58,12 @@ namespace ProjectTracker.Admin.Pages.Users
                 return NotFound();
             }
 
-            var user = await _userManager.FindByIdAsync(id.ToString());
+            var user = await _userManager.Users
+
+                .IgnoreQueryFilters()
+
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
                 return NotFound();
@@ -63,7 +74,8 @@ namespace ProjectTracker.Admin.Pages.Users
                 UserId = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
-                FullName = $"{user.FirstName} {user.LastName}"
+                FullName = $"{user.FirstName} {user.LastName}",
+                IsActive = user.Employee?.IsActive ?? false
             };
 
             // Get all roles
@@ -91,7 +103,12 @@ namespace ProjectTracker.Admin.Pages.Users
                 return Page();
             }
 
-            var user = await _userManager.FindByIdAsync(UserRoles.UserId.ToString());
+            var user = await _userManager.Users
+
+                .IgnoreQueryFilters()
+
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.Id == UserRoles.UserId);
             if (user == null)
             {
                 return NotFound();
@@ -154,6 +171,13 @@ namespace ProjectTracker.Admin.Pages.Users
             {
                 // Reload roles if there were errors
                 return await OnGetAsync(UserRoles.UserId);
+            }
+
+            if (user.Employee != null)
+            {
+                user.Employee.IsActive = UserRoles.IsActive;
+                _context.Update(user.Employee);
+                await _context.SaveChangesAsync();
             }
 
             TempData["Success"] = $"Roles updated successfully for user {user.UserName}.";

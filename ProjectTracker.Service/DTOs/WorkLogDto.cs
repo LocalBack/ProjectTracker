@@ -22,6 +22,10 @@ namespace ProjectTracker.Service.DTOs
         [Range(0.1, 24, ErrorMessage = "Süre 0.1 ile 24 saat arasında olmalıdır")]
         public decimal HoursSpent { get; set; }
 
+        [Display(Name = "Harcanan Para")]
+        [Range(0, double.MaxValue, ErrorMessage = "Maliyet negatif olamaz")]
+        public decimal Cost { get; set; }
+
         [Required(ErrorMessage = "Proje seçimi zorunludur")]
         [Display(Name = "Proje")]
         public int ProjectId { get; set; }

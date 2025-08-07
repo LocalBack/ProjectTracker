@@ -6,6 +6,7 @@
 
 <h1>Create Maintenance Schedule</h1>
 
+<<<<<<< HEAD
 <hr />
 <div class="row">
     <div class="col-md-6">
@@ -55,6 +56,16 @@
                 <a asp-page="Index" class="btn btn-secondary">Back to List</a>
             </div>
         </form>
+=======
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Task.ProjectId" class="form-label"></label>
+        <select asp-for="Task.ProjectId" asp-items="Model.ProjectOptions" class="form-select" onchange="location.href='?projectId=' + this.value"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Task.EquipmentId" class="form-label"></label>
+        <select asp-for="Task.EquipmentId" asp-items="Model.EquipmentOptions" class="form-select"></select>
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
     </div>
 </div>
 

@@ -18,10 +18,12 @@ namespace ProjectTracker.Data.Context
         public DbSet<WorkLog> WorkLogs { get; set; } = null!;
         public DbSet<WorkLogDetail> WorkLogDetails { get; set; } = null!;
         public DbSet<WorkLogAttachment> WorkLogAttachments { get; set; } = null!;
+        public DbSet<WorkLogHistory> WorkLogHistories { get; set; } = null!;
         public DbSet<ProjectEmployee> ProjectEmployees { get; set; } = null!;
         public DbSet<Equipment> Equipments { get; set; } = null!;
         public DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
         public DbSet<MaintenanceLog> MaintenanceLogs { get; set; } = null!;
+        public DbSet<ProjectDocument> ProjectDocuments { get; set; } = null!;
 
         // Identity Extension
         public DbSet<UserProject> UserProjects { get; set; } = null!;
@@ -87,6 +89,9 @@ namespace ProjectTracker.Data.Context
                 entity.Property(e => e.HireDate)
                     .IsRequired();
 
+                entity.Property(e => e.IsActive)
+                    .HasDefaultValue(true);
+
                 // Configure the relationship with ApplicationUser
                 entity.HasOne(e => e.User)
                     .WithOne()
@@ -116,6 +121,10 @@ namespace ProjectTracker.Data.Context
 
                 entity.Property(e => e.HoursSpent)
                     .HasColumnType("decimal(5,2)");
+
+                entity.Property(e => e.Cost)
+                    .HasColumnType("decimal(18,2)")
+                    .HasDefaultValue(0);
 
                 entity.HasOne(e => e.Project)
                     .WithMany(p => p.WorkLogs)
@@ -175,6 +184,50 @@ namespace ProjectTracker.Data.Context
 
                 entity.HasOne(e => e.WorkLog)
                     .WithMany(w => w.Attachments)
+                    .HasForeignKey(e => e.WorkLogId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // ProjectDocument Configuration
+            modelBuilder.Entity<ProjectDocument>(entity =>
+            {
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.FilePath)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.FileType)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(500);
+
+                entity.HasOne(e => e.Project)
+                    .WithMany(p => p.Documents)
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // WorkLogHistory Configuration
+            modelBuilder.Entity<WorkLogHistory>(entity =>
+            {
+                entity.ToTable("WorkLogHistory");
+                entity.Property(e => e.Action)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ChangedByUserName)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Changes)
+                    .HasColumnType("nvarchar(max)");
+
+                entity.HasOne(e => e.WorkLog)
+                    .WithMany(w => w.History)
                     .HasForeignKey(e => e.WorkLogId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -241,11 +294,18 @@ namespace ProjectTracker.Data.Context
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Project)
+<<<<<<< HEAD
                     .WithMany()
                     .HasForeignKey(e => e.ProjectId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasIndex(e => e.ProjectId);
+=======
+                    .WithMany(p => p.MaintenanceSchedules)
+                    .HasForeignKey(e => e.ProjectId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
                 entity.HasIndex(e => e.NextMaintenanceDate);
             });
 
@@ -300,6 +360,13 @@ namespace ProjectTracker.Data.Context
                 entity.HasIndex(e => e.EmployeeId)
                     .IsUnique()
                     .HasFilter("[EmployeeId] IS NOT NULL");
+
+                entity.Property(e => e.Kvkk)
+                    .HasColumnName("KVKK")
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.KvkkTimestamp)
+                    .HasColumnName("KVKK_Timestamp");
             });
 
             // UserProject Configuration (User-Project Many-to-Many)

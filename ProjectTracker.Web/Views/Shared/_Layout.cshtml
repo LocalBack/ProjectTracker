@@ -1,7 +1,9 @@
 ﻿@using Microsoft.Extensions.Configuration
+@using System.Globalization
 @inject IConfiguration Configuration
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -112,6 +114,10 @@
 
                 <!-- Right side - User info and logout -->
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item d-flex align-items-center me-2">
+                        <span class="text-white me-1">@Localizer["Language"]:</span>
+                        @await Html.PartialAsync("_CultureSwitcher")
+                    </li>
                     @if (User.Identity?.IsAuthenticated ?? false)
                     {
                         <!-- Role Badge -->
@@ -150,7 +156,7 @@
                                 <li>
                                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                         <button type="submit" class="dropdown-item">
-                                            <i class="fas fa-sign-out-alt"></i> Çıkış Yap
+                                            <i class="fas fa-sign-out-alt"></i> @Localizer["Logout"]
                                         </button>
                                     </form>
                                 </li>

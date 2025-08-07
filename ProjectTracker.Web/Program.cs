@@ -1,9 +1,16 @@
 using MediatR;
+<<<<<<< HEAD
 using ProjectTracker.Core.Events; // Event'in bulunduðu assembly  
+=======
+using ProjectTracker.Core.Events; // Event'in bulunduğu assembly
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
+using System.Globalization;
 using ProjectTracker.Core.Entities;
 using ProjectTracker.Data.Context;
 using ProjectTracker.Data.Repositories;
@@ -18,11 +25,32 @@ using ProjectTracker.Web.Authorization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddLocalization(opt => opt.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supported = new[] { "tr-TR", "en-US" }
+        .Select(c => new CultureInfo(c)).ToList();
+    options.DefaultRequestCulture = new RequestCulture("tr-TR");
+    options.SupportedCultures = supported;
+    options.SupportedUICultures = supported;
+    options.ApplyCurrentCultureToResponseHeaders = true;
+});
+
+builder.Services.AddControllersWithViews()
+       .AddViewLocalization()
+       .AddDataAnnotationsLocalization();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging()
+               .LogTo(Console.WriteLine, LogLevel.Information);
+    }
+});
 
 // Note: No need to add AppDbContext separately as AddDbContext already registers it
 
@@ -100,14 +128,20 @@ builder.Services.AddScoped<IWorkLogService, WorkLogService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IMaintenanceScheduleService, MaintenanceScheduleService>();
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
 builder.Services.AddScoped<IAuthorizationHandler, WorkLogAuthorizationHandler>();
 
 // Add before builder.Build()
 builder.Services.AddScoped<IUserDashboardService, UserDashboardService>(); // if you have this service
 builder.Services.AddHostedService<MaintenanceNotificationService>();
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
 builder.Services.AddMediatR(typeof(EmployeeUpdatedEventHandler).Assembly);
 builder.Services.AddScoped<IUserProjectService, UserProjectService>();
 
@@ -125,6 +159,8 @@ builder.Services.AddScoped<IUserProjectSyncService, UserProjectSyncService>();
 
 
 var app = builder.Build();
+
+app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
 // Seed Data - UPDATED VERSION
 using (var scope = app.Services.CreateScope())

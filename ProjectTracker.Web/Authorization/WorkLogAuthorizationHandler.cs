@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using ProjectTracker.Core.Entities;
+using ProjectTracker.Service.Services.Interfaces;
+using System.Linq;
 
 namespace ProjectTracker.Web.Authorization
 {
@@ -7,35 +9,40 @@ namespace ProjectTracker.Web.Authorization
 
     public class WorkLogAuthorizationHandler : AuthorizationHandler<WorkLogOwnerRequirement, WorkLog>
     {
-        protected override Task HandleRequirementAsync(
+        private readonly IEmployeeService _employeeService;
+
+        public WorkLogAuthorizationHandler(IEmployeeService employeeService)
+        {
+            _employeeService = employeeService;
+        }
+
+        protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             WorkLogOwnerRequirement requirement,
             WorkLog resource)
         {
-            var userId = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            // Admins can access all work logs
-            if (context.User.IsInRole("Admin"))
+            var userIdClaim = context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                context.Succeed(requirement);
-                return Task.CompletedTask;
+                return;
             }
 
-            // Managers can access work logs for their projects
-            if (context.User.IsInRole("Manager"))
+            if (context.User.IsInRole("Admin") || context.User.IsInRole("Manager"))
             {
-                // Add logic to check if manager manages this project
                 context.Succeed(requirement);
-                return Task.CompletedTask;
+                return;
             }
 
-            // Employees can only access their own work logs
-           // if (resource.Employee?.UserId == int.Parse(userId))
-         //   {
-          //      context.Succeed(requirement);
-          //  }
+            var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+            if (employee == null)
+            {
+                return;
+            }
 
-            return Task.CompletedTask;
+            if (resource.EmployeeId == employee.Id)
+            {
+                context.Succeed(requirement);
+            }
         }
     }
 }

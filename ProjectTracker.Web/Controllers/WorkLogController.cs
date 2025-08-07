@@ -1,10 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Http;
 using ProjectTracker.Service.DTOs;
 using ProjectTracker.Service.Services.Interfaces;
 using ProjectTracker.Web.ViewModels;
 using System.Security.Claims;
+using ProjectTracker.Web.Authorization;
+using System.IO;
+using System;
+
+using System.Collections.Generic;
+using System.Linq;
+
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -14,21 +22,28 @@ namespace ProjectTracker.Web.Controllers
         private readonly IWorkLogService _workLogService;
         private readonly IProjectService _projectService;
         private readonly IEmployeeService _employeeService;
+        private readonly IAuthorizationService _authorizationService;
         private readonly ILogger<WorkLogController> _logger;
+
+        private static readonly string[] _allowedExtensions = new[] { ".pdf", ".png", ".json" };
+        private const long _maxFileSize = 5 * 1024 * 1024; // 5 MB
 
         public WorkLogController(
             IWorkLogService workLogService,
             IProjectService projectService,
             IEmployeeService employeeService,
+            IAuthorizationService authorizationService,
             ILogger<WorkLogController> logger)
         {
             _workLogService = workLogService;
             _projectService = projectService;
             _employeeService = employeeService;
+            _authorizationService = authorizationService;
             _logger = logger;
         }
 
         // GET: WorkLog
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
             // Sorting parameters
@@ -51,8 +66,25 @@ namespace ProjectTracker.Web.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            // Get all work logs
-            var workLogs = await _workLogService.GetAllWorkLogsAsync();
+            // Get work logs based on user role
+            IEnumerable<WorkLogDto> workLogs;
+            var userIdValue = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                workLogs = await _workLogService.GetAllWorkLogsAsync();
+            }
+            else if (User.IsInRole("Employee"))
+            {
+                if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out int userId))
+                {
+                    return Unauthorized();
+                }
+                workLogs = await _workLogService.GetWorkLogsByUserIdAsync(userId);
+            }
+            else
+            {
+                return Forbid();
+            }
 
             // Apply search filter
             if (!string.IsNullOrEmpty(searchString))
@@ -105,6 +137,7 @@ namespace ProjectTracker.Web.Controllers
         }
 
         // GET: WorkLog/MyWorkLog
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> MyWorkLog(string sortOrder, string currentFilter, string searchString, int? pageNumber, int? pageSize)
         {
             // Get current user's work logs
@@ -181,103 +214,344 @@ namespace ProjectTracker.Web.Controllers
 
 
         // GET: WorkLog/Details/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Details(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
+
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
+            ViewBag.Details = workLog?.Details;
+            ViewBag.Attachments = workLog?.Attachments;
 
             return View(workLog);
         }
 
         // GET: WorkLog/Create
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Create()
         {
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name");
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName");
 
-            return View();
+            var model = new WorkLogDto();
+
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null)
+                {
+                    return Forbid();
+                }
+
+                model.EmployeeId = employee.Id;
+                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", employee.Id);
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName");
+            }
+
+            return View(model);
         }
 
         // POST: WorkLog/Create
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(WorkLogDto workLogDto)
+        public async Task<IActionResult> Create(WorkLogDto workLogDto, IFormFile? attachment)
         {
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null)
+                {
+                    return Forbid();
+                }
+
+                // Force the work log to use the current employee's id to prevent tampering
+                workLogDto.EmployeeId = employee.Id;
+            }
+
+            if (attachment != null && attachment.Length > 0)
+            {
+                var ext = Path.GetExtension(attachment.FileName).ToLowerInvariant();
+                if (!_allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("Attachment", "Unsupported file type. Only PDF and PNG are allowed.");
+                }
+                else if (attachment.Length > _maxFileSize)
+                {
+                    ModelState.AddModelError("Attachment", "File size exceeds the 5 MB limit.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                await _workLogService.CreateWorkLogAsync(workLogDto);
+                if (attachment != null && attachment.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Path.GetFileName(attachment.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    workLogDto.Attachments.Add(new WorkLogAttachmentDto
+                    {
+                        FileName = fileName,
+                        FilePath = Path.Combine("uploads", uniqueFileName),
+                        FileType = attachment.ContentType,
+                        FileSize = attachment.Length
+                    });
+                }
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                await _workLogService.CreateWorkLogAsync(workLogDto, userId);
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLogDto.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            if (User.IsInRole("Employee"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+                {
+                    var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", employee?.Id);
+                    workLogDto.EmployeeId = employee?.Id ?? workLogDto.EmployeeId;
+                }
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            }
 
             return View(workLogDto);
         }
 
         // GET: WorkLog/Edit/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Edit(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
 
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLog.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLog.EmployeeId);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                if (employee == null || workLog.EmployeeId != employee.Id)
+                {
+                    return Forbid();
+                }
+                ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLog.EmployeeId);
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLog.EmployeeId);
+            }
 
             return View(workLog);
         }
 
         // POST: WorkLog/Edit/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, WorkLogDto workLogDto)
+        public async Task<IActionResult> Edit(int id, WorkLogDto workLogDto, IFormFile? attachment)
         {
             if (id != workLogDto.Id)
             {
                 return NotFound();
             }
 
+
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+
+            }
+
+            if (attachment != null && attachment.Length > 0)
+            {
+                var ext = Path.GetExtension(attachment.FileName).ToLowerInvariant();
+                if (!_allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("Attachment", "Unsupported file type. Only PDF and PNG are allowed.");
+                }
+                else if (attachment.Length > _maxFileSize)
+                {
+                    ModelState.AddModelError("Attachment", "File size exceeds the 5 MB limit.");
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                await _workLogService.UpdateWorkLogAsync(id, workLogDto);
+                var existing = await _workLogService.GetWorkLogByIdAsync(id);
+                if (existing == null)
+                {
+                    return NotFound();
+                }
+
+                workLogDto.Attachments = existing.Attachments?.ToList() ?? new List<WorkLogAttachmentDto>();
+
+                if (attachment != null && attachment.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Path.GetFileName(attachment.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await attachment.CopyToAsync(stream);
+                    }
+
+                    workLogDto.Attachments.Add(new WorkLogAttachmentDto
+                    {
+                        FileName = fileName,
+                        FilePath = Path.Combine("uploads", uniqueFileName),
+                        FileType = attachment.ContentType,
+                        FileSize = attachment.Length
+                    });
+                }
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Unauthorized();
+                }
+                await _workLogService.UpdateWorkLogAsync(id, workLogDto, userId);
                 return RedirectToAction(nameof(Index));
             }
 
             ViewData["ProjectId"] = new SelectList(await _projectService.GetAllProjectsAsync(), "Id", "Name", workLogDto.ProjectId);
-            ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            if (!User.IsInRole("Admin") && !User.IsInRole("Manager"))
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+                {
+                    var employee = await _employeeService.GetEmployeeByUserIdAsync(userId);
+                    ViewData["EmployeeId"] = new SelectList(new[] { employee }, "Id", "FullName", workLogDto.EmployeeId);
+                }
+            }
+            else
+            {
+                ViewData["EmployeeId"] = new SelectList(await _employeeService.GetAllEmployeesAsync(), "Id", "FullName", workLogDto.EmployeeId);
+            }
 
             return View(workLogDto);
         }
 
         // GET: WorkLog/Delete/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         public async Task<IActionResult> Delete(int id)
         {
-            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
-            if (workLog == null)
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
             {
                 return NotFound();
             }
+
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var workLog = await _workLogService.GetWorkLogByIdAsync(id);
 
             return View(workLog);
         }
 
         // POST: WorkLog/Delete/5
+        [Authorize(Roles = "Admin,Manager,Employee")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _workLogService.DeleteWorkLogAsync(id);
+
+            var workLogEntity = await _workLogService.GetWorkLogEntityByIdAsync(id);
+            if (workLogEntity == null)
+
+            {
+                return NotFound();
+            }
+
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, workLogEntity, new WorkLogOwnerRequirement());
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
+            await _workLogService.DeleteWorkLogAsync(id, userId);
             return RedirectToAction(nameof(Index));
-
-
         }
-            public async Task<IActionResult> MyWorkLogs()
+
+
+        public async Task<IActionResult> MyWorkLogs()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
@@ -295,6 +569,6 @@ namespace ProjectTracker.Web.Controllers
 
             var workLogs = await _workLogService.GetWorkLogsByEmployeeIdAsync(employee.Id);
             return View(workLogs);
-            }
         }
     }
+}

@@ -30,6 +30,8 @@ public class Employee : BaseEntity
 
     public DateTime HireDate { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
     // Link to user account
     public int? UserId { get; set; }
     public virtual ApplicationUser User { get; set; }

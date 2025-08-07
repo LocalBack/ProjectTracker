@@ -9,12 +9,14 @@ namespace ProjectTracker.Core.Entities
         {
             Attachments = new HashSet<WorkLogAttachment>();
             Details = new HashSet<WorkLogDetail>();
+            History = new HashSet<WorkLogHistory>();
         }
 
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTime WorkDate { get; set; }
         public decimal HoursSpent { get; set; }
+        public decimal Cost { get; set; }
 
         public int ProjectId { get; set; }
         public Project Project { get; set; } = null!;
@@ -24,5 +26,6 @@ namespace ProjectTracker.Core.Entities
 
         public ICollection<WorkLogAttachment> Attachments { get; set; }
         public ICollection<WorkLogDetail> Details { get; set; }
+        public ICollection<WorkLogHistory> History { get; set; }
     }
 }

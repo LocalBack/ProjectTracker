@@ -17,7 +17,9 @@ namespace ProjectTracker.Service.Mapping
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate))
                 .ForMember(dest => dest.Budget, opt => opt.MapFrom(src => src.Budget))
                 .ForMember(dest => dest.ActualCost, opt => opt.MapFrom(src => src.ActualCost))
-                .ReverseMap();
+                .ForMember(dest => dest.Documents, opt => opt.MapFrom(src => src.Documents))
+                .ReverseMap()
+                .ForMember(dest => dest.Documents, opt => opt.MapFrom(src => src.Documents));
 
             // Employee Mappings
             CreateMap<Employee, EmployeeDto>()
@@ -27,9 +29,11 @@ namespace ProjectTracker.Service.Mapping
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.HireDate, opt => opt.MapFrom(src => src.HireDate))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
                 .ForMember(dest => dest.Projects,
         opt => opt.MapFrom(src => src.UserProjects.Select(up => up.Project)))
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(dest => dest.UserProjects, opt => opt.Ignore());
 
             // WorkLog Mappings
             CreateMap<WorkLog, WorkLogDto>()
@@ -38,6 +42,7 @@ namespace ProjectTracker.Service.Mapping
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.WorkDate, opt => opt.MapFrom(src => src.WorkDate))
                 .ForMember(dest => dest.HoursSpent, opt => opt.MapFrom(src => src.HoursSpent))
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.Cost))
                 .ForMember(dest => dest.ProjectId, opt => opt.MapFrom(src => src.ProjectId))
                 .ForMember(dest => dest.EmployeeId, opt => opt.MapFrom(src => src.EmployeeId))
                 .ForMember(dest => dest.ProjectName, opt => opt.MapFrom(src => src.Project != null ? src.Project.Name : string.Empty))
@@ -51,12 +56,13 @@ namespace ProjectTracker.Service.Mapping
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
                 .ForMember(dest => dest.WorkDate, opt => opt.MapFrom(src => src.WorkDate))
                 .ForMember(dest => dest.HoursSpent, opt => opt.MapFrom(src => src.HoursSpent))
+                .ForMember(dest => dest.Cost, opt => opt.MapFrom(src => src.Cost))
                 .ForMember(dest => dest.ProjectId, opt => opt.MapFrom(src => src.ProjectId))
                 .ForMember(dest => dest.EmployeeId, opt => opt.MapFrom(src => src.EmployeeId))
                 .ForMember(dest => dest.Project, opt => opt.Ignore())
                 .ForMember(dest => dest.Employee, opt => opt.Ignore())
                 .ForMember(dest => dest.Details, opt => opt.Ignore())
-                .ForMember(dest => dest.Attachments, opt => opt.Ignore())
+                .ForMember(dest => dest.Attachments, opt => opt.MapFrom(src => src.Attachments))
                 .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore())
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore());
@@ -76,6 +82,17 @@ namespace ProjectTracker.Service.Mapping
             CreateMap<WorkLogAttachment, WorkLogAttachmentDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.WorkLogId, opt => opt.MapFrom(src => src.WorkLogId))
+                .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => src.FileName))
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath))
+                .ForMember(dest => dest.FileType, opt => opt.MapFrom(src => src.FileType))
+                .ForMember(dest => dest.FileSize, opt => opt.MapFrom(src => src.FileSize))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ReverseMap();
+
+            // ProjectDocument Mappings
+            CreateMap<ProjectDocument, ProjectDocumentDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.ProjectId, opt => opt.MapFrom(src => src.ProjectId))
                 .ForMember(dest => dest.FileName, opt => opt.MapFrom(src => src.FileName))
                 .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath))
                 .ForMember(dest => dest.FileType, opt => opt.MapFrom(src => src.FileType))

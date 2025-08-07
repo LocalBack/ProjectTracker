@@ -1,5 +1,6 @@
 ﻿using ProjectTracker.Core.Entities;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace ProjectTracker.Service.DTOs
 {
@@ -30,5 +31,6 @@ namespace ProjectTracker.Service.DTOs
         [Display(Name = "Gerçekleşen Maliyet")]
         public decimal? ActualCost { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Active;
+        public ICollection<ProjectDocumentDto> Documents { get; set; } = new List<ProjectDocumentDto>();
     }
 }

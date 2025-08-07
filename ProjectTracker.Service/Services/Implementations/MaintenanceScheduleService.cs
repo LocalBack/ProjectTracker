@@ -24,7 +24,12 @@ namespace ProjectTracker.Service.Services.Implementations
         public async Task<IEnumerable<MaintenanceScheduleDto>> GetAllAsync()
         {
             var items = await _context.MaintenanceSchedules
+<<<<<<< HEAD
                 .Include(m => m.Equipment).Include(m => m.Project)
+=======
+                .Include(m => m.Equipment)
+                .Include(m => m.Project)
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
                 .ToListAsync();
             return _mapper.Map<IEnumerable<MaintenanceScheduleDto>>(items);
         }
@@ -34,7 +39,12 @@ namespace ProjectTracker.Service.Services.Implementations
             var now = DateTime.Today;
             var items = await _context.MaintenanceSchedules
                 .Where(m => m.NextMaintenanceDate <= now && !m.IsNotificationSent)
+<<<<<<< HEAD
                 .Include(m => m.Equipment).Include(m => m.Project)
+=======
+                .Include(m => m.Equipment)
+                .Include(m => m.Project)
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
                 .ToListAsync();
             return _mapper.Map<IEnumerable<MaintenanceScheduleDto>>(items);
         }

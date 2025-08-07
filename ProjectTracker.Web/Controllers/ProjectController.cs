@@ -5,6 +5,9 @@ using ProjectTracker.Service.DTOs;
 using ProjectTracker.Web.ViewModels;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System;
 
 namespace ProjectTracker.Web.Controllers
 {
@@ -107,10 +110,38 @@ namespace ProjectTracker.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> Create([Bind("Name,Description,StartDate,EndDate,Budget,Status")] ProjectDto projectDto)
+        public async Task<IActionResult> Create([Bind("Name,Description,StartDate,EndDate,Budget,Status")] ProjectDto projectDto, IFormFile? document)
         {
+            if (document != null && document.Length > 50 * 1024 * 1024)
+            {
+                ModelState.AddModelError("document", "Dosya boyutu 50 MB'dan büyük olamaz.");
+            }
+
             if (ModelState.IsValid)
             {
+                if (document != null && document.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = Path.GetFileName(document.FileName);
+                    var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await document.CopyToAsync(stream);
+                    }
+
+                    projectDto.Documents.Add(new ProjectDocumentDto
+                    {
+                        FileName = fileName,
+                        FilePath = $"/uploads/{uniqueFileName}",
+                        FileType = document.ContentType,
+                        FileSize = document.Length
+                    });
+                }
+
                 await _projectService.CreateProjectAsync(projectDto);
                 TempData["SuccessMessage"] = "Proje başarıyla oluşturuldu.";
                 return RedirectToAction(nameof(Index));
@@ -139,17 +170,45 @@ namespace ProjectTracker.Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,StartDate,EndDate,Budget,ActualCost,Status")] ProjectDto projectDto)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,StartDate,EndDate,Budget,ActualCost,Status")] ProjectDto projectDto, IFormFile? document)
         {
             if (id != projectDto.Id)
             {
                 return NotFound();
             }
 
+            if (document != null && document.Length > 50 * 1024 * 1024)
+            {
+                ModelState.AddModelError("document", "Dosya boyutu 50 MB'dan büyük olamaz.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (document != null && document.Length > 0)
+                    {
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+
+                        var fileName = Path.GetFileName(document.FileName);
+                        var uniqueFileName = $"{Guid.NewGuid()}_{fileName}";
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await document.CopyToAsync(stream);
+                        }
+
+                        projectDto.Documents.Add(new ProjectDocumentDto
+                        {
+                            FileName = fileName,
+                            FilePath = $"/uploads/{uniqueFileName}",
+                            FileType = document.ContentType,
+                            FileSize = document.Length
+                        });
+                    }
+
                     await _projectService.UpdateProjectAsync(id, projectDto);
                     TempData["SuccessMessage"] = "Proje başarıyla güncellendi.";
                 }

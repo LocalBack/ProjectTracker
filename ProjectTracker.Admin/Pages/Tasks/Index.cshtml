@@ -26,6 +26,7 @@
     @foreach (var item in Model.Schedules)
     {
         <tr>
+<<<<<<< HEAD
             <td>@item.Project?.Name</td>
             <td>@item.Equipment?.Name</td>
             <td>@item.MaintenanceType</td>
@@ -37,6 +38,13 @@
                 <a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
                 <a asp-page="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
             </td>
+=======
+            <td>@task.ProjectName</td>
+            <td>@task.EquipmentName</td>
+            <td>@task.MaintenanceType</td>
+            <td>@task.NextMaintenanceDate.ToShortDateString()</td>
+            <td>@task.IsNotificationSent</td>
+>>>>>>> 2087c97b6f0cb1ceca3b91bce13a5f84bb9a351d
         </tr>
     }
     </tbody>
