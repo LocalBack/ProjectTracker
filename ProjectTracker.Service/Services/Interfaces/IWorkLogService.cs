@@ -17,5 +17,6 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task<WorkLogDto> UpdateWorkLogAsync(int id, WorkLogDto workLogDto, int userId);
         Task<bool> DeleteWorkLogAsync(int id, int userId);
         Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int count = 10);
+        Task<int> GetActiveWorkLogCountAsync();
     }
 }

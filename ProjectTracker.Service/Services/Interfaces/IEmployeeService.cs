@@ -14,5 +14,6 @@ namespace ProjectTracker.Service.Services.Interfaces
         Task<bool> DeleteEmployeeAsync(int id);
         Task<bool> EmployeeExistsAsync(int id);
         Task<EmployeeDto> GetEmployeeByEmailAsync(string email);
+        Task<int> GetEmployeeCountAsync();
     }
 }

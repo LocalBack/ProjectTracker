@@ -12,18 +12,24 @@ namespace ProjectTracker.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IProjectService _projectService;
         private readonly IWorkLogService _workLogService;
+        private readonly IEmployeeService _employeeService;
+        private readonly IMaintenanceScheduleService _maintenanceScheduleService;
 
         public HomeController(
             ILogger<HomeController> logger,
             IProjectService projectService,
-            IWorkLogService workLogService)
+            IWorkLogService workLogService,
+            IEmployeeService employeeService,
+            IMaintenanceScheduleService maintenanceScheduleService)
         {
             _logger = logger;
             _projectService = projectService;
             _workLogService = workLogService;
+            _employeeService = employeeService;
+            _maintenanceScheduleService = maintenanceScheduleService;
         }
 
-        [AllowAnonymous] // Ana sayfa herkese açýk
+        [AllowAnonymous] // Ana sayfa herkese aÃ§Ä±k
         public async Task<IActionResult> Index()
         {
             if (User.Identity?.IsAuthenticated ?? false)
@@ -31,10 +37,10 @@ namespace ProjectTracker.Web.Controllers
                 var viewModel = new DashboardViewModel
                 {
                     TotalProjects = await _projectService.GetProjectCountAsync(),
-                    TotalEmployees = 8,
-                    ActiveWorkLogs = 24,  // This is now int, not List
-                    UpcomingMaintenances = 3,  // This is now int, not List
-                    RecentWorkLogs = (await _workLogService.GetRecentWorkLogsAsync(5)).ToList()  // Add .ToList()
+                    TotalEmployees = await _employeeService.GetEmployeeCountAsync(),
+                    ActiveWorkLogs = await _workLogService.GetActiveWorkLogCountAsync(),
+                    UpcomingMaintenances = await _maintenanceScheduleService.GetUpcomingMaintenanceCountAsync(),
+                    RecentWorkLogs = (await _workLogService.GetRecentWorkLogsAsync(5)).ToList()
                 };
 
                 return View(viewModel);
@@ -43,7 +49,7 @@ namespace ProjectTracker.Web.Controllers
             return View();
         }
 
-        // Privacy giriþ gerektiriyor (global policy'den)
+        // Privacy giriÅŸ gerektiriyor (global policy'den)
         public IActionResult Privacy()
         {
             return View();
