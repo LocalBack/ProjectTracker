@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="ProjectDashboard" xml:space="preserve">
+    <value>Proje Paneli</value>
+  </data>
+  <data name="Budget" xml:space="preserve">
+    <value>Bütçe</value>
+  </data>
+</root>

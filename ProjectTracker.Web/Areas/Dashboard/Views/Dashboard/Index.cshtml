@@ -1,0 +1,18 @@
+@model IEnumerable<ProjectTracker.Service.DTOs.ProjectDto>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
+
+<h2>@L["Projects"]</h2>
+<div class="row">
+@foreach (var proj in Model)
+{
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@proj.Name</h5>
+                <p class="card-text">@proj.Description</p>
+                <a asp-area="Dashboard" asp-controller="Project" asp-action="Index" asp-route-projectId="@proj.Id" class="btn btn-primary">@L["ViewDashboard"]</a>
+            </div>
+        </div>
+    </div>
+}
+</div>

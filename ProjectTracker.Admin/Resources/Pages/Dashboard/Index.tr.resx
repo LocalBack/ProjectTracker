@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Projects" xml:space="preserve">
+    <value>Projeler</value>
+  </data>
+  <data name="ViewDashboard" xml:space="preserve">
+    <value>Göster</value>
+  </data>
+</root>
