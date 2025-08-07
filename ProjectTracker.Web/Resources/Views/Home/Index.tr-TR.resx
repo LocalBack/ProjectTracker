@@ -8,6 +8,9 @@
   <data name="WelcomeBody" xml:space="preserve"><value>Projelerinizi takip edin, çalışma kayıtlarını yönetin ve bakım zamanlamalarını kontrol edin.</value></data>
   <data name="Login" xml:space="preserve"><value>Giriş Yap</value></data>
   <data name="TotalProjects" xml:space="preserve"><value>Toplam Proje</value></data>
+  <data name="TotalEmployees" xml:space="preserve"><value>Toplam Çalışan</value></data>
+  <data name="ActiveWorkLogs" xml:space="preserve"><value>Aktif İş Kayıtları</value></data>
+  <data name="UpcomingMaintenances" xml:space="preserve"><value>Yaklaşan Bakımlar</value></data>
   <data name="RecentWorkLogs" xml:space="preserve"><value>Son İş Kayıtları</value></data>
   <data name="Project" xml:space="preserve"><value>Proje</value></data>
   <data name="Employee" xml:space="preserve"><value>Çalışan</value></data>

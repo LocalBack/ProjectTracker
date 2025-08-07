@@ -8,6 +8,9 @@
   <data name="WelcomeBody" xml:space="preserve"><value>Track your projects, manage work logs, and check maintenance schedules.</value></data>
   <data name="Login" xml:space="preserve"><value>Login</value></data>
   <data name="TotalProjects" xml:space="preserve"><value>Total Projects</value></data>
+  <data name="TotalEmployees" xml:space="preserve"><value>Total Employees</value></data>
+  <data name="ActiveWorkLogs" xml:space="preserve"><value>Active Work Logs</value></data>
+  <data name="UpcomingMaintenances" xml:space="preserve"><value>Upcoming Maintenances</value></data>
   <data name="RecentWorkLogs" xml:space="preserve"><value>Recent Work Logs</value></data>
   <data name="Project" xml:space="preserve"><value>Project</value></data>
   <data name="Employee" xml:space="preserve"><value>Employee</value></data>
