@@ -7,6 +7,7 @@
 
 <h1>@L["ControlPanel"]</h1>
 
+<!-- Export Buttons -->
 <div class="mb-3">
     <form asp-action="ExportWorkLogs" method="post" class="d-inline">
         <input type="hidden" name="format" value="Excel" />
@@ -17,7 +18,6 @@
         <button type="submit" class="btn btn-danger btn-sm">Export Work Logs to PDF</button>
     </form>
 </div>
-
 <div class="mb-3">
     <form asp-action="ExportActivity" method="post" class="d-inline">
         <input type="hidden" name="format" value="Excel" />
@@ -28,7 +28,6 @@
         <button type="submit" class="btn btn-danger btn-sm">Export Activity to PDF</button>
     </form>
 </div>
-
 <div class="mb-3">
     <form asp-action="ExportPerformance" method="post" class="d-inline">
         <input type="hidden" name="format" value="Excel" />
@@ -40,6 +39,7 @@
     </form>
 </div>
 
+<!-- User Card -->
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="card shadow-sm">
@@ -89,12 +89,8 @@
     </div>
 </div>
 
-
 <!-- Active Projects Widget -->
-
 @if ((Model.UserRoles.Contains("Employee") || Model.UserRoles.Contains("Manager")) && Model.ActiveProjects != null && Model.ActiveProjects.Any())
-
-
 {
     <div class="row mb-4">
         <div class="col-12">
@@ -144,7 +140,7 @@ else
     <div class="text-muted">No data available</div>
 }
 
-<!-- Work Log Summary Widget -->
+<!-- Work Log Summary & Notifications Widget -->
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card shadow-sm">
@@ -158,7 +154,6 @@ else
             </div>
         </div>
     </div>
-    <!-- Notifications Widget -->
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header bg-warning text-dark">
@@ -183,6 +178,7 @@ else
         </div>
     </div>
 </div>
+
 <!-- Quick Actions Row -->
 <div class="row mb-4">
     <div class="col-12 text-center">
@@ -198,7 +194,7 @@ else
     </div>
 </div>
 
-
+<!-- Projects/Stats by Role -->
 @if (Model.UserRoles.Contains("Admin"))
 {
     <div class="row mt-4">
@@ -208,7 +204,6 @@ else
                     <h5 class="card-title">System Projects</h5>
                     <p class="card-text display-4">@Model.Stats.TotalProjects</p>
                 </div>
-
             </div>
         </div>
     </div>
@@ -240,7 +235,8 @@ else if (Model.UserRoles.Contains("Employee"))
     </div>
 }
 
-@if (Model.ProjectReports.Any())
+<!-- Project Reports Table & Budget Chart -->
+@if (Model.ProjectReports != null && Model.ProjectReports.Any())
 {
     <div class="row mt-4">
         <div class="col-md-6">
@@ -276,7 +272,8 @@ else
     <div class="text-muted">No data available</div>
 }
 
-@if (Model.RecentWorkLogs.Any())
+<!-- Recent Work Logs Table -->
+@if (Model.RecentWorkLogs != null && Model.RecentWorkLogs.Any())
 {
     <div class="row mt-4">
         <div class="col-md-12">
@@ -310,8 +307,9 @@ else
 else
 {
     <div class="text-muted">No data available</div>
+}
 
-
+<!-- Recent Equipment Actions -->
 @if (Model.RecentEquipmentActions != null && Model.RecentEquipmentActions.Any())
 {
     <div class="row mt-4">
@@ -346,7 +344,7 @@ else
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const weeklyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Stats.WeeklyHours));
-        const weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+        const weeklyLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
         new Chart(document.getElementById('workChart'), {
             type: 'bar',
             data: {
@@ -358,32 +356,32 @@ else
                 }]
             }
         });
+
         @if (Model.ProjectReports != null && Model.ProjectReports.Any())
         {
-            <text>
-            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName)));
-            const budgets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget)));
-            const actuals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost)));
-            new Chart(document.getElementById('budgetChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '@L["Budget"]',
-                            data: budgets,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
-                        },
-                        {
-                            label: '@L["Actual"]',
-                            data: actuals,
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                        }
-                    ]
-                }
-            });
-            </text>
+                <text>
+                const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ProjectName)));
+                const budgets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.Budget)));
+                const actuals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ProjectReports.Select(p => p.ActualCost)));
+                new Chart(document.getElementById('budgetChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '@L["Budget"]',
+                                data: budgets,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                            },
+                            {
+                                label: '@L["Actual"]',
+                                data: actuals,
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)'
+                            }
+                        ]
+                    }
+                });
+                </text>
         }
     </script>
-
 }
