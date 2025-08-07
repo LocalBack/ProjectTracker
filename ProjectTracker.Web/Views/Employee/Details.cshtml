@@ -1,6 +1,7 @@
-﻿@model ProjectTracker.Service.DTOs.EmployeeDto
+@model ProjectTracker.Service.DTOs.EmployeeDto
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Çalışan Detayları";
+    ViewData["Title"] = L["EmployeeDetails"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -8,29 +9,27 @@
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Ad Soyad</dt>
+            <dt class="col-sm-3">@L["FullName"]</dt>
             <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
 
-            <dt class="col-sm-3">E-posta</dt>
+            <dt class="col-sm-3">@L["Email"]</dt>
             <dd class="col-sm-9">
                 <a href="mailto:@Model.Email">@Model.Email</a>
             </dd>
 
-            <dt class="col-sm-3">Ünvan</dt>
+            <dt class="col-sm-3">@L["Title"]</dt>
             <dd class="col-sm-9">@(Model.Title ?? "-")</dd>
 
-            
-
-            <dt class="col-sm-3">İşe Başlama Tarihi</dt>
+            <dt class="col-sm-3">@L["HireDate"]</dt>
             <dd class="col-sm-9">@Model.HireDate.ToString("dd MMMM yyyy")</dd>
 
-            <dt class="col-sm-3">Çalışma Süresi</dt>
+            <dt class="col-sm-3">@L["WorkDuration"]</dt>
             <dd class="col-sm-9">
                 @{
                     var years = (DateTime.Now - Model.HireDate).Days / 365;
                     var months = ((DateTime.Now - Model.HireDate).Days % 365) / 30;
                 }
-                @years yıl @months ay
+                @years @L["Years"] @months @L["Months"]
             </dd>
         </dl>
     </div>
@@ -40,10 +39,11 @@
     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
     {
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
-            <i class="fas fa-edit"></i> Düzenle
+            <i class="fas fa-edit"></i> @L["Edit"]
         </a>
     }
     <a asp-action="Index" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Geri
+        <i class="fas fa-arrow-left"></i> @L["Back"]
     </a>
 </div>
+

@@ -1,6 +1,7 @@
-﻿@model PaginatedList<ProjectTracker.Service.DTOs.EmployeeDto>
+@model PaginatedList<ProjectTracker.Service.DTOs.EmployeeDto>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = "Çalışanlar";
+    ViewData["Title"] = L["Employees"];
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -11,7 +12,7 @@
     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
     {
         <a asp-action="Create" class="btn btn-success">
-            <i class="fas fa-plus me-2"></i>Yeni Çalışan
+            <i class="fas fa-plus me-2"></i>@L["NewEmployee"]
         </a>
     }
 </div>
@@ -39,25 +40,25 @@
                 <div class="col-md-6">
                     <div class="input-group">
                         <input type="text" name="searchString" value="@ViewData["CurrentFilter"]"
-                               class="form-control" placeholder="Ad, soyad, email veya ünvan ara..." />
-                        <button type="submit" class="btn btn-primary">Ara</button>
+                               class="form-control" placeholder="@L["SearchPlaceholder"]" />
+                        <button type="submit" class="btn btn-primary">@L["Search"]</button>
                         @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
                         {
-                            <a asp-action="Index" class="btn btn-secondary">Temizle</a>
+                            <a asp-action="Index" class="btn btn-secondary">@L["Clear"]</a>
                         }
                     </div>
                 </div>
                 <div class="col-md-3">
                     <select name="pageSize" class="form-select" onchange="this.form.submit()">
-                        <option value="10" selected="@(ViewData["CurrentPageSize"]?.ToString() == "10")">10 kayıt göster</option>
-                        <option value="20" selected="@(ViewData["CurrentPageSize"]?.ToString() == "20")">20 kayıt göster</option>
-                        <option value="50" selected="@(ViewData["CurrentPageSize"]?.ToString() == "50")">50 kayıt göster</option>
-                        <option value="100" selected="@(ViewData["CurrentPageSize"]?.ToString() == "100")">100 kayıt göster</option>
+                        <option value="10" selected="@(ViewData["CurrentPageSize"]?.ToString() == "10")">@L["ShowRecords", 10]</option>
+                        <option value="20" selected="@(ViewData["CurrentPageSize"]?.ToString() == "20")">@L["ShowRecords", 20]</option>
+                        <option value="50" selected="@(ViewData["CurrentPageSize"]?.ToString() == "50")">@L["ShowRecords", 50]</option>
+                        <option value="100" selected="@(ViewData["CurrentPageSize"]?.ToString() == "100")">@L["ShowRecords", 100]</option>
                     </select>
                 </div>
                 <div class="col-md-3 text-end">
                     <p class="mb-0 text-muted">
-                        Toplam @ViewData["TotalRecords"] çalışan
+                        @L["TotalEmployeesCount", ViewData["TotalRecords"]]
                     </p>
                 </div>
             </div>
@@ -71,27 +72,27 @@
                             <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
                                asp-route-currentFilter="@ViewData["CurrentFilter"]"
                                asp-route-pageSize="@ViewData["CurrentPageSize"]">
-                                Ad Soyad <i class="fas fa-sort"></i>
+                                @L["FullName"] <i class="fas fa-sort"></i>
                             </a>
                         </th>
-                        <th>Email</th>
+                        <th>@L["Email"]</th>
                         <th>
                             <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]"
                                asp-route-currentFilter="@ViewData["CurrentFilter"]"
                                asp-route-pageSize="@ViewData["CurrentPageSize"]">
-                                Ünvan <i class="fas fa-sort"></i>
+                                @L["Title"] <i class="fas fa-sort"></i>
                             </a>
                         </th>
-                        <th>Departman</th>
-                        <th>Telefon</th>
+                        <th>@L["Department"]</th>
+                        <th>@L["Phone"]</th>
                         <th>
                             <a asp-action="Index" asp-route-sortOrder="@ViewData["HireDateSortParm"]"
                                asp-route-currentFilter="@ViewData["CurrentFilter"]"
                                asp-route-pageSize="@ViewData["CurrentPageSize"]">
-                                İşe Başlama <i class="fas fa-sort"></i>
+                                @L["HireDate"] <i class="fas fa-sort"></i>
                             </a>
                         </th>
-                        <th>İşlemler</th>
+                        <th>@L["Actions"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,20 +116,20 @@
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a asp-action="Details" asp-route-id="@item.Id"
-                                       class="btn btn-info" title="Detaylar">
+                                       class="btn btn-info" title="@L["Details"]">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                                     {
                                         <a asp-action="Edit" asp-route-id="@item.Id"
-                                           class="btn btn-warning" title="Düzenle">
+                                           class="btn btn-warning" title="@L["Edit"]">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     }
                                     @if (User.IsInRole("Admin"))
                                     {
                                         <a asp-action="Delete" asp-route-id="@item.Id"
-                                           class="btn btn-danger" title="Sil">
+                                           class="btn btn-danger" title="@L["Delete"]">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     }
@@ -152,7 +153,7 @@
                                asp-route-pageNumber="@(Model.PageIndex - 1)"
                                asp-route-currentFilter="@ViewData["CurrentFilter"]"
                                asp-route-pageSize="@ViewData["CurrentPageSize"]">
-                                <i class="fas fa-chevron-left"></i> Önceki
+                                <i class="fas fa-chevron-left"></i> @L["Previous"]
                             </a>
                         </li>
                     }
@@ -178,7 +179,7 @@
                                asp-route-pageNumber="@(Model.PageIndex + 1)"
                                asp-route-currentFilter="@ViewData["CurrentFilter"]"
                                asp-route-pageSize="@ViewData["CurrentPageSize"]">
-                                Sonraki <i class="fas fa-chevron-right"></i>
+                                @L["Next"] <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
                     }
@@ -186,7 +187,7 @@
             </nav>
 
             <div class="text-center text-muted">
-                Sayfa @Model.PageIndex / @Model.TotalPages
+                @L["PageInfo", Model.PageIndex, Model.TotalPages]
             </div>
         }
     </div>
@@ -200,3 +201,4 @@
         }, 5000);
     </script>
 }
+

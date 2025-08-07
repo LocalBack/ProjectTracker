@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Employees" xml:space="preserve"><value>Çalışanlar</value></data>
+  <data name="NewEmployee" xml:space="preserve"><value>Yeni Çalışan</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Ad, soyad, email veya ünvan ara...</value></data>
+  <data name="Search" xml:space="preserve"><value>Ara</value></data>
+  <data name="Clear" xml:space="preserve"><value>Temizle</value></data>
+  <data name="ShowRecords" xml:space="preserve"><value>{0} kayıt göster</value></data>
+  <data name="TotalEmployeesCount" xml:space="preserve"><value>Toplam {0} çalışan</value></data>
+  <data name="FullName" xml:space="preserve"><value>Ad Soyad</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Title" xml:space="preserve"><value>Ünvan</value></data>
+  <data name="Department" xml:space="preserve"><value>Departman</value></data>
+  <data name="Phone" xml:space="preserve"><value>Telefon</value></data>
+  <data name="HireDate" xml:space="preserve"><value>İşe Başlama</value></data>
+  <data name="Actions" xml:space="preserve"><value>İşlemler</value></data>
+  <data name="Details" xml:space="preserve"><value>Detaylar</value></data>
+  <data name="Edit" xml:space="preserve"><value>Düzenle</value></data>
+  <data name="Delete" xml:space="preserve"><value>Sil</value></data>
+  <data name="Previous" xml:space="preserve"><value>Önceki</value></data>
+  <data name="Next" xml:space="preserve"><value>Sonraki</value></data>
+  <data name="PageInfo" xml:space="preserve"><value>Sayfa {0} / {1}</value></data>
+</root>
+
