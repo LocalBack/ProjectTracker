@@ -56,30 +56,41 @@
     </div>
 </div>
 
-<!-- Active Projects Widget -->
+<!-- Projects Widget -->
 @if (Model.ActiveProjects != null && Model.ActiveProjects.Any())
 {
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">
-                    <i class="fas fa-project-diagram"></i> @L["MyActiveProjects"]
+                    <i class="fas fa-project-diagram"></i> @L["MyProjects"]
                 </div>
                 <div class="card-body">
                     <div class="row">
                         @foreach (var project in Model.ActiveProjects)
                         {
+                            var statusClass = project.Status switch
+                            {
+                                ProjectTracker.Core.Entities.ProjectStatus.Planning => "bg-secondary",
+                                ProjectTracker.Core.Entities.ProjectStatus.Active => "bg-primary",
+                                ProjectTracker.Core.Entities.ProjectStatus.OnHold => "bg-warning text-dark",
+                                ProjectTracker.Core.Entities.ProjectStatus.Completed => "bg-success",
+                                ProjectTracker.Core.Entities.ProjectStatus.Cancelled => "bg-danger",
+                                _ => "bg-secondary"
+                            };
                             <div class="col-md-6 col-lg-4 mb-3">
                                 <div class="card h-100 border-primary">
                                     <div class="card-body">
                                         <h5 class="card-title">@project.Name</h5>
-                                        <p class="card-text text-muted">@L["Status"]: <span class="badge bg-info">@project.Status</span></p>
-                                        <!-- Placeholder progress bar -->
+                                        <p class="card-text text-muted">@L["Status"]: <span class="badge @statusClass">@project.StatusText</span></p>
                                         <div class="progress mb-2">
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: @project.CompletionPercent%" aria-valuenow="@project.CompletionPercent" aria-valuemin="0" aria-valuemax="100">@project.CompletionPercent%</div>
                                         </div>
-                                        <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-info-circle"></i> @L["Details"]
+                                        <a asp-controller="Project" asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm me-1">
+                                            <i class="fas fa-info-circle"></i> Go to Project
+                                        </a>
+                                        <a asp-controller="Task" asp-action="Index" asp-route-projectId="@project.Id" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-tasks"></i> View Tasks
                                         </a>
                                     </div>
                                 </div>

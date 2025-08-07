@@ -152,14 +152,36 @@ namespace ProjectTracker.Service.Services.Implementations
                 return new List<ProjectDto>();
 
             var projectEmployees = await _projectEmployeeRepository.GetAsync(
-                pe => pe.EmployeeId == employee.Id && pe.Project.Status == ProjectStatus.Active,
+                pe => pe.EmployeeId == employee.Id,
                 includes: new Expression<Func<ProjectEmployee, object>>[]
                 {
-                    pe => pe.Project
+                    pe => pe.Project,
+                    pe => pe.Project.WorkLogs
                 });
 
             var projects = projectEmployees.Select(pe => pe.Project).Distinct();
-            return _mapper.Map<IEnumerable<ProjectDto>>(projects);
+            var projectDtos = new List<ProjectDto>();
+
+            foreach (var project in projects)
+            {
+                var dto = _mapper.Map<ProjectDto>(project);
+
+                var spent = project.WorkLogs.Sum(w => w.Cost);
+                dto.CompletionPercent = project.Budget > 0 ? Math.Round(spent / project.Budget * 100, 2) : 0;
+                dto.StatusText = project.Status switch
+                {
+                    ProjectStatus.Planning => "Planning",
+                    ProjectStatus.Active => "Active",
+                    ProjectStatus.OnHold => "On Hold",
+                    ProjectStatus.Completed => "Completed",
+                    ProjectStatus.Cancelled => "Cancelled",
+                    _ => project.Status.ToString()
+                };
+
+                projectDtos.Add(dto);
+            }
+
+            return projectDtos;
         }
 
         public async Task<IEnumerable<ProjectReportDto>> GetProjectReportsAsync(int userId)
