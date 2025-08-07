@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Home" xml:space="preserve"><value>Home</value></data>
+  <data name="WelcomeUser" xml:space="preserve"><value>Welcome, {0}!</value></data>
+  <data name="LastLogin" xml:space="preserve"><value>Last login:</value></data>
+  <data name="WelcomeTitle" xml:space="preserve"><value>Welcome to ProjectTracker</value></data>
+  <data name="WelcomeLead" xml:space="preserve"><value>Start by logging into your project management system.</value></data>
+  <data name="WelcomeBody" xml:space="preserve"><value>Track your projects, manage work logs, and check maintenance schedules.</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="TotalProjects" xml:space="preserve"><value>Total Projects</value></data>
+  <data name="RecentWorkLogs" xml:space="preserve"><value>Recent Work Logs</value></data>
+  <data name="Project" xml:space="preserve"><value>Project</value></data>
+  <data name="Employee" xml:space="preserve"><value>Employee</value></data>
+  <data name="Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Duration" xml:space="preserve"><value>Duration</value></data>
+  <data name="Action" xml:space="preserve"><value>Action</value></data>
+  <data name="Hours" xml:space="preserve"><value>hours</value></data>
+</root>

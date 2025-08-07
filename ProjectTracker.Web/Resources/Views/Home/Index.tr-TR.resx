@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Home" xml:space="preserve"><value>Ana Sayfa</value></data>
+  <data name="WelcomeUser" xml:space="preserve"><value>Hoş Geldiniz, {0}!</value></data>
+  <data name="LastLogin" xml:space="preserve"><value>Son giriş:</value></data>
+  <data name="WelcomeTitle" xml:space="preserve"><value>ProjectTracker'a Hoş Geldiniz</value></data>
+  <data name="WelcomeLead" xml:space="preserve"><value>Proje yönetim sisteminize giriş yaparak başlayın.</value></data>
+  <data name="WelcomeBody" xml:space="preserve"><value>Projelerinizi takip edin, çalışma kayıtlarını yönetin ve bakım zamanlamalarını kontrol edin.</value></data>
+  <data name="Login" xml:space="preserve"><value>Giriş Yap</value></data>
+  <data name="TotalProjects" xml:space="preserve"><value>Toplam Proje</value></data>
+  <data name="RecentWorkLogs" xml:space="preserve"><value>Son İş Kayıtları</value></data>
+  <data name="Project" xml:space="preserve"><value>Proje</value></data>
+  <data name="Employee" xml:space="preserve"><value>Çalışan</value></data>
+  <data name="Title" xml:space="preserve"><value>Başlık</value></data>
+  <data name="Date" xml:space="preserve"><value>Tarih</value></data>
+  <data name="Duration" xml:space="preserve"><value>Süre</value></data>
+  <data name="Action" xml:space="preserve"><value>İşlem</value></data>
+  <data name="Hours" xml:space="preserve"><value>saat</value></data>
+</root>

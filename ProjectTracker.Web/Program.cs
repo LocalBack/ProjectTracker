@@ -30,6 +30,12 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supported;
     options.SupportedUICultures = supported;
     options.ApplyCurrentCultureToResponseHeaders = true;
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new QueryStringRequestCultureProvider(),
+        new CookieRequestCultureProvider(),
+        new AcceptLanguageHeaderRequestCultureProvider()
+    };
 });
 
 builder.Services.AddControllersWithViews()

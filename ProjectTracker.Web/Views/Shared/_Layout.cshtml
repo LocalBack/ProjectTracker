@@ -31,7 +31,7 @@
                     <!-- Ana Sayfa (Home) -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">
-                            <i class="fas fa-home"></i> Ana Sayfa
+                            <i class="fas fa-home"></i> @Localizer["Home"]
                         </a>
                     </li>
 
@@ -40,14 +40,14 @@
                         <!-- Kontrol Paneli (Dashboard) -->
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="UserDashboard" asp-action="Index">
-                                <i class="fas fa-tachometer-alt"></i> Kontrol Paneli
+                                <i class="fas fa-tachometer-alt"></i> @Localizer["Dashboard"]
                             </a>
                         </li>
 
                         <!-- Profilim (My Profile) -->
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Account" asp-action="Profile">
-                                <i class="fas fa-user"></i> Profilim
+                                <i class="fas fa-user"></i> @Localizer["Profile"]
                             </a>
                         </li>
 
@@ -56,7 +56,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="WorkLog" asp-action="MyWorkLog">
-                                    <i class="fas fa-clock"></i> İş Kayıtlarım
+                                    <i class="fas fa-clock"></i> @Localizer["MyWorkLogs"]
                                 </a>
                             </li>
                         }
@@ -66,22 +66,22 @@
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-briefcase"></i> Yönetim
+                                    <i class="fas fa-briefcase"></i> @Localizer["Management"]
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
                                         <a class="dropdown-item" asp-controller="Project" asp-action="Index">
-                                            <i class="fas fa-project-diagram"></i> Projeler
+                                            <i class="fas fa-project-diagram"></i> @Localizer["Projects"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Employee" asp-action="Index">
-                                            <i class="fas fa-users"></i> Çalışanlar
+                                            <i class="fas fa-users"></i> @Localizer["Employees"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="WorkLog" asp-action="Index">
-                                            <i class="fas fa-tasks"></i> Tüm İş Kayıtları
+                                            <i class="fas fa-tasks"></i> @Localizer["AllWorkLogs"]
                                         </a>
                                     </li>
                                 </ul>
@@ -93,17 +93,17 @@
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="systemDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-cog"></i> Sistem
+                                    <i class="fas fa-cog"></i> @Localizer["System"]
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
                                         <a class="dropdown-item" href="@Configuration["AdminPanelUrl"]" target="_blank">
-                                            <i class="fas fa-user-shield"></i> Admin Paneli
+                                            <i class="fas fa-user-shield"></i> @Localizer["AdminPanel"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="System" asp-action="Settings">
-                                            <i class="fas fa-sliders-h"></i> Sistem Ayarları
+                                            <i class="fas fa-sliders-h"></i> @Localizer["SystemSettings"]
                                         </a>
                                     </li>
                                 </ul>
@@ -124,15 +124,15 @@
                         <li class="nav-item d-flex align-items-center me-2">
                             @if (User.IsInRole("Admin"))
                             {
-                                <span class="badge bg-danger">Admin</span>
+                                <span class="badge bg-danger">@Localizer["Admin"]</span>
                             }
                             else if (User.IsInRole("Manager"))
                             {
-                                <span class="badge bg-warning">Yönetici</span>
+                                <span class="badge bg-warning">@Localizer["Manager"]</span>
                             }
                             else if (User.IsInRole("Employee"))
                             {
-                                <span class="badge bg-info">Çalışan</span>
+                                <span class="badge bg-info">@Localizer["Employee"]</span>
                             }
                         </li>
 
@@ -144,12 +144,12 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
                                     <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
-                                        <i class="fas fa-user"></i> Profilim
+                                        <i class="fas fa-user"></i> @Localizer["Profile"]
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
-                                        <i class="fas fa-key"></i> Şifre Değiştir
+                                        <i class="fas fa-key"></i> @Localizer["ChangePassword"]
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
@@ -167,7 +167,7 @@
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                                <i class="fas fa-sign-in-alt"></i> @Localizer["Login"]
                             </a>
                         </li>
                     }
@@ -186,7 +186,7 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">&copy; 2024 - ProjectTracker - <a asp-controller="Home" asp-action="Privacy">Privacy</a></span>
+            <span class="text-muted">&copy; 2024 - ProjectTracker - <a asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a></span>
         </div>
     </footer>
 

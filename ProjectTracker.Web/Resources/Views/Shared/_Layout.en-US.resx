@@ -6,4 +6,21 @@
   <data name="Logout" xml:space="preserve">
     <value>Logout</value>
   </data>
+  <data name="Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Profile" xml:space="preserve"><value>My Profile</value></data>
+  <data name="MyWorkLogs" xml:space="preserve"><value>My Work Logs</value></data>
+  <data name="Management" xml:space="preserve"><value>Management</value></data>
+  <data name="Projects" xml:space="preserve"><value>Projects</value></data>
+  <data name="Employees" xml:space="preserve"><value>Employees</value></data>
+  <data name="AllWorkLogs" xml:space="preserve"><value>All Work Logs</value></data>
+  <data name="System" xml:space="preserve"><value>System</value></data>
+  <data name="AdminPanel" xml:space="preserve"><value>Admin Panel</value></data>
+  <data name="SystemSettings" xml:space="preserve"><value>System Settings</value></data>
+  <data name="Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Manager" xml:space="preserve"><value>Manager</value></data>
+  <data name="Employee" xml:space="preserve"><value>Employee</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>Change Password</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="Privacy" xml:space="preserve"><value>Privacy</value></data>
 </root>
