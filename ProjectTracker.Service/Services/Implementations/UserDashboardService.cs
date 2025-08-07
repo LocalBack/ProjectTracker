@@ -69,7 +69,7 @@ namespace ProjectTracker.Service.Services.Implementations
 
                     PendingApprovals = 0,
                     UnreadMessages = 0,
-                    SystemAlerts = 0
+                    SystemAlerts = 0,
 
                     WeeklyHours = new List<decimal>()
 
