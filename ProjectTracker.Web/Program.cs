@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using ProjectTracker.Core.Entities;
@@ -39,7 +40,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 builder.Services.AddControllersWithViews()
-       .AddViewLocalization()
+       .AddViewLocalization(LanguageViewLocationExpanderFormat.SubFolder)
        .AddDataAnnotationsLocalization();
 
 // DbContext
@@ -194,3 +195,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program { }

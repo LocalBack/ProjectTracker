@@ -4,12 +4,12 @@ namespace ProjectTracker.Web.ViewModels
 {
     public class ChangePasswordViewModel
     {
-        [Required(ErrorMessage = "Mevcut şifre zorunludur")]
+        [Required(ErrorMessage = "Required")]
         [DataType(DataType.Password)]
         [Display(Name = "Mevcut Şifre")]
         public string OldPassword { get; set; }
 
-        [Required(ErrorMessage = "Yeni şifre zorunludur")]
+        [Required(ErrorMessage = "Required")]
         [StringLength(100, ErrorMessage = "{0} en az {2} ve en fazla {1} karakter olmalıdır.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Yeni Şifre")]

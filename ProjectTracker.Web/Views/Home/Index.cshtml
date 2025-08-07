@@ -1,7 +1,7 @@
 @model ProjectTracker.Web.ViewModels.DashboardViewModel
-@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer L
 @{
-    ViewData["Title"] = Localizer["Home"];
+    ViewData["Title"] = L["Home"];
 }
 
 <div class="container-fluid">
@@ -9,18 +9,18 @@
         <div class="col-12">
             @if (User.Identity?.IsAuthenticated ?? false)
             {
-                <h2>@Localizer["WelcomeUser", User.Identity!.Name ?? string.Empty]</h2>
-                <p class="text-muted">@Localizer["LastLogin"] @DateTime.Now.ToString("dd MMMM yyyy HH:mm")</p>
+                <h2>@L["WelcomeUser", User.Identity!.Name ?? string.Empty]</h2>
+                <p class="text-muted">@L["LastLogin"] @DateTime.Now.ToString("dd MMMM yyyy HH:mm")</p>
             }
             else
             {
                 <div class="jumbotron">
-                    <h1 class="display-4">@Localizer["WelcomeTitle"]</h1>
-                    <p class="lead">@Localizer["WelcomeLead"]</p>
+                    <h1 class="display-4">@L["WelcomeTitle"]</h1>
+                    <p class="lead">@L["WelcomeLead"]</p>
                     <hr class="my-4">
-                    <p>@Localizer["WelcomeBody"]</p>
+                    <p>@L["WelcomeBody"]</p>
                     <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">
-                        <i class="fas fa-sign-in-alt"></i> @Localizer["Login"]
+                        <i class="fas fa-sign-in-alt"></i> @L["Login"]
                     </a>
                 </div>
             }
@@ -38,7 +38,7 @@
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    @Localizer["TotalProjects"]
+                                    @L["TotalProjects"]
                                 </div>
                                 <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProjects</div>
                             </div>
@@ -61,7 +61,7 @@
                     <div class="card shadow">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-clock"></i> @Localizer["RecentWorkLogs"]
+                                <i class="fas fa-clock"></i> @L["RecentWorkLogs"]
                             </h5>
                         </div>
                         <div class="card-body">
@@ -69,12 +69,12 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>@Localizer["Project"]</th>
-                                            <th>@Localizer["Employee"]</th>
-                                            <th>@Localizer["Title"]</th>
-                                            <th>@Localizer["Date"]</th>
-                                            <th>@Localizer["Duration"]</th>
-                                            <th>@Localizer["Action"]</th>
+                                            <th>@L["Project"]</th>
+                                            <th>@L["Employee"]</th>
+                                            <th>@L["Title"]</th>
+                                            <th>@L["Date"]</th>
+                                            <th>@L["Duration"]</th>
+                                            <th>@L["Action"]</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -85,7 +85,7 @@
                                                 <td>@log.EmployeeName</td>
                                                 <td>@log.Title</td>
                                                 <td>@log.WorkDate.ToString("dd.MM.yyyy")</td>
-                                                <td>@log.HoursSpent @Localizer["Hours"]</td>
+                                                <td>@log.HoursSpent @L["Hours"]</td>
                                                 <td>
                                                     <a asp-controller="WorkLog" asp-action="Details" asp-route-id="@log.Id"
                                                        class="btn btn-sm btn-info">

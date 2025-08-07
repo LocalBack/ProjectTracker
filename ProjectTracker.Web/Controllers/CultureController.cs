@@ -7,7 +7,7 @@ namespace ProjectTracker.Web.Controllers
     [AllowAnonymous]
     public class CultureController : Controller
     {
-        [HttpPost]
+        [HttpGet]
         public IActionResult Set(string culture, string returnUrl)
         {
             Response.Cookies.Append(

@@ -1,0 +1,12 @@
+{
+  "decimal": "",
+  "emptyTable": "Tabloda veri yok",
+  "info": "_TOTAL_ kayıttan _START_ - _END_ arası gösteriliyor",
+  "infoEmpty": "0 kayıttan 0 - 0 arası gösteriliyor",
+  "infoFiltered": "(_MAX_ kayıt içerisinden filtrelendi)",
+  "lengthMenu": "Sayfada _MENU_ kayıt göster",
+  "loadingRecords": "Yükleniyor...",
+  "processing": "İşleniyor...",
+  "search": "Ara:",
+  "zeroRecords": "Eşleşen kayıt bulunamadı"
+}

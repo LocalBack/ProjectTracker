@@ -4,7 +4,7 @@ namespace ProjectTracker.Web.ViewModels
 {
     public class LoginWith2faViewModel
     {
-        [Required(ErrorMessage = "Doğrulama kodu zorunludur")]
+        [Required(ErrorMessage = "Required")]
         [StringLength(7, ErrorMessage = "{0} {2} ile {1} karakter arasında olmalıdır.", MinimumLength = 6)]
         [DataType(DataType.Text)]
         [Display(Name = "Doğrulama Kodu")]
