@@ -6,7 +6,7 @@ namespace ProjectTracker.Service.Services.Interfaces
 {
     public interface IUserDashboardService
     {
-        Task<DashboardDto> GetDashboardDataAsync(int userId);
+        Task<DashboardDto> GetDashboardDataAsync(int userId, IList<string> roles);
         Task<DashboardStatsDto> GetDashboardStatsAsync(int userId);
         Task<IEnumerable<WorkLogDto>> GetRecentWorkLogsAsync(int userId, int count = 5);
         Task<IEnumerable<MaintenanceLogDto>> GetRecentMaintenanceLogsAsync(int userId, int count = 5);
