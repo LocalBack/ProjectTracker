@@ -9,6 +9,8 @@ namespace ProjectTracker.Service.DTOs
         public List<string> UserRoles { get; set; }
         public DashboardStatsDto Stats { get; set; }
         public List<WorkLogDto> RecentWorkLogs { get; set; }
+        public List<MaintenanceLogDto> RecentMaintenanceLogs { get; set; }
+        public List<EquipmentActionDto> RecentEquipmentActions { get; set; }
         public List<ProjectDto> ActiveProjects { get; set; }
         public List<ProjectReportDto> ProjectReports { get; set; }
     }
