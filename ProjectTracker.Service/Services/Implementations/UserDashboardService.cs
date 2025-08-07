@@ -18,6 +18,8 @@ namespace ProjectTracker.Service.Services.Implementations
         private readonly IRepository<WorkLog> _workLogRepository;
         private readonly IRepository<Project> _projectRepository;
         private readonly IRepository<ProjectEmployee> _projectEmployeeRepository;
+        private readonly IRepository<MaintenanceLog> _maintenanceLogRepository;
+        private readonly IRepository<Equipment> _equipmentRepository;
         private readonly IMapper _mapper;
 
         public UserDashboardService(
@@ -25,12 +27,16 @@ namespace ProjectTracker.Service.Services.Implementations
             IRepository<WorkLog> workLogRepository,
             IRepository<Project> projectRepository,
             IRepository<ProjectEmployee> projectEmployeeRepository,
+            IRepository<MaintenanceLog> maintenanceLogRepository,
+            IRepository<Equipment> equipmentRepository,
             IMapper mapper)
         {
             _employeeRepository = employeeRepository;
             _workLogRepository = workLogRepository;
             _projectRepository = projectRepository;
             _projectEmployeeRepository = projectEmployeeRepository;
+            _maintenanceLogRepository = maintenanceLogRepository;
+            _equipmentRepository = equipmentRepository;
             _mapper = mapper;
         }
 
@@ -47,6 +53,10 @@ namespace ProjectTracker.Service.Services.Implementations
                     TotalProjects = 0,
                     ActiveProjects = 0,
                     CompletedProjects = 0,
+                    PendingWorkLogApprovals = 0,
+                    ActiveTasks = 0,
+                    CompletedTasks = 0,
+                    TotalEquipment = 0,
                     TotalHoursThisMonth = 0,
                     TotalHoursThisWeek = 0,
                     TotalWorkLogs = 0
@@ -102,9 +112,17 @@ namespace ProjectTracker.Service.Services.Implementations
                 stats.ActiveProjects = projectEmployees.Count(pe => pe.Project.Status == ProjectStatus.Active);
                 stats.CompletedProjects = projectEmployees.Count(pe => pe.Project.Status == ProjectStatus.Completed);
 
+                var projectIds = projectEmployees.Select(pe => pe.ProjectId).ToList();
+
+                // Equipment count across user's projects
+                stats.TotalEquipment = await _equipmentRepository.CountAsync(e => e.ProjectId.HasValue && projectIds.Contains(e.ProjectId.Value));
+
                 // Get work logs stats
-                var workLogs = await _workLogRepository.GetAsync(w => w.EmployeeId == employee.Id);
+                var workLogs = await _workLogRepository.GetAsync(
+                    w => w.EmployeeId == employee.Id,
+                    includes: new Expression<Func<WorkLog, object>>[] { w => w.History });
                 stats.TotalWorkLogs = workLogs.Count();
+                stats.PendingWorkLogApprovals = workLogs.Count(w => !w.History.Any(h => h.Action == "Approved"));
 
                 // This month's hours
                 var startOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -117,6 +135,13 @@ namespace ProjectTracker.Service.Services.Implementations
                 stats.TotalHoursThisWeek = workLogs
                     .Where(w => w.WorkDate >= startOfWeek)
                     .Sum(w => w.HoursSpent);
+
+                // Maintenance tasks for user's projects
+                var maintenanceLogs = await _maintenanceLogRepository.GetAsync(
+                    l => l.MaintenanceSchedule.Project.ProjectEmployees.Any(pe => pe.EmployeeId == employee.Id),
+                    includes: new Expression<Func<MaintenanceLog, object>>[] { l => l.MaintenanceSchedule });
+                stats.ActiveTasks = maintenanceLogs.Count(l => !l.IsCompleted);
+                stats.CompletedTasks = maintenanceLogs.Count(l => l.IsCompleted);
             }
 
             return stats;

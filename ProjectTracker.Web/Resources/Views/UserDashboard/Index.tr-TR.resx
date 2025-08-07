@@ -21,6 +21,13 @@
   <data name="RequestLeave" xml:space="preserve"><value>İzin Talep Et</value></data>
   <data name="CreateProject" xml:space="preserve"><value>Proje Oluştur</value></data>
   <data name="TotalProjects" xml:space="preserve"><value>Toplam Proje</value></data>
+  <data name="ActiveProjects" xml:space="preserve"><value>Aktif Projeler</value></data>
+  <data name="CompletedProjects" xml:space="preserve"><value>Tamamlanan Projeler</value></data>
+  <data name="PendingWorkLogApprovals" xml:space="preserve"><value>Onay Bekleyen İş Kayıtları</value></data>
+  <data name="ActiveTasks" xml:space="preserve"><value>Aktif Görevler</value></data>
+  <data name="CompletedTasks" xml:space="preserve"><value>Tamamlanan Görevler</value></data>
+  <data name="TotalEquipment" xml:space="preserve"><value>Toplam Ekipman</value></data>
+  <data name="TotalWorkLogs" xml:space="preserve"><value>Toplam İş Kayıtları</value></data>
   <data name="ProjectTimeCost" xml:space="preserve"><value>Proje Süre ve Maliyet</value></data>
   <data name="Project" xml:space="preserve"><value>Proje</value></data>
   <data name="TotalHours" xml:space="preserve"><value>Toplam Saat</value></data>
